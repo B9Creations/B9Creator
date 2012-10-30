@@ -55,7 +55,6 @@ public:
     ~MainWindow();
     
 public slots:
-    void handleTabChange(int index);
     void handleW1Hide();
     void handleW2Hide();
     void handleW3Hide();

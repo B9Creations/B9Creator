@@ -42,6 +42,10 @@
 // The correctly named current hex file MUST be in the application directory
 #define CURRENTFIRMWARE "v1.0.0"
 #define FIRMWAREHEXFILE "B9Firmware_1_0_0.hex"
+#define MSG_SEARCHING "Searching..."
+#define MSG_CONNECTED "Connected"
+#define MSG_FIRMUPDATE "Updating Firmware..."
+
 
 class  QextSerialPort;
 class  QextSerialEnumerator;

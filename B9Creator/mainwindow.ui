@@ -6,9 +6,73 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>277</width>
-    <height>232</height>
+    <width>203</width>
+    <height>241</height>
    </rect>
+  </property>
+  <property name="palette">
+   <palette>
+    <active>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Window">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>143</red>
+        <green>143</green>
+        <blue>143</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </active>
+    <inactive>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Window">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>143</red>
+        <green>143</green>
+        <blue>143</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </inactive>
+    <disabled>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>143</red>
+        <green>143</green>
+        <blue>143</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Window">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>143</red>
+        <green>143</green>
+        <blue>143</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </disabled>
+   </palette>
   </property>
   <property name="windowTitle">
    <string>B9Creator</string>
@@ -28,15 +92,21 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>251</width>
+      <width>181</width>
       <height>180</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QCommandLinkButton" name="commandLayout">
+       <property name="toolTip">
+        <string>Prepare a Layout containing your 3D Model(s)</string>
+       </property>
+       <property name="statusTip">
+        <string>Layout the stuff!</string>
+       </property>
        <property name="text">
-        <string>Layout your project</string>
+        <string>Layout</string>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -45,8 +115,11 @@
      </item>
      <item>
       <widget class="QCommandLinkButton" name="commandSlice">
+       <property name="toolTip">
+        <string>Slice your 3D Layout in preparation for printing</string>
+       </property>
        <property name="text">
-        <string>Slice your layout to a print job</string>
+        <string>Slice</string>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -55,8 +128,14 @@
      </item>
      <item>
       <widget class="QCommandLinkButton" name="commandEdit">
+       <property name="toolTip">
+        <string>Modifiy supports, correct slicing errors or import data from a 3rd party slicer</string>
+       </property>
+       <property name="statusTip">
+        <string/>
+       </property>
        <property name="text">
-        <string>Edit your print job</string>
+        <string>Edit</string>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -65,8 +144,14 @@
      </item>
      <item>
       <widget class="QCommandLinkButton" name="commandPrint">
+       <property name="toolTip">
+        <string>Select your Print Job and begin the printing process.</string>
+       </property>
+       <property name="statusTip">
+        <string/>
+       </property>
        <property name="text">
-        <string>Create!</string>
+        <string>Print</string>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -76,44 +161,103 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>117</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>117</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>120</red>
+         <green>120</green>
+         <blue>120</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::RightToLeft</enum>
+   </property>
+   <property name="sizeGripEnabled">
+    <bool>false</bool>
+   </property>
+  </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>277</width>
-     <height>21</height>
+     <width>203</width>
+     <height>19</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuMain">
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
+   <property name="mouseTracking">
+    <bool>true</bool>
+   </property>
+   <property name="acceptDrops">
+    <bool>true</bool>
+   </property>
+   <property name="statusTip">
+    <string/>
+   </property>
+   <property name="defaultUp">
+    <bool>false</bool>
+   </property>
+   <property name="nativeMenuBar">
+    <bool>true</bool>
+   </property>
+   <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionOptions"/>
+    <addaction name="actionTesting_Calibration"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
    </widget>
-   <widget class="QMenu" name="menuTools">
+   <widget class="QMenu" name="menuAbout">
     <property name="title">
-     <string>Tools</string>
+     <string>About</string>
     </property>
+    <addaction name="actionAbout_B9Creator"/>
+    <addaction name="actionHelp"/>
    </widget>
-   <widget class="QMenu" name="menuWindow">
-    <property name="title">
-     <string>Window</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menuHelp">
-    <property name="title">
-     <string>Help</string>
-    </property>
-   </widget>
-   <addaction name="menuMain"/>
-   <addaction name="menuTools"/>
-   <addaction name="menuWindow"/>
-   <addaction name="menuHelp"/>
-  </widget>
-  <widget class="QStatusBar" name="statusBar">
-   <property name="sizeGripEnabled">
-    <bool>false</bool>
-   </property>
+   <addaction name="menuFile"/>
+   <addaction name="menuAbout"/>
   </widget>
   <action name="actionShow">
    <property name="text">
@@ -123,6 +267,31 @@
   <action name="actionHide">
    <property name="text">
     <string>Hide</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Settings...</string>
+   </property>
+  </action>
+  <action name="actionAbout_B9Creator">
+   <property name="text">
+    <string>About B9Creator</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+  </action>
+  <action name="actionTesting_Calibration">
+   <property name="text">
+    <string>Testing &amp;&amp; Calibration...</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
    </property>
   </action>
  </widget>

@@ -179,11 +179,13 @@ void B9PrinterComm::watchDog()
         }
         m_Status.reset();
         //TODO Broadcast Lost Contact Signal, return without activating watchDog timer
-        emit updateConnectionStatus("Searching for B9Creator...");
+        emit updateConnectionStatus(MSG_SEARCHING);
         qDebug() << "WATCHDOG:  LOST CONTACT WITH B9CREATOR!";
     }
-    else // Still in Contact with B9Creator
+    else { // Still in Contact with B9Creator
          startWatchDogTimer();
+        emit updateConnectionStatus(MSG_CONNECTED);
+    }
 }
 
 void B9PrinterComm::startWatchDogTimer()
@@ -194,7 +196,7 @@ void B9PrinterComm::startWatchDogTimer()
 
 void B9PrinterComm::RefreshCommPortItems()
 {
-    QString sCommPortStatus = "Searching for B9Creator...";
+    QString sCommPortStatus = MSG_SEARCHING;
     QString sPortName;
     // Load the current enumerated available ports
     *pPorts = pEnumerator->getPorts();
@@ -252,7 +254,7 @@ void B9PrinterComm::RefreshCommPortItems()
             if(pPorts->at(i).vendorID==9025 && OpenB9CreatorCommPort(sPortName)){
          #endif
                 // Connected!
-                sCommPortStatus = "Connected to B9Creator On Port: "+sPortName;
+                sCommPortStatus = MSG_CONNECTED;
                 eTime = 5000;  // Re-check connection again in 5 seconds
                 if(m_serialDevice && m_Status.isCurrentVersion())startWatchDogTimer();  // Start B9Creator "crash" watchDog
                 break;
@@ -287,12 +289,12 @@ void B9PrinterComm::RefreshCommPortItems()
         }
         if(bUpdateFirmware){
             // Update the firmware on device on sPortName
-            emit updateConnectionStatus("Updating Firmware...");
+            emit updateConnectionStatus(MSG_FIRMUPDATE);
             B9FirmwareUpdate Firmware;
             QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
             Firmware.UploadHex(sPortName);
             QApplication::restoreOverrideCursor();
-            emit updateConnectionStatus("Searching for B9Creator...");
+            emit updateConnectionStatus(MSG_SEARCHING);
         }
         emit updateConnectionStatus(sCommPortStatus);
     }

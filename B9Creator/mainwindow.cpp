@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Always set up the B9PrinterComm in the MainWindow constructor
     pPrinter = new B9PrinterComm;
     connect(pPrinter, SIGNAL(updateConnectionStatus(QString)), ui->statusBar, SLOT(showMessage(QString)));
-    ui->statusBar->showMessage("Searching for B9Creator...");
+    ui->statusBar->showMessage(MSG_SEARCHING);
 
     pMW1 = new B9Plan(0);
     pMW1->setWindowTitle("Layout");
@@ -82,7 +82,7 @@ void MainWindow::closeEvent(QCloseEvent *event){
 
 void MainWindow::handleW1Hide()
 {
-    //this->show();
+    this->show();
     ui->commandLayout->setChecked(false);
 }
 void MainWindow::handleW2Hide()
@@ -97,21 +97,15 @@ void MainWindow::handleW3Hide()
 }
 void MainWindow::handleW4Hide()
 {
-    //this->show();  // Comment this out if not hiding mainwindow while showing this window
+    this->show();  // Comment this out if not hiding mainwindow while showing this window
     ui->commandPrint->setChecked(false);
-}
-
-
-void MainWindow::handleTabChange(int index)
-{
-    menuBar()->setNativeMenuBar(true);
 }
 
 void MainWindow::on_commandLayout_clicked(bool checked)
 {
     if(checked) {
         pMW1->show();
-        //this->hide(); // Comment this out if not hiding mainwindow while showing this window
+        this->hide(); // Comment this out if not hiding mainwindow while showing this window
     }
     else pMW1->hide();
 }
@@ -135,7 +129,7 @@ void MainWindow::on_commandPrint_clicked(bool checked)
 {
     if(checked) {
         pMW4->show();
-        //this->hide(); // Comment this out if not hiding mainwindow while showing this window
+        this->hide(); // Comment this out if not hiding mainwindow while showing this window
     }
     else pMW4->hide();
 }
