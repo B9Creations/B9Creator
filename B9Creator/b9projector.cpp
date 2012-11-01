@@ -138,7 +138,7 @@ void B9Projector::drawGrid()
 
 void B9Projector::drawStatusMsg()
 {
-	if(mStatusMsg.size()==0)return;
+    if(mStatusMsg.size()==0 || this->isHidden())return;
 	QPainter painter(&mImage);
 	QColor color;
 	color.setRgb(127,0,0);

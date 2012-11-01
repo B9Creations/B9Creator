@@ -1,0 +1,1 @@
+The B9Creator enables the user to create complex 3D model Layouts, slice them to a compressed job file add supports and print them on the B9Creaor 3D Printer System.

@@ -35,6 +35,11 @@
 #include <QTime>
 #include <QFile>
 #include <QTextStream>
+#include <QDir>
+#include <QUrl>
+#include <QDebug>
+#include <QApplication>
+#include <QDesktopServices>
 
 QString sLogFileName;
 void messageHandler(QtMsgType type, const char *msg)
@@ -85,3 +90,13 @@ LogFileManager::~LogFileManager()
 {
     qInstallMsgHandler(0);
 }
+
+void LogFileManager::openLogFileInFolder()
+{
+    QString path = QDir::toNativeSeparators(QApplication::applicationDirPath());
+    path += "/" + sLogFileName;
+    qDebug() << "Log File Location "+path;
+    path = "file:///" + path;
+    QDesktopServices::openUrl(QUrl(path));
+}
+

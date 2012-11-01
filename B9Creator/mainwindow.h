@@ -37,10 +37,15 @@
 
 #include <QMainWindow>
 #include <QCloseEvent>
+#include <QDesktopWidget>
 #include "logfilemanager.h"
 #include "b9plan.h"
+#include "b9slice.h"
+#include "b9edit.h"
+#include "b9creator.h"
 #include "b9terminal.h"
 #include "b9projector.h"
+#include "helpsystem.h"
 
 namespace Ui {
 class MainWindow;
@@ -53,28 +58,36 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    
+    QDesktopWidget *pDesktop;
+
 public slots:
     void handleW1Hide();
     void handleW2Hide();
     void handleW3Hide();
     void handleW4Hide();
 
+    void showLogAndExit();
+    void showTerminal();
+
 private slots:
     void on_commandLayout_clicked(bool checked);
     void on_commandSlice_clicked(bool checked);
     void on_commandEdit_clicked(bool checked);
     void on_commandPrint_clicked(bool checked);
+    void showHelp();
 
 private:
     Ui::MainWindow *ui;
     LogFileManager *pLogManager;
+    bool m_bOpenLogOnExit;
     B9PrinterComm *pPrinter;
+    HelpSystem m_HelpSystem;
 
     B9Plan *pMW1;
-    B9Projector *pMW2;
-    B9Plan *pMW3;
-    B9Terminal *pMW4;
+    B9Slice *pMW2;
+    B9Edit *pMW3;
+    B9Creator *pMW4;
+    B9Terminal *pTerminal;
 
     void closeEvent(QCloseEvent *event);
 

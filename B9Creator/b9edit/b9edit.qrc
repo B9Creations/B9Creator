@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/B9Edit">
+        <file>icons/edit.png</file>
+        <file>icons/importslices.png</file>
+        <file>icons/new.png</file>
+        <file>icons/open.png</file>
+        <file>icons/save.png</file>
+        <file>icons/editoriconbright.png</file>
+    </qresource>
+</RCC>

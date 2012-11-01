@@ -31,15 +31,53 @@
 //    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 *************************************************************************************/
-#include <QtGui/QApplication>
-#include "mainwindow.h"
+#ifndef DRAWINGCONTEXT_H
+#define DRAWINGCONTEXT_H
+#include <QtGui>
+#include <QWidget>
+#include <QImage>
 
-int main(int argc, char *argv[])
+class SliceEditView;
+class DrawingContext : public QWidget
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.pDesktop = a.desktop();
-    w.show();
-    
-    return a.exec();
-}
+	Q_OBJECT
+public:
+	DrawingContext(QWidget *parent = 0);
+	~DrawingContext();
+
+	SliceEditView* pEditView;
+	QImage* pActiveImage;
+	QImage* pLowerImage;
+
+	QString currDrawTool;//string indicating the current selected draw tool.
+	QString currSupportTool;//string indicating the current selected Support tool.
+
+	int PenWidth;
+	int supportSize;
+	bool deletemode;
+	bool fastsupportmode;
+	void SetPenColor(QColor color);
+	void SetPenWidth(int w);
+
+public slots:
+	void SetUpperImg(QImage* img); //displays the passed image to the screen.
+	void SetLowerImg(QImage* img); //sets the image to be displayed below the upper..
+	void GenerateLogicImage();
+	void GenerateGreenImage();
+
+protected:
+	 void mousePressEvent(QMouseEvent *event);
+     void mouseMoveEvent(QMouseEvent *event);
+     void mouseReleaseEvent(QMouseEvent *event);
+     void paintEvent(QPaintEvent *event);
+
+private:
+	void drawLineTo(const QPoint &endPoint);
+
+	
+	bool scribbling; //true when the mouse is down and is scribbling
+	
+    QColor PenColor;
+	QPoint lastPoint;
+};
+#endif

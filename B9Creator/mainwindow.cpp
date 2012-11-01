@@ -34,7 +34,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -43,20 +42,23 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowFlags(Qt::MSWindowsFixedSizeDialogHint);
 
     // Always set up the log manager in the MainWindow constructor
-    pLogManager = new LogFileManager("B9C_LOG_TestComm.txt", "B9TestComm Log Entries");
+    pLogManager = new LogFileManager("B9Creator_LOG.txt", "B9Creator Log Entries");
+    m_bOpenLogOnExit = false;
     qDebug() << "Program Start";
 
     // Always set up the B9PrinterComm in the MainWindow constructor
     pPrinter = new B9PrinterComm;
+    pPrinter->enableBlankCloning(true); // Allow for firmware update of suspected "blank" B9Creator Arduino's
     connect(pPrinter, SIGNAL(updateConnectionStatus(QString)), ui->statusBar, SLOT(showMessage(QString)));
     ui->statusBar->showMessage(MSG_SEARCHING);
 
     pMW1 = new B9Plan(0);
     pMW1->setWindowTitle("Layout");
-    pMW2 = new B9Projector(0);
-    pMW3 = new B9Plan(0);
-    pMW3->setWindowTitle("Edit");
-    pMW4 = new B9Terminal(pPrinter,0);
+    pMW2 = new B9Slice(0);
+    pMW3 = new B9Edit(0);
+    pMW4 = new B9Creator(0);
+
+    pTerminal = new B9Terminal(pPrinter, 0);
 
     connect(pMW1, SIGNAL(eventHiding()),this, SLOT(handleW1Hide()));
     connect(pMW2, SIGNAL(eventHiding()),this, SLOT(handleW2Hide()));
@@ -68,15 +70,35 @@ MainWindow::~MainWindow()
 {
     delete pPrinter;
     qDebug() << "Program End";
+    if(m_bOpenLogOnExit)
+        pLogManager->openLogFileInFolder(); // Show log file location
     delete pLogManager; // delete last so all messages are logged
     delete ui;
 }
 
-void MainWindow::closeEvent(QCloseEvent *event){
+void MainWindow::showLogAndExit()
+{
+    m_bOpenLogOnExit = true;
+    emit(this->close());
+}
+
+void MainWindow::showTerminal()
+{
+    pTerminal->show();
+}
+
+void MainWindow::showHelp()
+{
+    m_HelpSystem.showHelpFile("index.html");
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
     pMW1->hide();
     pMW2->hide();
     pMW3->hide();
     pMW4->hide();
+    pTerminal->hide();
     event->accept();
 }
 
@@ -129,6 +151,8 @@ void MainWindow::on_commandPrint_clicked(bool checked)
 {
     if(checked) {
         pMW4->show();
+        pMW4->pDesktop = pDesktop;
+        pMW4->makeConnections();
         this->hide(); // Comment this out if not hiding mainwindow while showing this window
     }
     else pMW4->hide();

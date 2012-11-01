@@ -59,12 +59,19 @@
    </property>
    <widget class="QMenu" name="menuB9Plan">
     <property name="title">
-     <string>B9Plan</string>
+     <string>&amp;B9Plan</string>
     </property>
     <addaction name="actionOpen_2"/>
     <addaction name="actionClose"/>
    </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="actionContext"/>
+   </widget>
    <addaction name="menuB9Plan"/>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -94,7 +101,35 @@
     <string>open</string>
    </property>
   </action>
+  <action name="actionContext">
+   <property name="text">
+    <string>Context Help</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionContext</sender>
+   <signal>triggered()</signal>
+   <receiver>B9Plan</receiver>
+   <slot>showHelp()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>showHelp()</slot>
+ </slots>
 </ui>

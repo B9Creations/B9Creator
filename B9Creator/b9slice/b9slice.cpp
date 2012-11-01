@@ -31,15 +31,23 @@
 //    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 *************************************************************************************/
-#include <QtGui/QApplication>
-#include "mainwindow.h"
+#include "b9slice.h"
+#include "ui_b9slice.h"
 
-int main(int argc, char *argv[])
+B9Slice::B9Slice(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::B9Slice)
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.pDesktop = a.desktop();
-    w.show();
-    
-    return a.exec();
+    ui->setupUi(this);
+}
+
+B9Slice::~B9Slice()
+{
+    delete ui;
+}
+
+void B9Slice::hideEvent(QHideEvent *event)
+{
+    emit eventHiding();
+    event->accept();
 }

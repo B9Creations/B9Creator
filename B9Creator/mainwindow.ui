@@ -87,6 +87,9 @@
    <string/>
   </property>
   <widget class="QWidget" name="centralWidget">
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
@@ -103,7 +106,7 @@
         <string>Prepare a Layout containing your 3D Model(s)</string>
        </property>
        <property name="statusTip">
-        <string>Layout the stuff!</string>
+        <string/>
        </property>
        <property name="text">
         <string>Layout</string>
@@ -146,9 +149,6 @@
       <widget class="QCommandLinkButton" name="commandPrint">
        <property name="toolTip">
         <string>Select your Print Job and begin the printing process.</string>
-       </property>
-       <property name="statusTip">
-        <string/>
        </property>
        <property name="text">
         <string>Print</string>
@@ -201,7 +201,7 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>8</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="layoutDirection">
@@ -217,22 +217,28 @@
      <x>0</x>
      <y>0</y>
      <width>203</width>
-     <height>19</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>8</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="mouseTracking">
     <bool>true</bool>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
    </property>
    <property name="acceptDrops">
     <bool>true</bool>
    </property>
    <property name="statusTip">
     <string/>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
    </property>
    <property name="defaultUp">
     <bool>false</bool>
@@ -241,47 +247,46 @@
     <bool>true</bool>
    </property>
    <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
     </property>
-    <addaction name="actionOptions"/>
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionSettings"/>
     <addaction name="actionTesting_Calibration"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
-     <string>About</string>
+     <string>&amp;Help</string>
     </property>
+    <addaction name="actionContents"/>
+    <addaction name="actionIndex"/>
+    <addaction name="actionContext"/>
+    <addaction name="separator"/>
+    <addaction name="actionB9Creator_Terminal_Utility"/>
+    <addaction name="actionExit_Open_Log_File"/>
+    <addaction name="separator"/>
     <addaction name="actionAbout_B9Creator"/>
-    <addaction name="actionHelp"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAbout"/>
   </widget>
-  <action name="actionShow">
+  <action name="actionSettings">
    <property name="text">
-    <string>Show</string>
-   </property>
-  </action>
-  <action name="actionHide">
-   <property name="text">
-    <string>Hide</string>
-   </property>
-  </action>
-  <action name="actionOptions">
-   <property name="text">
-    <string>Settings...</string>
+    <string>&amp;Settings...</string>
    </property>
   </action>
   <action name="actionAbout_B9Creator">
    <property name="text">
-    <string>About B9Creator</string>
+    <string>About &amp;B9Creator</string>
    </property>
   </action>
-  <action name="actionHelp">
+  <action name="actionIndex">
    <property name="text">
-    <string>Help</string>
+    <string>Index</string>
    </property>
   </action>
   <action name="actionTesting_Calibration">
@@ -291,15 +296,112 @@
   </action>
   <action name="actionExit">
    <property name="text">
+    <string>E&amp;xit</string>
+   </property>
+   <property name="toolTip">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionContents">
+   <property name="text">
+    <string>Contents</string>
+   </property>
+  </action>
+  <action name="actionContext">
+   <property name="text">
+    <string>Context</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="actionExit_Open_Log_File">
+   <property name="text">
+    <string>Exit &amp;&amp; Open &amp;Log File</string>
+   </property>
+  </action>
+  <action name="actionB9Creator_Terminal_Utility">
+   <property name="text">
+    <string>B9Creator &amp;Terminal Utility</string>
+   </property>
+   <property name="toolTip">
+    <string>Monitor Serial Communications</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionExit_Open_Log_File</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showLogAndExit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>101</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>101</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionB9Creator_Terminal_Utility</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showTerminal()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>101</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionContext</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showHelp()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>101</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
  <slots>
   <slot>myOpen()</slot>
   <slot>myClose()</slot>
+  <slot>showLogAndExit()</slot>
+  <slot>showTerminal()</slot>
+  <slot>showHelp()</slot>
  </slots>
 </ui>

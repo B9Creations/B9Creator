@@ -51,3 +51,8 @@ void B9Plan::hideEvent(QHideEvent *event)
     emit eventHiding();
     event->accept();
 }
+
+void B9Plan::showHelp()
+{
+    m_HelpSystem.showHelpFile("openfile.html");
+}

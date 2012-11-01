@@ -40,6 +40,7 @@ class LogFileManager
 public:
     LogFileManager(QString sLogfile = "LogFile.txt", QString sHeader = "Log File Entries");
     ~LogFileManager();
+    void openLogFileInFolder();
 };
 
 #endif // LOGFILEMANAGER_H

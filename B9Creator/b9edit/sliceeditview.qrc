@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/Cursors">
+        <file>icons/bucket.png</file>
+        <file>icons/bucketwhite.png</file>
+        <file>icons/crosshair.png</file>
+        <file>icons/delete.png</file>
+        <file>icons/penblack.png</file>
+        <file>icons/penwhite.png</file>
+    </qresource>
+    <qresource prefix="/Icons">
+        <file>icons/boxsupporticon.png</file>
+        <file>icons/bucketblackicon.png</file>
+        <file>icons/bucketwhiteicon.png</file>
+        <file>icons/cylindersupporticon.png</file>
+        <file>icons/diamondsupporticon.png</file>
+        <file>icons/penblackicon.png</file>
+        <file>icons/penwhiteicon.png</file>
+        <file>icons/trianglesupporticon.png</file>
+    </qresource>
+</RCC>

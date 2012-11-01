@@ -31,15 +31,30 @@
 //    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 *************************************************************************************/
-#include <QtGui/QApplication>
-#include "mainwindow.h"
+#include "aboutbox.h"
+#include "ui_aboutbox.h"
 
-int main(int argc, char *argv[])
+aboutbox::aboutbox(QWidget *parent, Qt::WFlags flags) :
+    QWidget(parent, flags),
+    ui(new Ui::aboutbox)
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.pDesktop = a.desktop();
-    w.show();
-    
-    return a.exec();
+    ui->setupUi(this);
+    this->setWindowFlags(Qt::Dialog| Qt::WindowTitleHint);
+
+
+}
+
+aboutbox::~aboutbox()
+{
+    delete ui;
+}
+
+
+
+
+void aboutbox::setText(QString content)
+{
+
+    ui->textBrowser->setText(content);
+
 }

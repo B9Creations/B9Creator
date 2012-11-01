@@ -31,15 +31,7 @@
 //    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 *************************************************************************************/
-#include <QtGui/QApplication>
-#include "mainwindow.h"
+#include <QImage>
+#include <QColor>
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.pDesktop = a.desktop();
-    w.show();
-    
-    return a.exec();
-}
+void floodFill(QImage* pImage, int xPos, int yPos, QColor fillColor = QColor(255,255,255));

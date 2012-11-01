@@ -1,0 +1,660 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>B9EditClass</class>
+ <widget class="QMainWindow" name="B9EditClass">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>411</width>
+    <height>238</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>238</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1000</width>
+    <height>238</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>B9JobEditor</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="b9edit.qrc">
+    <normaloff>:/B9Edit/icons/editoriconbright.png</normaloff>:/B9Edit/icons/editoriconbright.png</iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <property name="documentMode">
+   <bool>false</bool>
+  </property>
+  <property name="tabShape">
+   <enum>QTabWidget::Rounded</enum>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>false</bool>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetDefaultConstraint</enum>
+    </property>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>10000</height>
+       </size>
+      </property>
+      <property name="title">
+       <string>Job Properties</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Job Name:</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::AutoText</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_4"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Job Description:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_5"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>X-Y Pixels (µm):</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_6"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="xyinfo">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Z Layer (µm):</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_7"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="zinfo">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
+         <item>
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Slices :</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_8">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <spacer name="verticalSpacer_2">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>411</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNew_Job"/>
+    <addaction name="actionOpen_Exsisting_Job_File"/>
+    <addaction name="actionSave_To_Job"/>
+    <addaction name="actionSaveAs"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_Image_Folder"/>
+    <addaction name="actionExport_Slices"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionShow_Slice_Window"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout_B9Edit"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuView"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionOpen_Image_Folder">
+   <property name="icon">
+    <iconset resource="b9edit.qrc">
+     <normaloff>:/B9Edit/icons/importslices.png</normaloff>:/B9Edit/icons/importslices.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import Images...</string>
+   </property>
+   <property name="toolTip">
+    <string>Import Slices from a series of images</string>
+   </property>
+  </action>
+  <action name="actionOpen_Exsisting_Job_File">
+   <property name="icon">
+    <iconset resource="b9edit.qrc">
+     <normaloff>:/B9Edit/icons/open.png</normaloff>:/B9Edit/icons/open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open...</string>
+   </property>
+   <property name="toolTip">
+    <string>Opens an exsisting Job</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave_To_Job">
+   <property name="icon">
+    <iconset resource="b9edit.qrc">
+     <normaloff>:/B9Edit/icons/save.png</normaloff>:/B9Edit/icons/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="toolTip">
+    <string>Saves the current Job</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionFill">
+   <property name="text">
+    <string>Flood Fill</string>
+   </property>
+  </action>
+  <action name="actionFlood_Void">
+   <property name="text">
+    <string>Flood Void</string>
+   </property>
+  </action>
+  <action name="actionShow_Unsupported_Pixels">
+   <property name="text">
+    <string>Show Unsupported Pixels</string>
+   </property>
+  </action>
+  <action name="actionShow_Slice_Window">
+   <property name="icon">
+    <iconset resource="b9edit.qrc">
+     <normaloff>:/B9Edit/icons/edit.png</normaloff>:/B9Edit/icons/edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Slice Manager...</string>
+   </property>
+  </action>
+  <action name="actionNew_Job">
+   <property name="icon">
+    <iconset resource="b9edit.qrc">
+     <normaloff>:/B9Edit/icons/new.png</normaloff>:/B9Edit/icons/new.png</iconset>
+   </property>
+   <property name="text">
+    <string>New </string>
+   </property>
+   <property name="iconText">
+    <string>New</string>
+   </property>
+   <property name="toolTip">
+    <string>Creates A New Job</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="text">
+    <string>Save As...</string>
+   </property>
+   <property name="toolTip">
+    <string>Saves the current Job to a new file</string>
+   </property>
+  </action>
+  <action name="actionExport_Slices">
+   <property name="text">
+    <string>Export Images...</string>
+   </property>
+  </action>
+  <action name="actionAbout_B9Edit">
+   <property name="text">
+    <string>About B9Edit...</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="b9edit.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>B9EditClass</sender>
+   <signal>setName(QString)</signal>
+   <receiver>lineEdit_4</receiver>
+   <slot>setText(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>357</x>
+     <y>271</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>406</x>
+     <y>85</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>B9EditClass</sender>
+   <signal>setDescription(QString)</signal>
+   <receiver>lineEdit_5</receiver>
+   <slot>setText(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>387</x>
+     <y>271</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>460</x>
+     <y>113</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>B9EditClass</sender>
+   <signal>setXYPixel(QString)</signal>
+   <receiver>lineEdit_6</receiver>
+   <slot>setText(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>386</x>
+     <y>271</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>202</x>
+     <y>141</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>B9EditClass</sender>
+   <signal>setZLayer(QString)</signal>
+   <receiver>lineEdit_7</receiver>
+   <slot>setText(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>439</x>
+     <y>271</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>196</x>
+     <y>169</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEdit_4</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>B9EditClass</receiver>
+   <slot>updateName(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>220</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>175</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEdit_5</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>B9EditClass</receiver>
+   <slot>updateDescription(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>284</x>
+     <y>113</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>210</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEdit_6</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>B9EditClass</receiver>
+   <slot>updateXY(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>202</x>
+     <y>141</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEdit_7</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>B9EditClass</receiver>
+   <slot>updateZ(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>196</x>
+     <y>169</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>304</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShow_Slice_Window</sender>
+   <signal>triggered()</signal>
+   <receiver>B9EditClass</receiver>
+   <slot>ShowSliceWindow()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>435</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNew_Job</sender>
+   <signal>triggered()</signal>
+   <receiver>B9EditClass</receiver>
+   <slot>newJob()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>435</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOpen_Exsisting_Job_File</sender>
+   <signal>triggered()</signal>
+   <receiver>B9EditClass</receiver>
+   <slot>openJob()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>435</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave_To_Job</sender>
+   <signal>triggered()</signal>
+   <receiver>B9EditClass</receiver>
+   <slot>saveJob()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>435</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSaveAs</sender>
+   <signal>triggered()</signal>
+   <receiver>B9EditClass</receiver>
+   <slot>saveJobAs()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>435</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOpen_Image_Folder</sender>
+   <signal>triggered()</signal>
+   <receiver>B9EditClass</receiver>
+   <slot>importSlices()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>435</x>
+     <y>271</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>B9EditClass</sender>
+   <signal>setSliceIndicator(QString)</signal>
+   <receiver>lineEdit_8</receiver>
+   <slot>setText(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>97</x>
+     <y>271</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>290</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionExport_Slices</sender>
+   <signal>triggered()</signal>
+   <receiver>B9EditClass</receiver>
+   <slot>ExportToFolder()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>208</x>
+     <y>135</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAbout_B9Edit</sender>
+   <signal>triggered()</signal>
+   <receiver>B9EditClass</receiver>
+   <slot>ShowAboutBox()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>129</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <signal>selectedDirChanged(QSting)</signal>
+  <signal>setVersion(QString)</signal>
+  <signal>setName(QString)</signal>
+  <signal>setDescription(QString)</signal>
+  <signal>setXYPixel(QString)</signal>
+  <signal>setZLayer(QString)</signal>
+  <signal>setSliceIndicator(QString)</signal>
+  <slot>updateVersion(QString)</slot>
+  <slot>updateName(QString)</slot>
+  <slot>updateDescription(QString)</slot>
+  <slot>updateXY(QString)</slot>
+  <slot>updateZ(QString)</slot>
+  <slot>SetViewedSlice(int)</slot>
+  <slot>ShowSliceWindow()</slot>
+  <slot>SetUpperSliceBound(QString)</slot>
+  <slot>SetLowerSliceBound(QString)</slot>
+  <slot>saveJob()</slot>
+  <slot>newJob()</slot>
+  <slot>openJob()</slot>
+  <slot>saveJobAs()</slot>
+  <slot>importSlicesFromFirstFile()</slot>
+  <slot>ExportToFolder()</slot>
+  <slot>importSlices()</slot>
+  <slot>ShowAboutBox()</slot>
+ </slots>
+</ui>

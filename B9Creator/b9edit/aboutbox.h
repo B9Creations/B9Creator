@@ -31,15 +31,28 @@
 //    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 *************************************************************************************/
-#include <QtGui/QApplication>
-#include "mainwindow.h"
+#ifndef ABOUTBOX_H
+#define ABOUTBOX_H
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.pDesktop = a.desktop();
-    w.show();
-    
-    return a.exec();
+#include <QWidget>
+
+namespace Ui {
+class aboutbox;
 }
+
+class aboutbox : public QWidget
+{
+    Q_OBJECT
+    
+public:
+    explicit aboutbox(QWidget *parent = 0, Qt::WFlags flags = Qt::Dialog);
+    ~aboutbox();
+    void setText(QString content);
+
+
+    Ui::aboutbox *ui;
+private:
+
+};
+
+#endif // ABOUTBOX_H

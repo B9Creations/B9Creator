@@ -1,0 +1,684 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SliceEditViewClass</class>
+ <widget class="QMainWindow" name="SliceEditViewClass">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>275</width>
+    <height>291</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>275</width>
+    <height>291</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QSlider" name="horizontalSlider">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>35</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="invertedControls">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>212</width>
+         <height>218</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>275</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuPoo">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <widget class="QMenu" name="menuDrawing">
+     <property name="title">
+      <string>Drawing</string>
+     </property>
+     <addaction name="actionFlood_Fill"/>
+     <addaction name="actionFlood_Void"/>
+     <addaction name="actionWhite_Pen"/>
+     <addaction name="actionBlack_Pen"/>
+     <addaction name="separator"/>
+     <addaction name="actionSetPen"/>
+    </widget>
+    <widget class="QMenu" name="menuSupports">
+     <property name="minimumSize">
+      <size>
+       <width>1</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>Supports</string>
+     </property>
+     <addaction name="actionCircle"/>
+     <addaction name="actionSquare"/>
+     <addaction name="actionTriangle_2"/>
+     <addaction name="actionDiamond"/>
+     <addaction name="separator"/>
+     <addaction name="actionRemove_All_Supports"/>
+    </widget>
+    <addaction name="menuDrawing"/>
+    <addaction name="menuSupports"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionNext_Slice"/>
+    <addaction name="actionPrev_Slice"/>
+    <addaction name="separator"/>
+    <addaction name="actionBase"/>
+    <addaction name="actionTop"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionSupport_Mode"/>
+    <addaction name="actionPrepare_Base_Gap"/>
+    <addaction name="separator"/>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="separator"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
+   </widget>
+   <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
+   <addaction name="menuPoo"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <action name="actionTools">
+   <property name="text">
+    <string>Tools</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="toolTip">
+    <string>reverses the flow of the space-time continuum</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionFlood_Fill">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="sliceeditview.qrc">
+     <normaloff>:/Icons/icons/bucketwhiteicon.png</normaloff>:/Icons/icons/bucketwhiteicon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Flood Fill</string>
+   </property>
+  </action>
+  <action name="actionFlood_Void">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="sliceeditview.qrc">
+     <normaloff>:/Icons/icons/bucketblackicon.png</normaloff>:/Icons/icons/bucketblackicon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Flood Void</string>
+   </property>
+  </action>
+  <action name="actionSetPen">
+   <property name="text">
+    <string>SetPenWidth...</string>
+   </property>
+  </action>
+  <action name="actionWhite_Pen">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="sliceeditview.qrc">
+     <normaloff>:/Icons/icons/penwhiteicon.png</normaloff>:/Icons/icons/penwhiteicon.png</iconset>
+   </property>
+   <property name="text">
+    <string>White Pen</string>
+   </property>
+  </action>
+  <action name="actionBlack_Pen">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="sliceeditview.qrc">
+     <normaloff>:/Icons/icons/penblackicon.png</normaloff>:/Icons/icons/penblackicon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Black Pen</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
+   </property>
+  </action>
+  <action name="actionNext_Slice">
+   <property name="text">
+    <string>Next</string>
+   </property>
+   <property name="shortcut">
+    <string>Up</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WindowShortcut</enum>
+   </property>
+  </action>
+  <action name="actionPrev_Slice">
+   <property name="text">
+    <string>Prev</string>
+   </property>
+   <property name="shortcut">
+    <string>Down</string>
+   </property>
+  </action>
+  <action name="actionBase">
+   <property name="text">
+    <string>Base</string>
+   </property>
+   <property name="shortcut">
+    <string>Home</string>
+   </property>
+  </action>
+  <action name="actionTop">
+   <property name="text">
+    <string>Top</string>
+   </property>
+   <property name="shortcut">
+    <string>End</string>
+   </property>
+  </action>
+  <action name="actionSetColor">
+   <property name="text">
+    <string>SetColor</string>
+   </property>
+  </action>
+  <action name="actionPrepare_Base_Gap">
+   <property name="text">
+    <string>Base...</string>
+   </property>
+   <property name="shortcut">
+    <string>B</string>
+   </property>
+  </action>
+  <action name="actionAdd_Supports">
+   <property name="text">
+    <string>Add Supports</string>
+   </property>
+  </action>
+  <action name="actionShow_Unsupported_Pixels">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Unsupported Pixels</string>
+   </property>
+   <property name="shortcut">
+    <string>P</string>
+   </property>
+  </action>
+  <action name="actionSupport_Mode">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Enter Support Mode</string>
+   </property>
+   <property name="shortcut">
+    <string>M</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionCircle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="sliceeditview.qrc">
+     <normaloff>:/Icons/icons/cylindersupporticon.png</normaloff>:/Icons/icons/cylindersupporticon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Circle</string>
+   </property>
+  </action>
+  <action name="actionSquare">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="sliceeditview.qrc">
+     <normaloff>:/Icons/icons/boxsupporticon.png</normaloff>:/Icons/icons/boxsupporticon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Square</string>
+   </property>
+  </action>
+  <action name="actionTriangle_2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="sliceeditview.qrc">
+     <normaloff>:/Icons/icons/trianglesupporticon.png</normaloff>:/Icons/icons/trianglesupporticon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Triangle</string>
+   </property>
+  </action>
+  <action name="actionSetSupportSize">
+   <property name="text">
+    <string>SetSupportSize...</string>
+   </property>
+  </action>
+  <action name="actionNext">
+   <property name="text">
+    <string>next</string>
+   </property>
+   <property name="shortcut">
+    <string>Up</string>
+   </property>
+  </action>
+  <action name="actionDiamond">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="sliceeditview.qrc">
+     <normaloff>:/Icons/icons/diamondsupporticon.png</normaloff>:/Icons/icons/diamondsupporticon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Diamond</string>
+   </property>
+  </action>
+  <action name="actionRemove_All_Supports">
+   <property name="text">
+    <string>Remove All Supports</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Del</string>
+   </property>
+  </action>
+  <action name="actionDelete_Support">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Delete Support</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
+  <action name="actionAuto_Support_End">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Auto Support End</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="sliceeditview.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>actionUndo</sender>
+   <signal>triggered()</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>Undo()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>423</x>
+     <y>328</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSetPen</sender>
+   <signal>triggered()</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>SelectPenWidth()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>423</x>
+     <y>328</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSetColor</sender>
+   <signal>triggered()</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>SelectPenColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>423</x>
+     <y>328</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRedo</sender>
+   <signal>triggered()</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>Redo()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>423</x>
+     <y>328</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPrepare_Base_Gap</sender>
+   <signal>triggered()</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>PromptBaseOptions()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>498</x>
+     <y>379</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>horizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>GoToSlice(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>44</x>
+     <y>82</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>245</x>
+     <y>736</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSupport_Mode</sender>
+   <signal>triggered()</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>TogSupportMode()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>498</x>
+     <y>379</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNext_Slice</sender>
+   <signal>triggered()</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>NextSlice()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>498</x>
+     <y>379</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPrev_Slice</sender>
+   <signal>triggered()</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>PrevSlice()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>498</x>
+     <y>379</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionBase</sender>
+   <signal>triggered()</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>BaseSlice()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>498</x>
+     <y>379</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionTop</sender>
+   <signal>triggered()</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>TopSlice()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>498</x>
+     <y>379</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCopy</sender>
+   <signal>triggered()</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>CopyToClipboard()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>498</x>
+     <y>379</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPaste</sender>
+   <signal>triggered()</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>PasteFromClipboard()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>498</x>
+     <y>379</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRemove_All_Supports</sender>
+   <signal>triggered()</signal>
+   <receiver>SliceEditViewClass</receiver>
+   <slot>DeleteAllSupports()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>498</x>
+     <y>379</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>GoToSlice(int)</slot>
+  <slot>Undo()</slot>
+  <slot>SelectPenWidth()</slot>
+  <slot>SelectPenColor()</slot>
+  <slot>Redo()</slot>
+  <slot>ShowRedPixels(bool)</slot>
+  <slot>TogSupportMode()</slot>
+  <slot>PromptBaseOptions()</slot>
+  <slot>NextSlice()</slot>
+  <slot>PrevSlice()</slot>
+  <slot>PgUpSlice()</slot>
+  <slot>PgDownSlice()</slot>
+  <slot>BaseSlice()</slot>
+  <slot>TopSlice()</slot>
+  <slot>CopyToClipboard()</slot>
+  <slot>PasteFromClipboard()</slot>
+  <slot>DeleteAllSupports()</slot>
+ </slots>
+</ui>

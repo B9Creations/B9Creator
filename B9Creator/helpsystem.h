@@ -31,15 +31,25 @@
 //    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 *************************************************************************************/
-#include <QtGui/QApplication>
-#include "mainwindow.h"
+#ifndef HELPSYSTEM_H
+#define HELPSYSTEM_H
 
-int main(int argc, char *argv[])
+#include <QtCore/QString>
+
+QT_BEGIN_NAMESPACE
+class QProcess;
+QT_END_NAMESPACE
+
+class HelpSystem
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.pDesktop = a.desktop();
-    w.show();
-    
-    return a.exec();
-}
+public:
+    HelpSystem();
+    ~HelpSystem();
+    void showHelpFile(const QString &file);
+
+private:
+    bool startHelp();
+    QProcess *pHelpProcess;
+};
+
+#endif // HELPSYSTEM_H

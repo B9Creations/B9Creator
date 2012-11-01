@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QHelpCollectionProject version="1.0">
+    <assistant>
+        <title>B9Creator 3D Printer Help System</title>
+        <applicationIcon>images/handbook.png</applicationIcon>
+        <cacheDirectory>B9Creations/B9Creator</cacheDirectory>
+        <startPage>qthelp://com.b9creations.b9creator/doc/index.html</startPage>
+        <aboutMenuText>
+            <text>About B9Creator Help</text>
+        </aboutMenuText>
+        <aboutDialog>
+            <file>about.txt</file>
+            <icon>images/icon.png</icon>
+        </aboutDialog>
+        <enableDocumentationManager>false</enableDocumentationManager>
+        <enableAddressBar>false</enableAddressBar>
+        <enableFilterFunctionality>false</enableFilterFunctionality>
+    </assistant>
+    <docFiles>
+        <generate>
+            <file>
+                <input>b9creator.qhp</input>
+                <output>b9creator.qch</output>
+                </file>
+            </generate>
+        <register>
+            <file>b9creator.qch</file>
+            </register>
+        </docFiles>
+    </QHelpCollectionProject>

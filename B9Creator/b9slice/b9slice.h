@@ -31,15 +31,31 @@
 //    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 *************************************************************************************/
-#include <QtGui/QApplication>
-#include "mainwindow.h"
+#ifndef B9SLICE_H
+#define B9SLICE_H
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.pDesktop = a.desktop();
-    w.show();
-    
-    return a.exec();
+#include <QDialog>
+#include <QHideEvent>
+
+namespace Ui {
+class B9Slice;
 }
+
+class B9Slice : public QDialog
+{
+    Q_OBJECT
+    
+public:
+    explicit B9Slice(QWidget *parent = 0);
+    ~B9Slice();
+    
+signals:
+    void eventHiding();
+
+
+private:
+    void hideEvent(QHideEvent *event);
+    Ui::B9Slice *ui;
+};
+
+#endif // B9SLICE_H

@@ -36,6 +36,7 @@
 
 #include <QMainWindow>
 #include <QHideEvent>
+#include "helpsystem.h"
 
 namespace Ui {
 class B9Plan;
@@ -52,10 +53,14 @@ public:
 signals:
     void eventHiding();
 
+private slots:
+    void showHelp();
     
 private:
     void hideEvent(QHideEvent *event);
     Ui::B9Plan *ui;
+    HelpSystem m_HelpSystem;
+
 };
 
 #endif // B9PLAN_H
