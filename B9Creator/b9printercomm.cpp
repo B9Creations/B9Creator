@@ -43,17 +43,17 @@
 void B9PrinterStatus::reset(){
     // Reset all status variables to unknown
     iV1 = iV2 = iV3 = -1;
-    iResetState = -1;
-    iProjPwr = -1;
+    m_eHomeStatus = HS_UNKNOWN;
+    m_eProjStatus = PS_UNKNOWN;
+    m_bProjCmdOn  = false;
     lastMsgTime.start();
     bResetInProgress = false;
-
+    bDoResume = false;
 }
 
 void B9PrinterStatus::setVersion(QString s)
 {
     // s must be formated as "n1 n2 n3" where nx are integers.
-
     int i=0;
     QChar c;
     int p=0;
@@ -157,7 +157,7 @@ B9PrinterComm::~B9PrinterComm()
 void B9PrinterComm::SendCmd(QString sCmd)
 {
     if(m_serialDevice)m_serialDevice->write(sCmd.toAscii()+'\n');
-    if(sCmd == "r" || sCmd == "R")m_Status.setFindingHomeStatus(true);
+    if(sCmd == "r" || sCmd == "R") m_Status.setHomeStatus(B9PrinterStatus::HS_SEEKING);
     qDebug() << "SendCmd->" << sCmd;
 }
 
@@ -165,27 +165,31 @@ void B9PrinterComm::watchDog()
 {
     // We expect a valid handle to m_SerialDevice and
     // we expect the last readReady signal from the Printer to have happened within the last 10 seconds
-    // Unless the printer is busy finding the home location (which
+    // Unless the printer is busy finding the home location
     int iTimeLimit = 10000;
-    if(m_Status.isFindingHome()) iTimeLimit = 60000;
+    if(m_Status.getHomeStatus() == B9PrinterStatus::HS_SEEKING) iTimeLimit = 60000;
 
-    if( m_serialDevice==NULL || m_Status.getLastMsgElapsedTime() > iTimeLimit){
-        // Lost contact with B9Creator!
-        if(m_serialDevice!=NULL){
-            if (m_serialDevice->isOpen())
-            m_serialDevice->close();
-            delete m_serialDevice;
-            m_serialDevice = NULL;
-        }
-        m_Status.reset();
-        //TODO Broadcast Lost Contact Signal, return without activating watchDog timer
-        emit updateConnectionStatus(MSG_SEARCHING);
-        qDebug() << "WATCHDOG:  LOST CONTACT WITH B9CREATOR!";
-    }
-    else { // Still in Contact with B9Creator
-         startWatchDogTimer();
+    if( m_serialDevice != NULL && m_Status.getLastMsgElapsedTime() <= iTimeLimit){
+        // Still in Contact with the B9Creator
+        startWatchDogTimer();
         emit updateConnectionStatus(MSG_CONNECTED);
+        return;
     }
+
+    // Lost Comm...
+    if(m_Status.getHomeStatus()==B9PrinterStatus::HS_SEEKING) m_Status.setHomeStatus(B9PrinterStatus::HS_UNKNOWN);
+    if(m_serialDevice!=NULL){
+        // port device still exists but getting no messages, time to reboot the port
+        if (m_serialDevice->isOpen())
+        m_serialDevice->close();
+        delete m_serialDevice;
+        m_serialDevice = NULL;
+    }
+    //Attempt to pick up were we lost contact if we find the port again within a short time
+    m_Status.setResumeOnReconnect(true);
+    emit updateConnectionStatus(MSG_SEARCHING);
+    qDebug() << "WATCHDOG:  LOST CONTACT WITH B9CREATOR!";
+//TODO Broadcast Lost Contact Signal, return without activating watchDog timer
 }
 
 void B9PrinterComm::startWatchDogTimer()
@@ -328,8 +332,8 @@ bool B9PrinterComm::OpenB9CreatorCommPort(QString sPortName)
         return false;
     }
 
-    // Delay for up to 3 seconds while we wait for response from printer
-    QTime delayTime = QTime::currentTime().addSecs(3);
+    // Delay for up to 5 seconds while we wait for response from printer
+    QTime delayTime = QTime::currentTime().addSecs(5);
     while( QTime::currentTime() < delayTime && !m_Status.isValidVersion() )
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
@@ -345,16 +349,32 @@ bool B9PrinterComm::OpenB9CreatorCommPort(QString sPortName)
         sNoFirmwareAurdinoPort = sPortName;
         return false;
     }
+
+    if(m_Status.resumeOnReconnect()&& m_Status.getLastMsgElapsedTime()<30000){
+        // We were connected not too long ago, let's pick up where we left off
+        m_Status.setResumeOnReconnect(false);
+        restoreState();
+    }
     return true;
 }
 
-void B9PrinterComm::ReadAvailable() {
-    if(m_serialDevice==NULL) qFatal("Error:  slotRead, NULL Port Handle");
+void B9PrinterComm::restoreState(){
+    // send the print parameters & set the last known z position as current, do not cycle the vat!
+//TODO  everything mentioned in the above comment!  If we are printing and waiting on cycle completed msg, assume we
+    // missed it and transmit an alternate "Cycle_Error" type message so we can resume the print
+// setHomeStatus() to HS_FOUND after setting known z position as current!
 
-    m_Status.resetLastMsgTime();
-    if(m_Status.isFindingHome()) {
-        m_Status.setFindingHomeStatus(false); // if we are receiving data, we must not be finding home!
-        // TODO emit reset complete signal
+    qDebug() << "Restoring State to last known values.";
+}
+
+void B9PrinterComm::ReadAvailable() {
+    if(m_serialDevice==NULL) qFatal("Error:  slot 'ReadAvailable()' but NULL Port Handle");
+
+    m_Status.resetLastMsgTime();  //update for watchdog
+
+    if(m_Status.getHomeStatus() == B9PrinterStatus::HS_SEEKING) {
+        m_Status.setHomeStatus(B9PrinterStatus::HS_UNKNOWN); // if we are receiving data, we must no longer be seeking Home
+        // we'll set the status to HS_FOUND once we recieve a 'X' diff broadcast
     }
 
     QByteArray ba = m_serialDevice->readAll();  // read block of available raw data
@@ -366,33 +386,59 @@ void B9PrinterComm::ReadAvailable() {
         c = ba.at(iCurPos);
         iCurPos++;
         if(c!='\r') m_sSerialString+=QString(c);
-        if(c=='\n'||c=='\r'){
+        if(c=='\n'/*||c=='\r'*/){
             // Line Read Complete, process data
-            emit broadcastPrinterComm(m_sSerialString);
 
-            if(m_sSerialString.left(1) == "C"){
-                // Comment
-                // qDebug() << m_sSerialString.right(m_sSerialString.length()-1) << "\n";
+            if(m_sSerialString.left(1) != "P" && m_sSerialString.length()>0){
+                // We only emit this data for display & log purposes
+                emit BC_RawData(m_sSerialString);//+"\n");
+                if(m_sSerialString.left(1) == "C")
+                    qDebug() << m_sSerialString.right(m_sSerialString.length()-1) << "\n";
+                else
+                    qDebug() << m_sSerialString << "\n";
             }
-            if(m_sSerialString.left(1) == "V"){
-                // Version
+
+            int iCmdID = m_sSerialString.left(1).toUpper().toAscii().at(0);
+            switch (iCmdID){
+
+            case 'P':  // take care of projector status
+                handleProjectorBC(m_sSerialString.right(m_sSerialString.length()-1).toInt());
+                break;
+
+            case 'X':  // Found Home with this Difference Offset
+                m_Status.setHomeStatus(B9PrinterStatus::HS_FOUND);
+                m_Status.setLastHomeDiff(m_sSerialString.right(m_sSerialString.length()-1).toInt());
+                emit BC_HomeFound();
+                break;
+
+            case 'C':  // Comment
+                emit BC_Comment(m_sSerialString.right(m_sSerialString.length()-1));
+                break;
+
+            case 'V':  // Version
                 m_Status.setVersion(m_sSerialString.right(m_sSerialString.length()-1));
-                //qDebug() << "Version: " << m_Status.getVersion() << "\n";
+                break;
+
+            case 'M':  // Model
+                m_Status.setModel(m_sSerialString.right(m_sSerialString.length()-1));
+                break;
+
+            default:
+                break;
             }
 
+/*
             if(m_sSerialString.left(1) == "F"){
-                /*
-                if(m_iPrintState == PRINT_MOV2READY){
-                    m_iPrintState = PRINT_WAITFORP;
-                }
-                else if(m_iPrintState == PRINT_MOV2NEXT){
-//					exposeLayer();
-                    breatheLayer();
-                }
-                else if(m_iPrintState == PRINT_NO) {
-                    sendCmd("p0");
-                }
-                */
+                //if(m_iPrintState == PRINT_MOV2READY){
+                //    m_iPrintState = PRINT_WAITFORP;
+                //}
+                //else if(m_iPrintState == PRINT_MOV2NEXT){
+//				//	exposeLayer();
+                //    breatheLayer();
+                //}
+                //else if(m_iPrintState == PRINT_NO) {
+                //    sendCmd("p0");
+                //}
             }
 
             if(m_sSerialString.left(2) == "R0"){
@@ -424,8 +470,129 @@ void B9PrinterComm::ReadAvailable() {
                 //dPos /= 100000;
                 //ui.lineEditZPos->setText(QString::number(dPos,'g',8)+" mm");
             }
+            */
 
             m_sSerialString=""; // Line processed, clear it for next line
+        }
+    }
+}
+
+void B9PrinterComm::handleProjectorBC(int iBC){
+    if(m_Status.isProjectorPowerCmdOn() && iBC == 0){
+        // Projector commanded ON but current report is OFF
+        switch(m_Status.getProjectorStatus()){
+        case B9PrinterStatus::PS_OFF:
+            SendCmd("P1"); // Turn On Command
+            m_Status.setProjectorStatus(B9PrinterStatus::PS_TURNINGON);
+            m_Status.resetLastProjCmdTime();
+            emit BC_ProjectorStatusChanged();
+            break;
+        case B9PrinterStatus::PS_TURNINGON:
+            if(m_Status.getLastProjCmdElapsedTime()>30000){
+                // Taking too long to turn on, something is wrong!
+                m_Status.setProjectorStatus(B9PrinterStatus::PS_TIMEOUT);
+            }
+            else {
+                // Waiting for first sign of power on, keep sending P1 cmd
+                SendCmd("P1"); // Turn On Command
+            }
+            break;
+        case B9PrinterStatus::PS_WARMING:
+        case B9PrinterStatus::PS_ON:
+            // Uncommanded Power off!  Lost power or bulb failure?
+            m_Status.setProjectorStatus(B9PrinterStatus::PS_FAIL);
+            emit BC_ProjectorStatusChanged();
+            emit BC_ProjectorFAIL();
+            break;
+        case B9PrinterStatus::PS_COOLING:
+            // Done cooling off
+            m_Status.setProjectorStatus(B9PrinterStatus::PS_OFF);
+            emit BC_ProjectorStatusChanged();
+            break;
+        case B9PrinterStatus::PS_UNKNOWN:
+            // Now we know it's OFF
+            m_Status.setProjectorStatus(B9PrinterStatus::PS_OFF);
+            emit BC_ProjectorStatusChanged();
+            break;
+        case B9PrinterStatus::PS_TIMEOUT:
+            break;
+        case B9PrinterStatus::PS_FAIL:
+        default:
+            // Nothing we can do
+            break;
+        }
+    }
+    else if(m_Status.isProjectorPowerCmdOn() && iBC == 1){
+        // Projector commanded ON and current report is ON
+        switch(m_Status.getProjectorStatus()){
+        case B9PrinterStatus::PS_COOLING:
+        case B9PrinterStatus::PS_OFF:
+        case B9PrinterStatus::PS_UNKNOWN:
+        case B9PrinterStatus::PS_TIMEOUT:
+        case B9PrinterStatus::PS_FAIL:
+            // We were turning off, off, failed, timed out or unknown and suddenly we're cmd on and actually on?
+            // Best we can do is set the status on and report
+            m_Status.setProjectorStatus(B9PrinterStatus::PS_ON);
+            emit BC_ProjectorStatusChanged();
+            break;
+        case B9PrinterStatus::PS_TURNINGON:
+            // We were turning on and now we need to warm up a bit
+            m_Status.setProjectorStatus(B9PrinterStatus::PS_WARMING);
+            startWarmingTime.restart();
+            emit BC_ProjectorStatusChanged();
+            break;
+        case B9PrinterStatus::PS_WARMING:
+            if(startWarmingTime.elapsed()>15000){
+                // Need to let the bulb warm up a bit longer
+                m_Status.setProjectorStatus(B9PrinterStatus::PS_ON);
+                emit BC_ProjectorStatusChanged();
+            }
+            break;
+        case B9PrinterStatus::PS_ON:
+        default:
+            // No change, we're good.
+            break;
+        }
+    }
+    else if(!m_Status.isProjectorPowerCmdOn() && iBC == 0){
+        // Projector commanded OFF and current report is OFF
+        switch(m_Status.getProjectorStatus()){
+        case B9PrinterStatus::PS_TURNINGON:
+        case B9PrinterStatus::PS_WARMING:
+        case B9PrinterStatus::PS_ON:
+        case B9PrinterStatus::PS_COOLING:
+        case B9PrinterStatus::PS_UNKNOWN:
+        case B9PrinterStatus::PS_TIMEOUT:
+        case B9PrinterStatus::PS_FAIL:
+            // We were turning on, warming up, on, cooling off, unknown, timed out or failed and now we're off
+            m_Status.setProjectorStatus(B9PrinterStatus::PS_OFF);
+            emit BC_ProjectorStatusChanged();
+            break;
+        case B9PrinterStatus::PS_OFF:
+        default:
+            // No change, we're good
+            break;
+        }
+    }
+    else if(!m_Status.isProjectorPowerCmdOn() && iBC == 1){
+        // Projector commanded OFF but current report is ON
+        switch(m_Status.getProjectorStatus()){
+        case B9PrinterStatus::PS_COOLING:
+            // Waiting for first sign of power off, keep sending P0 cmd
+            SendCmd("P0"); // Turn Off Command
+            break;
+        case B9PrinterStatus::PS_OFF:
+        case B9PrinterStatus::PS_TURNINGON:
+        case B9PrinterStatus::PS_WARMING:
+        case B9PrinterStatus::PS_ON:
+        case B9PrinterStatus::PS_UNKNOWN:
+        case B9PrinterStatus::PS_TIMEOUT:
+        case B9PrinterStatus::PS_FAIL:
+        default:
+            SendCmd("P0"); // Turn OFF
+            m_Status.setProjectorStatus(B9PrinterStatus::PS_COOLING);
+            emit BC_ProjectorStatusChanged();
+            break;
         }
     }
 }

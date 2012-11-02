@@ -47,8 +47,9 @@ B9Terminal::B9Terminal(B9PrinterComm *pPC, QWidget *parent, Qt::WFlags flags) :
 
     pPrinterComm = pPC;
     connect(pPrinterComm,SIGNAL(updateConnectionStatus(QString)), this, SLOT(onUpdateConnectionStatus(QString)));
-    connect(pPrinterComm,SIGNAL(broadcastPrinterComm(QString)), this, SLOT(onUpdatePrinterComm(QString)));
-    connect(this,SIGNAL(sendCMD(QString)),pPrinterComm, SLOT(SendCmd(QString)));
+    connect(pPrinterComm,SIGNAL(BC_RawData(QString)), this, SLOT(onUpdatePrinterComm(QString)));
+    //connect(pPrinterComm,SIGNAL(BC_Comment(QString)), this, SLOT(onUpdatePrinterComm(QString)));
+    connect(pPrinterComm,SIGNAL(BC_ProjectorStatusChanged()), this, SLOT(onBC_ProjStatusChanged()));
 }
 
 B9Terminal::~B9Terminal()
@@ -65,7 +66,7 @@ void B9Terminal::hideEvent(QHideEvent *event)
 
 void B9Terminal::sendCommand()
 {
-    emit sendCMD(ui->lineEditCommand->text());
+    pPrinterComm->SendCmd(ui->lineEditCommand->text());
     ui->lineEditCommand->clear();
 }
 
@@ -81,3 +82,47 @@ void B9Terminal::onUpdatePrinterComm(QString sText)
     ui->textEditCommOut->insertPlainText(sText);
     ui->textEditCommOut->setAlignment(Qt::AlignBottom);
 }
+
+void B9Terminal::on_pushButtonProjPower_toggled(bool checked)
+{
+    // User has changed the commanded projector power setting
+    if(checked)
+        ui->pushButtonProjPower->setText("ON");
+    else
+        ui->pushButtonProjPower->setText("OFF");
+    pPrinterComm->cmdProjectorPowerOn(checked);
+}
+
+void B9Terminal::onBC_ProjStatusChanged()
+{
+    QString sText = "UNKNOWN";
+    switch (pPrinterComm->getProjectorStatus()){
+    case B9PrinterStatus::PS_OFF:
+        sText = "OFF";
+        break;
+    case B9PrinterStatus::PS_TURNINGON:
+        sText = "POWERING UP";
+        break;
+    case B9PrinterStatus::PS_WARMING:
+        sText = "WARMING UP";
+        break;
+    case B9PrinterStatus::PS_ON:
+        sText = "ON";
+        break;
+    case B9PrinterStatus::PS_COOLING:
+        sText = "COOLING OFF";
+        break;
+    case B9PrinterStatus::PS_TIMEOUT:
+        sText = "TIMED OUT";
+        break;
+    case B9PrinterStatus::PS_FAIL:
+        sText = "FAIL";
+        break;
+    case B9PrinterStatus::PS_UNKNOWN:
+    default:
+        sText = "UNKNOWN";
+        break;
+    }
+    ui->lineEditProjState->setText(sText);
+}
+

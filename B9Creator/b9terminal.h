@@ -55,10 +55,13 @@ public slots:
     void onUpdateConnectionStatus(QString sText);
     void onUpdatePrinterComm(QString sText);
     void sendCommand();
+    void onBC_ProjStatusChanged();
 
 signals:
     void eventHiding();
-    void sendCMD(QString sCmd);
+
+private slots:
+    void on_pushButtonProjPower_toggled(bool checked);
 
 private:
     Ui::B9Terminal *ui;

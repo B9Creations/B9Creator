@@ -40,8 +40,8 @@
 // The Firmware version is tied to a specific version
 // These defines determine how we attempt to update Firmware
 // The correctly named current hex file MUST be in the application directory
-#define CURRENTFIRMWARE "v1.0.0"
-#define FIRMWAREHEXFILE "B9Firmware_1_0_0.hex"
+#define CURRENTFIRMWARE "v1.0.1"
+#define FIRMWAREHEXFILE "B9Firmware_1_0_1.hex"
 #define MSG_SEARCHING "Searching..."
 #define MSG_CONNECTED "Connected"
 #define MSG_FIRMUPDATE "Updating Firmware..."
@@ -55,24 +55,56 @@ struct QextPortInfo;
 class B9PrinterStatus
 {
 public:
+    enum ProjectorStatus{PS_OFF, PS_TURNINGON, PS_WARMING, PS_ON, PS_COOLING, PS_UNKNOWN, PS_TIMEOUT, PS_FAIL};
+    enum HomeStatus{HS_SEEKING, HS_FOUND, HS_UNKNOWN};
+
+
     B9PrinterStatus(){reset();}
     void reset();
+
     QString getVersion();
     void setVersion(QString s);
     bool isCurrentVersion();
     bool isValidVersion();
 
+    void cmdProjectorPowerOn(bool bOn){m_bProjCmdOn = bOn;}
+    bool isProjectorPowerCmdOn(){return m_bProjCmdOn;}
+
+    QString getModel(){return m_sModel;}
+    void setModel(QString sModel){m_sModel = sModel;}
+
+    HomeStatus getHomeStatus() {return m_eHomeStatus;}
+    void setHomeStatus(HomeStatus eHS) {m_eHomeStatus = eHS;}
+
+    ProjectorStatus getProjectorStatus() {return m_eProjStatus;}
+    void setProjectorStatus(ProjectorStatus ePS) {m_eProjStatus = ePS;}
+
+    int getLastHomeDiff() {return m_iLastHomeDiff;}
+    void setLastHomeDiff(int iDiff) {m_iLastHomeDiff = iDiff;}
+
+    bool resumeOnReconnect() {return bDoResume;}
+    void setResumeOnReconnect(bool bResume) {bDoResume = bResume;}
+
     void resetLastMsgTime() {lastMsgTime.start();}
     int getLastMsgElapsedTime() {return lastMsgTime.elapsed();}
-    bool isFindingHome() {return bResetInProgress;}
-    void setFindingHomeStatus(bool b) {bResetInProgress = b;}
+
+    void resetLastProjCmdTime() {lastProjCmdTime.start();}
+    int getLastProjCmdElapsedTime() {return lastProjCmdTime.elapsed();}
 
 private:
     QTime lastMsgTime; // Updated on every serial readReady signal
     bool bResetInProgress; // Set to True during home location reset
+    bool bDoResume; // set to true if we wish to resume after disconnect
+
     int iV1,iV2,iV3; // version values
-    int iResetState; // Has home been located?  0 no, 1 yes, -1 ????
-    int iProjPwr; // 0 = off, 1 = on, -1 = ????
+    QString m_sModel; // Product Model Description
+    int m_iLastHomeDiff; // When we reset to home this is Z expected - found (in PU)
+
+    HomeStatus m_eHomeStatus; // Has home been located?
+    ProjectorStatus m_eProjStatus; // What's the projector doing?
+
+    bool m_bProjCmdOn;  //Set to true if we want the projector on, false if off
+    QTime lastProjCmdTime; //Updated on every serial cmd to projector;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -108,9 +140,16 @@ public:
     bool isConnected(){return m_Status.isValidVersion();}
     void enableBlankCloning(bool bEnable){m_bCloneBlanks = bEnable;}
 
+    void cmdProjectorPowerOn(bool bOn){m_Status.cmdProjectorPowerOn(bOn);}
+    B9PrinterStatus::ProjectorStatus getProjectorStatus(){return m_Status.getProjectorStatus();}
+
 signals:
-    void updateConnectionStatus(QString sText);
-    void broadcastPrinterComm(QString sText);
+    void updateConnectionStatus(QString sText); // Connected or Searching
+    void BC_RawData(QString sText);    // Raw Data
+    void BC_Comment(QString sComment); // Comment String
+    void BC_HomeFound(); // Done with Reset, re-enable contols, etc.
+    void BC_ProjectorStatusChanged(); // Projector status has changed
+    void BC_ProjectorFAIL(); // Projector experienced and uncommanded power off
 
 public slots:
     void SendCmd(QString sCmd);
@@ -132,5 +171,8 @@ private:
 
     bool OpenB9CreatorCommPort(QString sPortName);
     void startWatchDogTimer();
+    void restoreState();
+    void handleProjectorBC(int iBC);
+    QTime startWarmingTime;
 };
 #endif // B9PRINTERCOMM_H

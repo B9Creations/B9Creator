@@ -48,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Always set up the B9PrinterComm in the MainWindow constructor
     pPrinter = new B9PrinterComm;
+    pTerminal = new B9Terminal(pPrinter, 0);
     pPrinter->enableBlankCloning(true); // Allow for firmware update of suspected "blank" B9Creator Arduino's
     connect(pPrinter, SIGNAL(updateConnectionStatus(QString)), ui->statusBar, SLOT(showMessage(QString)));
     ui->statusBar->showMessage(MSG_SEARCHING);
@@ -58,8 +59,6 @@ MainWindow::MainWindow(QWidget *parent) :
     pMW3 = new B9Edit(0);
     pMW4 = new B9Creator(0);
 
-    pTerminal = new B9Terminal(pPrinter, 0);
-
     connect(pMW1, SIGNAL(eventHiding()),this, SLOT(handleW1Hide()));
     connect(pMW2, SIGNAL(eventHiding()),this, SLOT(handleW2Hide()));
     connect(pMW3, SIGNAL(eventHiding()),this, SLOT(handleW3Hide()));
@@ -68,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete pTerminal;
     delete pPrinter;
     qDebug() << "Program End";
     if(m_bOpenLogOnExit)
