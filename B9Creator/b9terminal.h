@@ -36,6 +36,7 @@
 
 #include <QtGui/QWidget>
 #include <QHideEvent>
+#include <QTimer>
 #include "b9printercomm.h"
 #include "logfilemanager.h"
 
@@ -48,20 +49,71 @@ class B9Terminal : public QWidget
     Q_OBJECT
     
 public:
-    explicit B9Terminal(B9PrinterComm *pPC, QWidget *parent = 0, Qt::WFlags flags = Qt::Widget);
+    explicit B9Terminal(QWidget *parent = 0, Qt::WFlags flags = Qt::Widget);
     ~B9Terminal();
     
 public slots:
-    void onUpdateConnectionStatus(QString sText);
-    void onUpdatePrinterComm(QString sText);
-    void sendCommand();
-    void onBC_ProjStatusChanged();
+    void on_pushButtonProjPower_toggled(bool checked);  //Remote slot for turning projector on/off
+    void on_pushButtonCmdReset_clicked(); // Remote slot for commanding Reset (find home) motion
+    void showIt(){show();setEnabledWarned();;}
 
 signals:
+    void updateConnectionStatus(QString sText); // Connected or Searching
     void eventHiding();
 
 private slots:
-    void on_pushButtonProjPower_toggled(bool checked);
+    void sendCommand();
+    void setProjectorPowerCmd(bool bPwrFlag); // call to send projector power on/off command
+    void onUpdateConnectionStatus(QString sText);
+    void onBC_ConnectionStatusDetailed(QString sText);
+    void onUpdatePrinterComm(QString sText);
+    void onBC_LostCOMM();
+    void onBC_ProjStatusChanged();
+    void onBC_ProjStatusFAIL();
+
+    void onMotionResetTimeout();
+    void onMotionResetComplete();
+
+    void onBC_ModelInfo(QString sModel);
+    void onBC_FirmVersion(QString sVersion);
+    void onBC_ProjectorRemoteCapable(bool bCapable);
+    void onBC_HasShutter(bool bHS);
+    void onBC_PU(int iPU);
+    void onBC_UpperZLimPU(int iUpZLimPU);
+    void onBC_CurrentZPosInPU(int iCZ);
+    void onBC_CurrentVatPercentOpen(int iPO);
+
+    void setTgtAltitudePU(int iTgtPU);
+    void setTgtAltitudeMM(double iTgtMM);
+    void setTgtAltitudeIN(double iTgtIN);
+
+
+
+    void on_lineEditZRaiseSpd_editingFinished();
+
+    void on_lineEditZLowerSpd_editingFinished();
+
+    void on_lineEditVatOpenSpeed_editingFinished();
+
+    void on_lineEditVatCloseSpeed_editingFinished();
+
+    void on_lineEditDelayClosedPos_editingFinished();
+
+    void on_lineEditDelayOpenPos_editingFinished();
+
+    void on_lineEditOverLift_editingFinished();
+
+    void on_lineEditTgtZPU_editingFinished();
+
+    void on_lineEditTgtZMM_editingFinished();
+
+    void on_lineEditTgtZInches_editingFinished();
+
+    void on_lineEditCurZPosInPU_returnPressed();
+
+    void on_lineEditCurZPosInMM_returnPressed();
+
+    void on_lineEditCurZPosInInches_returnPressed();
 
 private:
     Ui::B9Terminal *ui;
@@ -70,6 +122,12 @@ private:
     B9PrinterComm *pPrinterComm;
     LogFileManager *pLogManager;
 
+    QTimer *m_pResetTimer;
+    bool m_bResetInProgress;
+
+    void setEnabledWarned(); // Set the enabled status based on connection and user response
+    bool m_bWaiverPresented;
+    bool m_bWaiverAccepted;
 };
 
 #endif // B9TERMINAL_H

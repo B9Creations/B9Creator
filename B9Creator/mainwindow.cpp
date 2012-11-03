@@ -46,18 +46,18 @@ MainWindow::MainWindow(QWidget *parent) :
     m_bOpenLogOnExit = false;
     qDebug() << "Program Start";
 
-    // Always set up the B9PrinterComm in the MainWindow constructor
-    pPrinter = new B9PrinterComm;
-    pTerminal = new B9Terminal(pPrinter, 0);
-    pPrinter->enableBlankCloning(true); // Allow for firmware update of suspected "blank" B9Creator Arduino's
-    connect(pPrinter, SIGNAL(updateConnectionStatus(QString)), ui->statusBar, SLOT(showMessage(QString)));
+    pTerminal = new B9Terminal(0);
+    pTerminal->setEnabled(true);
+
+    connect(pTerminal, SIGNAL(updateConnectionStatus(QString)), ui->statusBar, SLOT(showMessage(QString)));
+
     ui->statusBar->showMessage(MSG_SEARCHING);
 
     pMW1 = new B9Plan(0);
     pMW1->setWindowTitle("Layout");
     pMW2 = new B9Slice(0);
     pMW3 = new B9Edit(0);
-    pMW4 = new B9Creator(0);
+    pMW4 = new B9Creator(pTerminal, 0);
 
     connect(pMW1, SIGNAL(eventHiding()),this, SLOT(handleW1Hide()));
     connect(pMW2, SIGNAL(eventHiding()),this, SLOT(handleW2Hide()));
@@ -68,7 +68,6 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete pTerminal;
-    delete pPrinter;
     qDebug() << "Program End";
     if(m_bOpenLogOnExit)
         pLogManager->openLogFileInFolder(); // Show log file location
@@ -84,7 +83,7 @@ void MainWindow::showLogAndExit()
 
 void MainWindow::showTerminal()
 {
-    pTerminal->show();
+    pTerminal->showIt();
 }
 
 void MainWindow::showHelp()
@@ -121,6 +120,7 @@ void MainWindow::handleW4Hide()
 {
     this->show();  // Comment this out if not hiding mainwindow while showing this window
     ui->commandPrint->setChecked(false);
+    pTerminal->setEnabled(true);
 }
 
 void MainWindow::on_commandLayout_clicked(bool checked)
@@ -150,6 +150,7 @@ void MainWindow::on_commandEdit_clicked(bool checked)
 void MainWindow::on_commandPrint_clicked(bool checked)
 {
     if(checked) {
+        pTerminal->setEnabled(false);
         pMW4->show();
         pMW4->pDesktop = pDesktop;
         pMW4->makeConnections();

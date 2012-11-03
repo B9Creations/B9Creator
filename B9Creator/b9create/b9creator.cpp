@@ -39,9 +39,12 @@
 #include "b9creator.h"
 
 
-B9Creator::B9Creator(QWidget *parent, Qt::WFlags flags)
+B9Creator::B9Creator(B9Terminal *pTerm, QWidget *parent, Qt::WFlags flags)
 	: QDialog(parent, flags)
 {
+    pTerminal = pTerm;
+    if(pTerminal == NULL) qFatal("FATAL Call to B9Creator with null B9Terminal Pointer");
+
 	ui.setupUi(this);
 	setAttribute(Qt::WA_MacVariableSize,true);
     pProjector = new B9Projector(this);
@@ -103,10 +106,17 @@ void B9Creator::hideEvent(QHideEvent *event)
 void B9Creator::closeEvent(QCloseEvent *e)
 {
 	mpSettings->setValue("geometry", saveGeometry());
+    pProjector->hide();
+    e->accept();
 }
 
 void B9Creator::makeConnections()
 {
+    // example of how to connect a signal to the printer's remote "terminal"...
+    connect(this, SIGNAL(setProjectorPowerCmd(bool)), pTerminal, SLOT(on_pushButtonProjPower_toggled(bool)));
+
+
+
 	connect(this, SIGNAL(showProjector(int, int, int, int)),pProjector, SLOT(showProjector(int, int, int, int)));
 //	connect(this, SIGNAL(showProjector(const QByteArray &)),pProjector, SLOT(showProjector(const QByteArray &)));
 //    connect(this, SIGNAL(SetProjectorFullScreen(bool)),pProjector,SLOT(SetFullScreen(bool)));
@@ -650,12 +660,14 @@ void B9Creator::resetPrinter()
 
 void B9Creator::projPwrON()
 {
-	sendCmd("p1");
+    //sendCmd("p1");
+    emit(setProjectorPowerCmd(true));
 }
 
 void B9Creator::projPwrOFF()
 {
 	sendCmd("p0");
+    emit(setProjectorPowerCmd(false));
 }
 
 void B9Creator::vatOpen()

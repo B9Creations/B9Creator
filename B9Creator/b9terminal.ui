@@ -6,118 +6,781 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>520</height>
+    <width>755</width>
+    <height>483</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>B9Creator Terminal Utility</string>
   </property>
-  <widget class="QLineEdit" name="lineEditCommand">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>60</y>
-     <width>121</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QLineEdit" name="commStatus">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>231</width>
-     <height>20</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QTextEdit" name="textEditCommOut">
    <property name="enabled">
     <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>90</y>
-     <width>361</width>
-     <height>181</height>
+     <x>105</x>
+     <y>10</y>
+     <width>231</width>
+     <height>20</height>
     </rect>
    </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
   </widget>
-  <widget class="QGroupBox" name="groupBox">
+  <widget class="QLabel" name="label_10">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>280</y>
-     <width>181</width>
-     <height>71</height>
+     <y>15</y>
+     <width>92</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Connection Status:</string>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBoxMain">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>35</y>
+     <width>736</width>
+     <height>436</height>
     </rect>
    </property>
    <property name="title">
-    <string>Projector Power</string>
+    <string/>
    </property>
-   <widget class="QWidget" name="">
+   <widget class="QLineEdit" name="lineEditCommand">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>245</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBoxVAT">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>20</y>
-      <width>161</width>
-      <height>44</height>
+      <y>210</y>
+      <width>176</width>
+      <height>76</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Commanded</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Current State</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QPushButton" name="pushButtonProjPower">
-       <property name="toolTip">
-        <string>Toggle desired projector state on/off</string>
-       </property>
-       <property name="text">
-        <string>Off</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-       <property name="flat">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="lineEditProjState">
-       <property name="text">
-        <string>UNKNOWN</string>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <property name="title">
+     <string>VAT (Shutter) Control</string>
+    </property>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>15</y>
+       <width>158</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>VAT % Open</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEditVatPercentOpen">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="pushButtonVOpen">
+        <property name="text">
+         <string>Open</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="pushButtonVClose">
+        <property name="text">
+         <string>Close</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="pushButtonCmdReset">
+    <property name="geometry">
+     <rect>
+      <x>215</x>
+      <y>140</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Find Home</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEditCommOut">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>270</y>
+      <width>526</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBoxProjector">
+    <property name="geometry">
+     <rect>
+      <x>195</x>
+      <y>5</y>
+      <width>166</width>
+      <height>96</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Projector Power</string>
+    </property>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>15</y>
+       <width>149</width>
+       <height>77</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Commanded</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="pushButtonProjPower">
+        <property name="toolTip">
+         <string>Toggle desired projector state on/off</string>
+        </property>
+        <property name="text">
+         <string>Off</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Current State</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLineEdit" name="lineEditProjState">
+        <property name="text">
+         <string>UNKNOWN</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Lamp Hours</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="lineEditLampHrs">
+        <property name="text">
+         <string>UNKNOWN</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBoxPrinterInfo">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>5</y>
+      <width>176</width>
+      <height>201</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Printer Information</string>
+    </property>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>15</y>
+       <width>156</width>
+       <height>74</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Printer Model:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2" colspan="2">
+       <widget class="QLineEdit" name="lineEditModelInfo">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>Firmware Version:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2" colspan="2">
+       <widget class="QLineEdit" name="lineEditFirmVersion">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Z Step Size (mm):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2" colspan="2">
+       <widget class="QLineEdit" name="lineEditPUinMicrons">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QGroupBox" name="groupBoxZLimits">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>95</y>
+       <width>156</width>
+       <height>96</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Z Axis Upper Limit</string>
+     </property>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>15</y>
+        <width>136</width>
+        <height>74</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Z Steps:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineEditUpperZLimPU">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>Millimeters:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="lineEditUpperZLimMM">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>Inches:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="lineEditUpperZLimInches">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBoxZPosition">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>290</y>
+      <width>176</width>
+      <height>96</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Z Position</string>
+    </property>
+    <widget class="QWidget" name="layoutWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>15</y>
+       <width>156</width>
+       <height>74</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_5">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>Z Steps:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_14">
+        <property name="text">
+         <string>Millimeters:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_15">
+        <property name="text">
+         <string>Inches:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEditCurZPosInPU">
+        <property name="readOnly">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="lineEditCurZPosInMM">
+        <property name="readOnly">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="lineEditCurZPosInInches">
+        <property name="readOnly">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_4">
+    <property name="geometry">
+     <rect>
+      <x>365</x>
+      <y>10</y>
+      <width>361</width>
+      <height>251</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Print Release Cycle Settings</string>
+    </property>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="geometry">
+      <rect>
+       <x>185</x>
+       <y>15</y>
+       <width>166</width>
+       <height>96</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>VAT &amp;&amp; Build Table Settings</string>
+     </property>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>15</y>
+        <width>146</width>
+        <height>74</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_7">
+       <item row="0" column="0" colspan="2">
+        <widget class="QLabel" name="label_19">
+         <property name="text">
+          <string>Delay @ Closed:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLineEdit" name="lineEditDelayClosedPos">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QLabel" name="label_20">
+         <property name="text">
+          <string>Delay @Open:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLineEdit" name="lineEditDelayOpenPos">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_21">
+         <property name="text">
+          <string>Z Overlift:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEditOverLift">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QPushButton" name="pushButtonPrintNext">
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>190</y>
+       <width>141</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Next</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>15</y>
+       <width>166</width>
+       <height>126</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Print Speed Settings</string>
+     </property>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>146</width>
+        <height>100</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_6">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Z Raise Speed:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineEditZRaiseSpd">
+         <property name="text">
+          <string>85</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_16">
+         <property name="text">
+          <string>Z Lower Speed:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="lineEditZLowerSpd">
+         <property name="text">
+          <string>85</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_18">
+         <property name="text">
+          <string>VAT Open Speed:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="lineEditVatOpenSpeed">
+         <property name="text">
+          <string>85</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>VAT Close Speed:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="lineEditVatCloseSpeed">
+         <property name="text">
+          <string>85</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBoxZPosition_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>145</y>
+       <width>166</width>
+       <height>96</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Print Cycle Target Layer Z</string>
+     </property>
+     <widget class="QWidget" name="layoutWidget_3">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>15</y>
+        <width>146</width>
+        <height>74</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_8">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_22">
+         <property name="text">
+          <string>Z Steps:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_23">
+         <property name="text">
+          <string>Millimeters:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_24">
+         <property name="text">
+          <string>Inches:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineEditTgtZPU">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="readOnly">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="lineEditTgtZMM">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="readOnly">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="lineEditTgtZInches">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="readOnly">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="geometry">
+      <rect>
+       <x>185</x>
+       <y>115</y>
+       <width>166</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Cycle Status</string>
+     </property>
+     <widget class="QLineEdit" name="lineEditCycleStatus">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>15</y>
+        <width>146</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QPushButton" name="pushButtonPrintBase">
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>165</y>
+       <width>141</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Base</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButtonPrintFinal">
+     <property name="geometry">
+      <rect>
+       <x>195</x>
+       <y>215</y>
+       <width>141</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Final</string>
+     </property>
+    </widget>
    </widget>
   </widget>
+  <zorder>groupBoxMain</zorder>
+  <zorder>commStatus</zorder>
+  <zorder>label_10</zorder>
  </widget>
+ <tabstops>
+  <tabstop>commStatus</tabstop>
+  <tabstop>lineEditModelInfo</tabstop>
+  <tabstop>lineEditFirmVersion</tabstop>
+  <tabstop>lineEditPUinMicrons</tabstop>
+  <tabstop>lineEditUpperZLimPU</tabstop>
+  <tabstop>lineEditUpperZLimMM</tabstop>
+  <tabstop>lineEditUpperZLimInches</tabstop>
+  <tabstop>lineEditVatPercentOpen</tabstop>
+  <tabstop>pushButtonVOpen</tabstop>
+  <tabstop>pushButtonVClose</tabstop>
+  <tabstop>lineEditCurZPosInPU</tabstop>
+  <tabstop>lineEditCurZPosInMM</tabstop>
+  <tabstop>lineEditCurZPosInInches</tabstop>
+  <tabstop>pushButtonProjPower</tabstop>
+  <tabstop>lineEditProjState</tabstop>
+  <tabstop>lineEditLampHrs</tabstop>
+  <tabstop>lineEditZRaiseSpd</tabstop>
+  <tabstop>lineEditZLowerSpd</tabstop>
+  <tabstop>lineEditVatOpenSpeed</tabstop>
+  <tabstop>lineEditVatCloseSpeed</tabstop>
+  <tabstop>lineEditDelayClosedPos</tabstop>
+  <tabstop>lineEditDelayOpenPos</tabstop>
+  <tabstop>pushButtonCmdReset</tabstop>
+  <tabstop>lineEditCommand</tabstop>
+  <tabstop>textEditCommOut</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

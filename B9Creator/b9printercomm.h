@@ -73,11 +73,32 @@ public:
     QString getModel(){return m_sModel;}
     void setModel(QString sModel){m_sModel = sModel;}
 
+    bool isProjectorRemoteCapable(){ return m_bCanControlProjector;}
+    void setProjectorRemoteCapable(bool bIsCapable){m_bCanControlProjector=bIsCapable;}
+
+    bool hasShutter(){ return m_bHasShutter;}
+    void setHasShutter(bool bHS){m_bHasShutter=bHS;}
+
     HomeStatus getHomeStatus() {return m_eHomeStatus;}
     void setHomeStatus(HomeStatus eHS) {m_eHomeStatus = eHS;}
 
     ProjectorStatus getProjectorStatus() {return m_eProjStatus;}
     void setProjectorStatus(ProjectorStatus ePS) {m_eProjStatus = ePS;}
+
+    int getLampHrs(){return m_iLampHours;}
+    void setLampHrs(int iLH){m_iLampHours = iLH;}
+
+    void setPU(int iPU){m_iPU = iPU;}
+    int getPU(){return m_iPU;}
+
+    void setUpperZLimPU(int iZLimPU){m_iUpperZLimPU = iZLimPU;}
+    int getUpperZLimPU(){return m_iUpperZLimPU;}
+
+    void setCurZPosInPU(int iCZ){m_iCurZPosInPU = iCZ;}
+    int getCurZPosInPU(){return m_iCurZPosInPU;}
+
+    void setCurVatPercentOpen(int iPO){m_iCurVatPercentOpen = iPO;}
+    int getCurVatPercentOpen(){return m_iCurVatPercentOpen;}
 
     int getLastHomeDiff() {return m_iLastHomeDiff;}
     void setLastHomeDiff(int iDiff) {m_iLastHomeDiff = iDiff;}
@@ -98,6 +119,8 @@ private:
 
     int iV1,iV2,iV3; // version values
     QString m_sModel; // Product Model Description
+    bool m_bCanControlProjector; //set to true if printer reports capability to command projector
+    bool m_bHasShutter; // set to true if printer reports capability to close a shutter
     int m_iLastHomeDiff; // When we reset to home this is Z expected - found (in PU)
 
     HomeStatus m_eHomeStatus; // Has home been located?
@@ -105,6 +128,12 @@ private:
 
     bool m_bProjCmdOn;  //Set to true if we want the projector on, false if off
     QTime lastProjCmdTime; //Updated on every serial cmd to projector;
+    int m_iLampHours;  // Total bulb time as reported by projector
+
+    int m_iPU;
+    int m_iUpperZLimPU;
+    int m_iCurZPosInPU;
+    int m_iCurVatPercentOpen;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -141,18 +170,35 @@ public:
     void enableBlankCloning(bool bEnable){m_bCloneBlanks = bEnable;}
 
     void cmdProjectorPowerOn(bool bOn){m_Status.cmdProjectorPowerOn(bOn);}
+    bool isProjectorPowerCmdOn(){return m_Status.isProjectorPowerCmdOn();}
     B9PrinterStatus::ProjectorStatus getProjectorStatus(){return m_Status.getProjectorStatus();}
+    int getLampHrs(){return m_Status.getLampHrs();}
+    int getPU(){return m_Status.getPU();}
+    int getUpperZLimPU(){return m_Status.getUpperZLimPU();}
 
 signals:
     void updateConnectionStatus(QString sText); // Connected or Searching
+    void BC_ConnectionStatusDetailed(QString sText); // Connected or Searching
+    void BC_LostCOMM(); // Lost previous connection!
     void BC_RawData(QString sText);    // Raw Data
     void BC_Comment(QString sComment); // Comment String
     void BC_HomeFound(); // Done with Reset, re-enable contols, etc.
     void BC_ProjectorStatusChanged(); // Projector status has changed
     void BC_ProjectorFAIL(); // Projector experienced and uncommanded power off
 
+    void BC_ModelInfo(QString sModel); // Printer Model Description Info
+    void BC_FirmVersion(QString sVersion); // Printer Firmware Version Number
+    void BC_ProjectorRemoteCapable(bool isCapable); // Projector has ability to be remote controled?
+    void BC_HasShutter(bool hasShutter); // Projector has a mechanical shutter
+    void BC_PU(int); //Update to Printer Units (Microns * 100)
+    void BC_UpperZLimPU(int); //Update to Upper Z Limit in PU
+
+    void BC_CurrentZPosInPU(int); //Broadcast whenever we get an update on the Z Position
+    void BC_CurrentVatPercentOpen(int); //Broadcast whenever we get an update on the Vat Position
+
 public slots:
     void SendCmd(QString sCmd);
+    void setProjectorPowerCmd(bool bPwrFlag); // call to send projector power on/off command
 
 private slots:
     void ReadAvailable();
@@ -172,7 +218,8 @@ private:
     bool OpenB9CreatorCommPort(QString sPortName);
     void startWatchDogTimer();
     void restoreState();
-    void handleProjectorBC(int iBC);
+    void handleLostComm();
+    bool handleProjectorBC(int iBC);
     QTime startWarmingTime;
 };
 #endif // B9PRINTERCOMM_H

@@ -42,6 +42,7 @@
 #include "qextserialenumerator.h"
 #include "crushbitmap.h"
 #include "b9projector.h"
+#include "b9terminal.h"
 
 
 class B9Creator : public QDialog
@@ -49,7 +50,7 @@ class B9Creator : public QDialog
 	Q_OBJECT
 
 public:
-	B9Creator(QWidget *parent = 0, Qt::WFlags flags = Qt::WindowSystemMenuHint|Qt::WindowTitleHint|Qt::MSWindowsFixedSizeDialogHint|Qt::WindowMinimizeButtonHint);
+    B9Creator(B9Terminal *pTerm, QWidget *parent = 0, Qt::WFlags flags = Qt::WindowSystemMenuHint|Qt::WindowTitleHint|Qt::MSWindowsFixedSizeDialogHint|Qt::WindowMinimizeButtonHint);
 	~B9Creator();
 	void makeConnections();
 	QDesktopWidget *pDesktop;
@@ -57,6 +58,8 @@ public:
 
 
 private:
+    B9Terminal *pTerminal;
+
     void hideEvent(QHideEvent *event);
     Ui::B9CreatorClass ui;
 	void closeEvent(QCloseEvent *e);
@@ -135,6 +138,9 @@ public slots:
 
 
 signals:
+
+    void setProjectorPowerCmd(bool bPwrFlag);
+
     void eventHiding();
     void showProjector(int x, int y, int w, int h);		// signal to the Projector window to show itself
 	//void showProjector(const QByteArray & geometry);	// signal to the Projector window to show itself
