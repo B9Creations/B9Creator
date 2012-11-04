@@ -108,7 +108,7 @@ void B9Terminal::hideEvent(QHideEvent *event)
 {
     emit eventHiding();
     event->accept();
-    m_bWaiverPresented = false;
+    //m_bWaiverPresented = false;
 }
 
 void B9Terminal::sendCommand()

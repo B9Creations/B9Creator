@@ -32,11 +32,13 @@
 //
 *************************************************************************************/
 #include <QtGui/QApplication>
+#include "b9nativeapp.h"
 #include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+//    QApplication a(argc, argv);
+    B9NativeApp a(argc, argv);
     MainWindow w;
     w.pDesktop = a.desktop();
     w.show();

@@ -60,7 +60,8 @@ SOURCES += main.cpp\
     b9edit/aboutbox.cpp \
     b9create/b9creator.cpp \
     b9slice/b9slice.cpp \
-    helpsystem.cpp
+    helpsystem.cpp \
+    b9nativeapp.cpp
 
 HEADERS  += mainwindow.h \
     b9plan.h \
@@ -77,7 +78,8 @@ HEADERS  += mainwindow.h \
     b9edit/aboutbox.h \
     b9create/b9creator.h \
     b9slice/b9slice.h \
-    helpsystem.h
+    helpsystem.h \
+    b9nativeapp.h
 
 FORMS    += mainwindow.ui \
     b9plan.ui \
