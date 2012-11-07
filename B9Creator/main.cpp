@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 //    QApplication a(argc, argv);
     B9NativeApp a(argc, argv);
     MainWindow w;
-    w.pDesktop = a.desktop();
+    //w.pDesktop = a.desktop();
     w.show();
     
     return a.exec();

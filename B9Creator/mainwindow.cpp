@@ -152,7 +152,7 @@ void MainWindow::on_commandPrint_clicked(bool checked)
     if(checked) {
         pTerminal->setEnabled(false);
         pMW4->show();
-        pMW4->pDesktop = pDesktop;
+        //pMW4->pDesktop = pDesktop;
         pMW4->makeConnections();
         this->hide(); // Comment this out if not hiding mainwindow while showing this window
     }

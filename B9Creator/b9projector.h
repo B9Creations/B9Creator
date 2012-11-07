@@ -45,34 +45,35 @@ class B9Projector : public QWidget
 	Q_OBJECT
 
 public:
-    B9Projector(QWidget *parent = 0, Qt::WFlags flags = Qt::WindowMinMaxButtonsHint|Qt::Window);
+    B9Projector(bool bPrintWindow, QWidget *parent = 0, Qt::WFlags flags = Qt::WindowMinMaxButtonsHint|Qt::Window|Qt::WindowCloseButtonHint);
     ~B9Projector();
 
-	void keyReleaseEvent(QKeyEvent * pEvent);		// Handle key Released events
-	void mouseReleaseEvent(QMouseEvent * pEvent);	// Handle mouse button released events
-	void mouseMoveEvent(QMouseEvent * pEvent);		// Handle mouse movement events
-	void paintEvent (QPaintEvent * pEvent);			// Handle paint events
-	void resizeEvent ( QResizeEvent * event );      // Handle resize events
-
 public slots:
-	void showProjector(int x, int y, int w, int h);	// Show ourself when we are signaled
-	void showProjector(const QByteArray &geometry); // Show ourself when we are signaled
-	void hideCursor(){setCursor(Qt::BlankCursor);}	// Hide the mouse cursor when signaled
+    void showProjector(int x, int y, int w, int h);	// Show ourself when we are signaled
+
+    void hideCursor(){setCursor(Qt::BlankCursor);}	// Hide the mouse cursor when signaled
 
 	void setShowGrid(bool bShow);					// Set bShow to true if Grid is to be drawn
 	void setStatusMsg(QString status);				// Set status to the message to be displayed
 	void setCPJ(CrushedPrintJob *pCPJ);				// Set the pointer to the CMB to be displayed, NULL if blank
-	void setXoff(int xOff){m_xOffset = xOff;drawAll();}
-	void setYoff(int yOff){m_yOffset = yOff;drawAll();}
+    void setXoff(int xOff){m_xOffset = xOff;drawAll();} // x offset for layer image
+    void setYoff(int yOff){m_yOffset = yOff;drawAll();} // y offset for layer image
 
 
 signals:
     void eventHiding();             // signal to the parent that we are being hidden
     void hideProjector();			// signal to the parent requesting we be hidden
-	void keyReleased (int iKey);	// signal that a key has been pressed and released
-	void newGeometry (int iScreenNumber, QRect geoRect);
+
+    void keyReleased (int iKey);	// signal that a key has been pressed and released
+    void newGeometry (int iScreenNumber, QRect geoRect);
 
 private:
+    void keyReleaseEvent(QKeyEvent * pEvent);		// Handle key Released events
+    void mouseReleaseEvent(QMouseEvent * pEvent);	// Handle mouse button released events
+    void mouseMoveEvent(QMouseEvent * pEvent);		// Handle mouse movement events
+    void paintEvent (QPaintEvent * pEvent);			// Handle paint events
+    void resizeEvent ( QResizeEvent * event );      // Handle resize events
+
     void hideEvent(QHideEvent *event);
 	void drawAll();			// refresh the entire screen from scratch
 	void blankProjector();	// fills the background in with black, overwrites previous image
@@ -80,7 +81,8 @@ private:
 	void drawStatusMsg();	// draws the current status msg on the projector screen
 	void drawCBM();			// draws the current CBM pointed to by mpCBM, returns if mpCBM is null
 	
-	bool bGrid;				// if true, grid is to be drawn
+    bool m_bIsPrintWindow;  // set to true if we lock the window to full screen when shown
+    bool m_bGrid;			// if true, grid is to be drawn
 	CrushedPrintJob* mpCPJ;	// CPJ to inflate CBM from
 	QImage mImage;
 	QString mStatusMsg;

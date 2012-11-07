@@ -44,7 +44,6 @@
 #include "b9edit/b9edit.h"
 #include "b9create/b9creator.h"
 #include "b9terminal.h"
-//#include "b9projector.h"
 #include "helpsystem.h"
 
 namespace Ui {
@@ -58,7 +57,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    QDesktopWidget *pDesktop;
+//    QDesktopWidget *pDesktop;
 
 public slots:
     void handleW1Hide();
@@ -80,7 +79,6 @@ private:
     Ui::MainWindow *ui;
     LogFileManager *pLogManager;
     bool m_bOpenLogOnExit;
-    //B9PrinterComm *pPrinter;
     HelpSystem m_HelpSystem;
 
     B9Plan *pMW1;
@@ -90,7 +88,6 @@ private:
     B9Terminal *pTerminal;
 
     void closeEvent(QCloseEvent *event);
-
 };
 
 #endif // MAINWINDOW_H

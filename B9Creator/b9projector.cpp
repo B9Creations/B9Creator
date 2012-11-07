@@ -34,15 +34,16 @@
 #include <QtGui>
 #include "b9projector.h"
 
-B9Projector::B9Projector(QWidget *parent, Qt::WFlags flags)
+B9Projector::B9Projector(bool bPrintWindow, QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags)
 {
 	hideCursor();
 	setMouseTracking(true);
-    bGrid = true;
+    m_bGrid = true;
 	mStatusMsg = "B9Creator - www.b9creator.com";
 	mpCPJ = NULL;
 	m_xOffset = m_yOffset = 0;
+    m_bIsPrintWindow = bPrintWindow;
 }
 
 B9Projector::~B9Projector()
@@ -59,31 +60,12 @@ void B9Projector::hideEvent(QHideEvent *event)
 void B9Projector::showProjector(int x, int y, int w, int h)
 {
 	setWindowTitle("Preview");
-//	setGeometry(x,y,w,h);
-	////setFixedWidth(w);
-	//setFixedHeight(h);
-	show();
-	setFocus();
-
+    setGeometry(x,y,w,h);
+    if(m_bIsPrintWindow) showFullScreen(); else show();
 	mImage = QImage(width(),height(),QImage::Format_RGB32);
-
 	drawAll();
 }
 
-void B9Projector::showProjector(const QByteArray & geometry)
-{
-	setWindowTitle("Preview");
-	show();
-	bool b = restoreGeometry(geometry);
-	setFocus();
-
-	QImage newImage(width(),height(),QImage::Format_RGB32);
-	QPainter painter(&newImage);
-	painter.drawImage(QPoint(0,0), mImage);
-	mImage = newImage;
-
-	drawAll();
-}
 
 void B9Projector::setStatusMsg(QString status)
 {
@@ -94,8 +76,8 @@ void B9Projector::setStatusMsg(QString status)
 
 void B9Projector::setShowGrid(bool bShow)
 {
-	if(bGrid == bShow) return;
-	bGrid = bShow;
+    if(m_bGrid == bShow) return;
+    m_bGrid = bShow;
 	drawAll();
 }
 
@@ -121,7 +103,7 @@ void B9Projector::blankProjector()
 
 void B9Projector::drawGrid()
 {
-	if(!bGrid) return;
+    if(!m_bGrid) return;
 	QPainter painter(&mImage);
 	QColor color;
 	color.setRgb(127,0,0);
@@ -169,17 +151,16 @@ void B9Projector::paintEvent (QPaintEvent * pEvent)
 	painter.drawImage(dirtyRect, mImage, dirtyRect);
 }
 
-
 void B9Projector::keyReleaseEvent(QKeyEvent * pEvent)
 {
 	QWidget::keyReleaseEvent(pEvent);
-	emit keyReleased(pEvent->key());
+    emit keyReleased(pEvent->key());
 }
 
 void B9Projector::mouseReleaseEvent(QMouseEvent * pEvent)
 {
 	QWidget::mouseReleaseEvent(pEvent);
-	if(pEvent->button()==Qt::LeftButton)
+    if(pEvent->button()==Qt::LeftButton && !m_bIsPrintWindow)
 		emit hideProjector();
 }
 

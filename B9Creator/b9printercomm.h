@@ -40,8 +40,8 @@
 // The Firmware version is tied to a specific version
 // These defines determine how we attempt to update Firmware
 // The correctly named current hex file MUST be in the application directory
-#define CURRENTFIRMWARE "v1.0.1"
-#define FIRMWAREHEXFILE "B9Firmware_1_0_1.hex"
+#define CURRENTFIRMWARE "v1.0.2"
+#define FIRMWAREHEXFILE "B9Firmware_1_0_2.hex"
 #define MSG_SEARCHING "Searching..."
 #define MSG_CONNECTED "Connected"
 #define MSG_FIRMUPDATE "Updating Firmware..."
@@ -175,6 +175,10 @@ public:
     int getLampHrs(){return m_Status.getLampHrs();}
     int getPU(){return m_Status.getPU();}
     int getUpperZLimPU(){return m_Status.getUpperZLimPU();}
+    int getLastHomeDiff() {return m_Status.getLastHomeDiff();}
+    B9PrinterStatus::HomeStatus getHomeStatus() {return m_Status.getHomeStatus();}
+    void setHomeStatus(B9PrinterStatus::HomeStatus eHS) {m_Status.setHomeStatus(eHS);}
+
 
 signals:
     void updateConnectionStatus(QString sText); // Connected or Searching
@@ -195,6 +199,8 @@ signals:
 
     void BC_CurrentZPosInPU(int); //Broadcast whenever we get an update on the Z Position
     void BC_CurrentVatPercentOpen(int); //Broadcast whenever we get an update on the Vat Position
+
+    void BC_PrintReleaseCycleFinished();  // Broadcast when we receive the "F" notice from the printer
 
 public slots:
     void SendCmd(QString sCmd);

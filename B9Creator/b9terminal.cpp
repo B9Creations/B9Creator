@@ -42,6 +42,7 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
 {
     m_bWaiverPresented = false;
     m_bWaiverAccepted = false;
+    m_bWavierActive = false;
 
     ui->setupUi(this);
     ui->commStatus->setText("Searching for B9Creator...");
@@ -52,11 +53,25 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     pPrinterComm = new B9PrinterComm;
     pPrinterComm->enableBlankCloning(true); // Allow for firmware update of suspected "blank" B9Creator Arduino's
 
+    // Always set up the B9Projector in the Terminal constructor
+    m_pDesktop = QApplication::desktop();
+    pProjector = NULL;
+    m_bPrimaryScreen = false;
+    onScreenCountChanged(); // Determine if/where the projector is connected
+    if(m_bPrimaryScreen){
+        QMessageBox msg;
+        msg.setWindowTitle("Projector Connection?");
+        msg.setText("WARNING:  The printer's projector is not connected to a secondary video output?  Please check that all connections (VGA or HDMI) and system display settings are correct.  Disregard this message if your system has one video output and you will utilizes a splitter to provide video output to both monitor and Projector.");
+        msg.exec();
+    }
+
+    connect(m_pDesktop, SIGNAL(screenCountChanged(int)),this, SLOT(onScreenCountChanged(int)));
+
     connect(pPrinterComm,SIGNAL(updateConnectionStatus(QString)), this, SLOT(onUpdateConnectionStatus(QString)));
     connect(pPrinterComm,SIGNAL(BC_ConnectionStatusDetailed(QString)), this, SLOT(onBC_ConnectionStatusDetailed(QString)));
     connect(pPrinterComm,SIGNAL(BC_LostCOMM()),this,SLOT(onBC_LostCOMM()));
 
-    //connect(pPrinterComm,SIGNAL(BC_RawData(QString)), this, SLOT(onUpdatePrinterComm(QString)));
+    connect(pPrinterComm,SIGNAL(BC_RawData(QString)), this, SLOT(onUpdateRAWPrinterComm(QString)));
     connect(pPrinterComm,SIGNAL(BC_Comment(QString)), this, SLOT(onUpdatePrinterComm(QString)));
 
     connect(pPrinterComm,SIGNAL(BC_ModelInfo(QString)),this,SLOT(onBC_ModelInfo(QString)));
@@ -69,12 +84,18 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     // Z Position Control
     connect(pPrinterComm, SIGNAL(BC_PU(int)), this, SLOT(onBC_PU(int)));
     connect(pPrinterComm, SIGNAL(BC_UpperZLimPU(int)), this, SLOT(onBC_UpperZLimPU(int)));
-    m_bResetInProgress = false;
     m_pResetTimer = new QTimer(this);
     connect(m_pResetTimer, SIGNAL(timeout()), this, SLOT(onMotionResetTimeout()));
     connect(pPrinterComm, SIGNAL(BC_HomeFound()), this, SLOT(onMotionResetComplete()));
     connect(pPrinterComm, SIGNAL(BC_CurrentZPosInPU(int)), this, SLOT(onBC_CurrentZPosInPU(int)));
+
+    m_pVatTimer = new QTimer(this);
+    connect(m_pVatTimer, SIGNAL(timeout()), this, SLOT(onMotionVatTimeout()));
     connect(pPrinterComm, SIGNAL(BC_CurrentVatPercentOpen(int)), this, SLOT(onBC_CurrentVatPercentOpen(int)));
+
+    m_pPReleaseCycleTimer = new QTimer(this);
+    connect(m_pPReleaseCycleTimer, SIGNAL(timeout()), this, SLOT(onReleaseCycleTimeout()));
+    connect(pPrinterComm, SIGNAL(BC_PrintReleaseCycleFinished()), this, SLOT(onBC_PrintReleaseCycleFinished()));
 }
 
 B9Terminal::~B9Terminal()
@@ -84,22 +105,38 @@ B9Terminal::~B9Terminal()
     qDebug() << "Terminal End";
 }
 
+void B9Terminal::makeProjectorConnections()
+{
+    // should be called any time we create a new projector object
+    connect(pProjector, SIGNAL(keyReleased(int)),this, SLOT(getKey(int)));
+    connect(this, SIGNAL(sendStatusMsg(QString)),pProjector, SLOT(setStatusMsg(QString)));
+    connect(this, SIGNAL(sendGrid(bool)),pProjector, SLOT(setShowGrid(bool)));
+    connect(this, SIGNAL(sendCPJ(CrushedPrintJob*)),pProjector, SLOT(setCPJ(CrushedPrintJob*)));
+    connect(this, SIGNAL(sendXoff(int)),pProjector, SLOT(setXoff(int)));
+    connect(this, SIGNAL(sendYoff(int)),pProjector, SLOT(setYoff(int)));
+}
+
 void B9Terminal::setEnabledWarned(){
     if(isHidden())return;
-    if(!m_bWaiverPresented){
+    if(!m_bWaiverPresented||m_bWaiverAccepted==false){
         // Present Waiver
         m_bWaiverPresented = true;
         m_bWaiverAccepted = false;
-        int ret = QMessageBox::information(this, tr("Enable Terminal Control?"),
-                                       tr("Warning: Manual operation can damage the VAT coating.\n"
-                                          "If your VAT is installed and empty of resin care must be\n"
-                                          "taken to ensure it is not damaged.  Operation is only safe\n"
-                                          "with either the VAT removed, or the Sweeper and Build Table removed.\n"
-                                          "Do you want to enable manual control?"),
-                                       QMessageBox::Yes | QMessageBox::No
-                                       | QMessageBox::Cancel);
-        if(ret==QMessageBox::Cancel){hide();return;}
-        else if(ret==QMessageBox::Yes)m_bWaiverAccepted=true;
+        if(!m_bWavierActive){
+            m_bWavierActive = true;
+            int ret = QMessageBox::information(this, tr("Enable Terminal Control?"),
+                                           tr("Warning: Manual operation can damage the VAT coating.\n"
+                                              "If your VAT is installed and empty of resin care must be\n"
+                                              "taken to ensure it is not damaged.  Operation is only safe\n"
+                                              "with either the VAT removed, or the Sweeper and Build Table removed.\n"
+                                              "The purpose of this utility is to assist in troubleshooting.\n"
+                                              "Its use is not required during normal printing operations.\n"
+                                              "Do you want to enable manual control?"),
+                                           QMessageBox::Yes | QMessageBox::No
+                                           | QMessageBox::Cancel);
+            if(ret==QMessageBox::Cancel){hide();return;}
+            else if(ret==QMessageBox::Yes)m_bWaiverAccepted=true;
+            m_bWavierActive = false;        }
     }
     ui->groupBoxMain->setEnabled(m_bWaiverAccepted&&pPrinterComm->isConnected());
 }
@@ -108,7 +145,6 @@ void B9Terminal::hideEvent(QHideEvent *event)
 {
     emit eventHiding();
     event->accept();
-    //m_bWaiverPresented = false;
 }
 
 void B9Terminal::sendCommand()
@@ -118,9 +154,8 @@ void B9Terminal::sendCommand()
 }
 
 void B9Terminal::onBC_LostCOMM(){
-    //TODO handle the loss of comm if we are printing.
     //Broadcast an alert
-
+    emit signalAbortPrint("ERROR: Lost Printer Connection.  Possible reasons: Power Loss, USB cord unplugged.");
 }
 
 void B9Terminal::onBC_ConnectionStatusDetailed(QString sText)
@@ -137,7 +172,14 @@ void B9Terminal::onUpdateConnectionStatus(QString sText)
 
 void B9Terminal::onUpdatePrinterComm(QString sText)
 {
-    ui->textEditCommOut->insertPlainText(sText);
+    QString html = "<font color=\"Black\">" + sText + "</font><br>";
+    ui->textEditCommOut->insertHtml(html);
+    ui->textEditCommOut->setAlignment(Qt::AlignBottom);
+}
+void B9Terminal::onUpdateRAWPrinterComm(QString sText)
+{
+    QString html = "<font color=\"Blue\">" + sText + "</font><br>";
+    ui->textEditCommOut->insertHtml(html);
     ui->textEditCommOut->setAlignment(Qt::AlignBottom);
 }
 
@@ -151,6 +193,10 @@ void B9Terminal::on_pushButtonProjPower_toggled(bool checked)
         ui->pushButtonProjPower->setText("OFF");
     pPrinterComm->cmdProjectorPowerOn(checked);
     emit(setProjectorPowerCmd(checked));
+
+    // if m_bPrimaryScreen is true, we need to show it before turning on projector!
+    if(m_bPrimaryScreen) onScreenCountChanged();
+    emit sendStatusMsg("B9Creator - Projector status: CMD ON");
 }
 
 void B9Terminal::setProjectorPowerCmd(bool bPwrFlag){
@@ -162,7 +208,7 @@ void B9Terminal::onBC_ProjStatusFAIL()
 {
     // First, update the interface
     on_pushButtonProjPower_toggled(pPrinterComm->isProjectorPowerCmdOn());
-    onBC_ProjStatusChanged();
+    onBC_ProjStatusChanged();  
 
     // Now let the user know something bad happened...
     QMessageBox msg;
@@ -176,8 +222,9 @@ void B9Terminal::onBC_ProjStatusFAIL()
         msg.setText("Lost Communications with Projector.  Possible Causes:  Manually powered off, Power Failure, Cord Disconnected or Projector Lamp Failure");
     else
         msg.setText("Unknown Projector FAIL Mode Encountered.  Check all connections.");
+
     qDebug() << "Projector FAIL broadcast: " << msg.text();
-    msg.exec();
+    //msg.exec();
 }
 
 void B9Terminal::onBC_ProjStatusChanged()
@@ -207,17 +254,22 @@ void B9Terminal::onBC_ProjStatusChanged()
     case B9PrinterStatus::PS_TIMEOUT:
         ui->pushButtonProjPower->setEnabled(false);
         sText = "TIMEOUT";
+        emit signalAbortPrint("Timed out while attempting to turn on projector.  Check Projector's Power Cord and RS-232 cable.");
         break;
     case B9PrinterStatus::PS_FAIL:
         ui->pushButtonProjPower->setEnabled(false);
         sText = "FAIL";
+        emit signalAbortPrint("Lost Communications with Projector.  Possible Causes:  Manually powered off, Power Failure, Cord Disconnected or Projector Lamp Failure");
         break;
     case B9PrinterStatus::PS_UNKNOWN:
         ui->pushButtonProjPower->setEnabled(true);
+        emit signalAbortPrint("Unknown Projector FAIL Mode Encountered.  Check all connections.");
     default:
         sText = "UNKNOWN";
         break;
     }
+    emit sendStatusMsg("B9Creator - Projector status: "+sText);
+
     ui->lineEditProjState->setText(sText);
     sText = "UNKNOWN";
     int iLH = pPrinterComm->getLampHrs();
@@ -230,34 +282,39 @@ void B9Terminal::onBC_ProjStatusChanged()
 
 void B9Terminal::on_pushButtonCmdReset_clicked()
 {
-    int iTimeoutEstimate = 10000;
-    //iTimeoutEstimate = pPrinterComm->m_Status.
+    /*
+    int ret = QMessageBox::information(this, tr("Initialize Home Positions?"),
+                                   tr("This command will move the Build Table and VAT to their home locations.\n"
+                                      "Are you sure you wish to proceed?"),
+                                   QMessageBox::Yes | QMessageBox::Cancel);
+    if(ret==QMessageBox::Cancel){return;}
+    */
+
+    int iTimeoutEstimate = 80000; // 80 seconds (should never take longer than 75 secs from upper limit)
 
     ui->groupBoxMain->setEnabled(false);
+    ui->lineEditNeedsInit->setText("Seeking");
     // Remote activation of Reset (Find Home) Motion
-    if(m_bResetInProgress) return;
     m_pResetTimer->start(iTimeoutEstimate);
-    m_bResetInProgress = true;
     pPrinterComm->SendCmd("R");
-
 }
+
 void B9Terminal::onMotionResetComplete()
-{
+{    
     ui->groupBoxMain->setEnabled(true);
+    if(pPrinterComm->getHomeStatus()==B9PrinterStatus::HS_FOUND) ui->lineEditNeedsInit->setText("No");
+    else if(pPrinterComm->getHomeStatus()==B9PrinterStatus::HS_UNKNOWN) ui->lineEditNeedsInit->setText("Yes");
+    else ui->lineEditNeedsInit->setText("Seeking");
+    ui->lineEditZDiff->setText(QString::number(pPrinterComm->getLastHomeDiff()).toAscii());
     m_pResetTimer->stop();
-    m_bResetInProgress = false;
-    QMessageBox msg;
-    msg.setText("Reset complete");
-    msg.exec();
 }
 
 void B9Terminal::onMotionResetTimeout(){
     ui->groupBoxMain->setEnabled(true);
     m_pResetTimer->stop();
-QMessageBox msg;
-msg.setText("Timed out");
-msg.exec();
-m_bResetInProgress=false;
+    QMessageBox msg;
+    msg.setText("ERROR: TIMEOUT attempting to locate home position.  Check connections.");
+    msg.exec();
 }
 
 
@@ -296,15 +353,6 @@ void B9Terminal::onBC_CurrentZPosInPU(int iCurZPU){
     ui->lineEditCurZPosInInches->setText(QString::number(dZPosMM/25.4,'g',8));
     ui->lineEditCurZPosInPU->setText(QString::number(iCurZPU,'g',8));
 }
-
-void B9Terminal::onBC_CurrentVatPercentOpen(int iPO){
-    int iVPO = iPO;
-    if (iVPO>-3 & iVPO<4)iVPO=0;
-    if (iVPO>97 & iVPO<104)iVPO=100;
-    ui->lineEditVatPercentOpen->setText(QString::number(iVPO));
-}
-
-
 
 void B9Terminal::on_lineEditZRaiseSpd_editingFinished()
 {
@@ -506,7 +554,7 @@ void B9Terminal::setTgtAltitudeIN(double dTgtIN){
 void B9Terminal::on_lineEditCurZPosInPU_returnPressed()
 {
     int iValue=ui->lineEditCurZPosInPU->text().toInt();
-    if(QString::number(iValue)!=ui->lineEditCurZPosInPU->text()|| iValue<0 || iValue >31497){
+    if(QString::number(iValue)!=ui->lineEditCurZPosInPU->text()|| iValue<0 || iValue >32000){
         // Bad Value, just return
         ui->lineEditCurZPosInPU->setText("Bad Value");
         return;
@@ -521,7 +569,7 @@ void B9Terminal::on_lineEditCurZPosInMM_returnPressed()
 {
     double dPU = (double)pPrinterComm->getPU()/100000.0;
     double dValue=ui->lineEditCurZPosInMM->text().toDouble();
-    if((dValue==0 && ui->lineEditCurZPosInMM->text().length()>1 )||dValue<0 || dValue >200.00595){
+    if((dValue==0 && ui->lineEditCurZPosInMM->text().length()>1 )||dValue<0 || dValue >203.2){
         // Bad Value, just return
         ui->lineEditCurZPosInMM->setText("Bad Value");
         return;
@@ -537,7 +585,7 @@ void B9Terminal::on_lineEditCurZPosInInches_returnPressed()
 {
     double dPU = (double)pPrinterComm->getPU()/100000.0;
     double dValue=ui->lineEditCurZPosInInches->text().toDouble();
-    if((dValue==0 && ui->lineEditCurZPosInMM->text().length()>1 )||dValue<0 || dValue >7.87425){
+    if((dValue==0 && ui->lineEditCurZPosInMM->text().length()>1 )||dValue<0 || dValue >8.0){
         // Bad Value, just return
         ui->lineEditCurZPosInInches->setText("Bad Value");
         return;
@@ -548,4 +596,310 @@ void B9Terminal::on_lineEditCurZPosInInches_returnPressed()
     ui->lineEditCurZPosInMM->setText("In Motion...");
     ui->lineEditCurZPosInInches->setText("In Motion...");
 
+}
+
+void B9Terminal::on_pushButtonStop_clicked()
+{
+    pPrinterComm->SendCmd("S");
+    onBC_PrintReleaseCycleFinished();
+    m_pVatTimer->stop();
+    ui->groupBoxVAT->setEnabled(true);
+}
+
+void B9Terminal::on_checkBoxVerbose_clicked(bool checked)
+{
+    if(checked)pPrinterComm->SendCmd("T1"); else pPrinterComm->SendCmd("T0");
+}
+
+void B9Terminal::on_pushButtonVOpen_clicked()
+{
+    ui->lineEditVatPercentOpen->setText("In Motion...");
+    ui->groupBoxVAT->setEnabled(false);
+    pPrinterComm->SendCmd("V100");
+    m_pVatTimer->start(5000); //should never take that long, even at slow speed
+}
+
+void B9Terminal::on_pushButtonVClose_clicked()
+{
+    ui->lineEditVatPercentOpen->setText("In Motion...");
+    ui->groupBoxVAT->setEnabled(false);
+    pPrinterComm->SendCmd("V0");
+    m_pVatTimer->start(5000); //should never take that long, even at slow speed
+}
+
+void B9Terminal::on_lineEditVatPercentOpen_returnPressed()
+{
+    int iValue=ui->lineEditVatPercentOpen->text().toInt();
+    if(QString::number(iValue)!=ui->lineEditVatPercentOpen->text()|| iValue<0 || iValue >125){
+        // Bad Value, just return
+        ui->lineEditVatPercentOpen->setText("Bad Value");
+        return;
+    }
+    pPrinterComm->SendCmd("V"+QString::number(iValue));
+    ui->lineEditVatPercentOpen->setText("In Motion...");
+    ui->groupBoxVAT->setEnabled(false);
+    m_pVatTimer->start(5000); //should never take that long, even at slow speed
+ }
+void B9Terminal::onMotionVatTimeout(){
+    on_pushButtonStop_clicked(); // STOP!
+    m_pVatTimer->stop();
+    QMessageBox msg;
+    ui->lineEditVatPercentOpen->setText("ERROR");
+    msg.setText("Vat Timed out");
+    msg.exec();
+    ui->groupBoxVAT->setEnabled(true);
+}
+void B9Terminal::onBC_CurrentVatPercentOpen(int iPO){
+    int iVPO = iPO;
+    if (iVPO>-3 && iVPO<4)iVPO=0;
+    if (iVPO>97 && iVPO<104)iVPO=100;
+    ui->lineEditVatPercentOpen->setText(QString::number(iVPO));
+    m_pVatTimer->stop();
+    ui->groupBoxVAT->setEnabled(true);
+}
+
+void B9Terminal::onBC_PrintReleaseCycleFinished()
+{
+    m_pPReleaseCycleTimer->stop();
+    ui->lineEditCycleStatus->setText("Cycle Complete.");
+    ui->pushButtonPrintBase->setEnabled(true);
+    ui->pushButtonPrintNext->setEnabled(true);
+    ui->pushButtonPrintFinal->setEnabled(true);
+}
+
+void B9Terminal::onReleaseCycleTimeout()
+{
+    on_pushButtonStop_clicked(); // STOP!
+    m_pPReleaseCycleTimer->stop();
+    ui->lineEditCycleStatus->setText("ERROR: TimeOut");
+    ui->pushButtonPrintBase->setEnabled(true);
+    ui->pushButtonPrintNext->setEnabled(true);
+    ui->pushButtonPrintFinal->setEnabled(true);
+    emit signalAbortPrint("ERROR: Cycle Timed Out.  Possible reasons: Power Loss, Jammed Mechanism.");
+}
+
+void B9Terminal::on_pushButtonPrintBase_clicked()
+{
+    ui->lineEditCycleStatus->setText("Moving to Base...");
+    ui->pushButtonPrintBase->setEnabled(false);
+    ui->pushButtonPrintNext->setEnabled(false);
+    ui->pushButtonPrintFinal->setEnabled(false);
+
+    SetCycleParameters();
+    pPrinterComm->SendCmd("B"+ui->lineEditTgtZPU->text());
+    int iTimeout = getEstBaseCycleTime(ui->lineEditCurZPosInPU->text().toInt()-ui->lineEditTgtZPU->text().toInt(),
+                                       ui->lineEditZLowerSpd->text().toInt(),ui->lineEditVatCloseSpeed->text().toInt(),
+                                       ui->lineEditDelayOpenPos->text().toInt());
+
+    m_pPReleaseCycleTimer->start(iTimeout * 1.5); // Timeout after 150% of estimated time required
+
+}
+
+
+void B9Terminal::on_pushButtonPrintNext_clicked()
+{
+    ui->lineEditCycleStatus->setText("Cycling to Next...");
+    ui->pushButtonPrintBase->setEnabled(false);
+    ui->pushButtonPrintNext->setEnabled(false);
+    ui->pushButtonPrintFinal->setEnabled(false);
+
+    SetCycleParameters();
+    pPrinterComm->SendCmd("N"+ui->lineEditTgtZPU->text());
+    int iTimeout = getEstNextCycleTime(ui->lineEditCurZPosInPU->text().toInt()-ui->lineEditTgtZPU->text().toInt(),
+                                       ui->lineEditZRaiseSpd->text().toInt(),ui->lineEditZLowerSpd->text().toInt(),
+                                       ui->lineEditVatOpenSpeed->text().toInt(),ui->lineEditVatCloseSpeed->text().toInt(),
+                                       ui->lineEditDelayClosedPos->text().toInt(),ui->lineEditDelayOpenPos->text().toInt(),
+                                       ui->lineEditOverLift->text().toInt());
+    m_pPReleaseCycleTimer->start(iTimeout * 4); // Timeout after 400% of estimated time required
+}
+
+void B9Terminal::on_pushButtonPrintFinal_clicked()
+{
+    rcProjectorPwr(false);  // command projector OFF
+    ui->lineEditCycleStatus->setText("Final Release...");
+    ui->pushButtonPrintBase->setEnabled(false);
+    ui->pushButtonPrintNext->setEnabled(false);
+    ui->pushButtonPrintFinal->setEnabled(false);
+
+    SetCycleParameters();
+    pPrinterComm->SendCmd("F"+ui->lineEditTgtZPU->text());
+    int iTimeout = getEstFinalCycleTime(ui->lineEditCurZPosInPU->text().toInt()-ui->lineEditTgtZPU->text().toInt(),
+                                       ui->lineEditZRaiseSpd->text().toInt(),ui->lineEditVatCloseSpeed->text().toInt());
+    m_pPReleaseCycleTimer->start(iTimeout * 4); // Timeout after 400% of estimated time required
+}
+
+void B9Terminal::SetCycleParameters(){
+    pPrinterComm->SendCmd("D"+ui->lineEditDelayClosedPos->text()); // Breathe delay time
+    pPrinterComm->SendCmd("E"+ui->lineEditDelayOpenPos->text()); // Settle delay time
+
+    pPrinterComm->SendCmd("J"+ui->lineEditOverLift->text()); // Overlift Raise Gap
+
+    pPrinterComm->SendCmd("K"+ui->lineEditZRaiseSpd->text()); // Raise Speed
+    pPrinterComm->SendCmd("L"+ui->lineEditZLowerSpd->text()); // Lower Speed
+
+    pPrinterComm->SendCmd("W"+ui->lineEditVatOpenSpeed->text()); // Vat open speed
+    pPrinterComm->SendCmd("X"+ui->lineEditVatCloseSpeed->text()); // Vat close speed
+}
+
+
+void B9Terminal::rcProjectorPwr(bool bPwrOn){
+    on_pushButtonProjPower_toggled(bPwrOn);
+}
+
+void B9Terminal::rcResetHomePos(){
+    on_pushButtonCmdReset_clicked();
+}
+
+int B9Terminal::getZMoveTime(int iDelta, int iSpd){
+    // returns time to travel iDelta distance in milliseconds
+    if(iDelta==0)return 0;
+    double dPUms; // printer units per millisecond
+    dPUms = ((double)iSpd/100.0)*130.0 + 10.0;
+    dPUms *= 200.0; // PU per minute
+    dPUms /= 60; // PU per second
+    dPUms /= 1000; // PU per millisecond
+    return (int)(double(iDelta)/dPUms);
+}
+
+int B9Terminal::getVatMoveTime(int iSpeed){
+    double dPercent = (double)iSpeed/100.0;
+    return 900 - dPercent*150.0;
+}
+
+int B9Terminal::getEstBaseCycleTime(int iDelta, int iDwnSpd, int iClsSpd, int iSettle){
+    // Time to move -iDelta
+    int iTimeReq = getZMoveTime(iDelta, iDwnSpd);
+    // Plus time to close vat, ~1000 ms
+    iTimeReq += getVatMoveTime(iClsSpd);
+    // Plus settle time;
+    iTimeReq += iSettle;
+    return iTimeReq;
+}
+
+int B9Terminal::getEstNextCycleTime(int iDelta, int iUpSpd, int iDwnSpd, int iOpnSpd, int iClsSpd, int iBreathe, int iSettle, int iGap){
+    // Time to move +iDelta + iGap, up and down
+    int iTimeReq = getZMoveTime(iDelta+iGap, iUpSpd);
+    iTimeReq += getZMoveTime(iDelta+iGap, iDwnSpd);
+    // Plus time to close + open the vat
+    iTimeReq += getVatMoveTime(iClsSpd)+getVatMoveTime(iOpnSpd);
+    // Plus breathe & settle time;
+    iTimeReq += iBreathe + iSettle;
+    return iTimeReq;
+}
+
+int B9Terminal::getEstFinalCycleTime(int iDelta, int iUpSpd, int iClsSpd){
+    // Time to move +iDelta up
+    int iTimeReq = getZMoveTime(iDelta, iUpSpd);
+    // Plus time to close the vat
+    iTimeReq += getVatMoveTime(iClsSpd);
+    return iTimeReq;
+}
+
+void B9Terminal::onScreenCountChanged(int iCount){
+    if(pProjector) delete pProjector;
+    pProjector = new B9Projector(true, this);
+    makeProjectorConnections();
+    int i=0;
+    int screenCount = m_pDesktop->screenCount();
+    QRect screenGeometry;
+    for(i=screenCount-1;i>= 0;i--) {
+        screenGeometry = m_pDesktop->screenGeometry(i);
+        if(screenGeometry.width() == 1024 && screenGeometry.height() == 768) {
+            //Found the projector
+            //TODO use the calibrated resolution settings from the user input for xy
+            break;
+        }
+    }
+    if(i<=0)m_bPrimaryScreen = true; else m_bPrimaryScreen = false;
+    pProjector->setShowGrid(true);
+    pProjector->setCPJ(NULL);
+
+    emit sendStatusMsg("B9Creator - Idle");
+    pProjector->setGeometry(screenGeometry);
+    if(!m_bPrimaryScreen){
+        pProjector->showFullScreen(); // Only show it if it is a secondary monitor
+        activateWindow(); // if not using primary monitor, take focus back to here.
+    }
+    else if(pPrinterComm->getProjectorStatus() != B9PrinterStatus::PS_OFF &&
+            pPrinterComm->getProjectorStatus() != B9PrinterStatus::PS_UNKNOWN) {
+        // if the projector is not turned off, we better put up the blank screen now!
+        pProjector->showFullScreen();
+    }
+}
+
+void B9Terminal::getKey(int iKey)
+{
+    if(!m_bPrimaryScreen)return; // Ignore keystrokes from the print window unless we're using the primary monitor
+
+//	if(m_iPrintState!=PRINT_NO){
+//		if(m_iPrintState==PRINT_WAITFORP && iKey==80){
+//			exposeLayer();
+//			breatheLayer();
+//		}
+//		return;
+//	}
+
+    QMessageBox msgBox;
+    msgBox.setText(QString::number(iKey));
+    msgBox.exec();
+
+/*
+    switch(iKey){
+    case 85:		// 'U' Increase Y Offset
+        ui.sliderYoff->setValue(ui.sliderYoff->value()-2);
+        break;
+    case 68:		// 'D' Decrease Y Offset
+        ui.sliderYoff->setValue(ui.sliderYoff->value()+2);
+        break;
+    case 82:		// 'R' Increase X Offset
+        ui.sliderXoff->setValue(ui.sliderXoff->value()+2);
+        break;
+    case 76:		// 'L' Decrease X Offset
+        ui.sliderXoff->setValue(ui.sliderXoff->value()-2);
+        break;
+    case 66:		// 'B' Blank Screen
+        emit sendCPJ(NULL);
+        break;
+    case 70:		// 'F' Toggle Full Screen
+        if(m_bPrimaryScreen){
+            if(!pProjector->isFullScreen())
+                pProjector->setWindowState(Qt::WindowFullScreen);
+            else
+                pProjector->setWindowState(Qt::WindowNoState);
+                //pProjector->hide();
+        }
+        break;
+    case 71:		// 'G' Toggle Grid
+        if(ui.checkBoxShowGrid->isChecked())
+            updateGrid(false);
+        else
+            updateGrid(true);
+        break;
+    case 16777216:	// Escape Key
+            if(m_bPrimaryScreen) hideProjector();
+        break;
+    case 16777232: // HOME
+        ui.SliderCurSlice->setValue(homeIndex());
+        break;
+    case 16777233: // END
+        ui.SliderCurSlice->setValue(endIndex());
+        break;
+    case 16777238: // Page Up
+        ui.SliderCurSlice->setValue(getNextIndex(ui.SliderCurSlice->value(),10));
+        break;
+    case 16777239: // Page Down
+        ui.SliderCurSlice->setValue(getNextIndex(ui.SliderCurSlice->value(),-10));
+        break;
+    case 16777235: // Arrow Up
+    case 16777236: // Arrow Right
+        ui.SliderCurSlice->setValue(getNextIndex(ui.SliderCurSlice->value(),1));
+        break;
+    case 16777237: // Arrow Down
+    case 16777234: // Arrow Left
+        ui.SliderCurSlice->setValue(getNextIndex(ui.SliderCurSlice->value(),-1));
+        break;
+    default:
+        break;
+    }
+*/
 }

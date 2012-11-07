@@ -52,6 +52,7 @@ void B9PrinterStatus::reset(){
     m_iUpperZLimPU = -1;
     m_iCurZPosInPU = -1;
     m_iCurVatPercentOpen = -1;
+    m_iLastHomeDiff = 0;
 
     lastMsgTime.start();
     bResetInProgress = false;
@@ -313,7 +314,7 @@ void B9PrinterComm::RefreshCommPortItems()
         if(bUpdateFirmware){
             // Update the firmware on device on sPortName
             emit updateConnectionStatus(MSG_FIRMUPDATE);
-            emit BC_ConnectionStatusDetailed("Updateing Firmware on port: "+sPortName);
+            emit BC_ConnectionStatusDetailed("Updating Firmware on port: "+sPortName);
             B9FirmwareUpdate Firmware;
             QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
             Firmware.UploadHex(sPortName);
@@ -413,10 +414,9 @@ void B9PrinterComm::ReadAvailable() {
         if(c=='\n'){
             // Line Read Complete, process data
 
-            if(m_sSerialString.left(1) != "P" && m_sSerialString.left(1) != "L" && m_sSerialString.length()>0){
+           if(m_sSerialString.left(1) != "P" && m_sSerialString.left(1) != "L" && m_sSerialString.length()>0){
                 // We only emit this data for display & log purposes
                 if(m_sSerialString.left(1) == "C"){
-                    emit BC_RawData(m_sSerialString.right(m_sSerialString.length()-1));
                     qDebug() << m_sSerialString.right(m_sSerialString.length()-1) << "\n";
                 }
                 else{
@@ -427,7 +427,9 @@ void B9PrinterComm::ReadAvailable() {
 
             int iCmdID = m_sSerialString.left(1).toUpper().toAscii().at(0);
             switch (iCmdID){
-
+            case 'U':  // Mechanical failure of encoder?
+                qDebug() << "WARNING:  Printer has sent 'U' report, runaway X Motor indication: " + m_sSerialString << "\n";
+                break;
             case 'Q':  // Printer got tired of waiting for command and shut down projectors
                        // We will likely never see this as something bad has happened
                        // (like we have crashed or been shut off during a print process
@@ -457,6 +459,13 @@ void B9PrinterComm::ReadAvailable() {
             case 'X':  // Found Home with this Difference Offset
                 m_Status.setHomeStatus(B9PrinterStatus::HS_FOUND);
                 m_Status.setLastHomeDiff(m_sSerialString.right(m_sSerialString.length()-1).toInt());
+                emit BC_HomeFound();
+                break;
+
+            case 'R':  // Needs Reset?
+                iInput = m_sSerialString.right(m_sSerialString.length()-1).toInt();
+                if(iInput==0) m_Status.setHomeStatus(B9PrinterStatus::HS_FOUND);
+                else m_Status.setHomeStatus(B9PrinterStatus::HS_UNKNOWN);
                 emit BC_HomeFound();
                 break;
 
@@ -494,6 +503,10 @@ void B9PrinterComm::ReadAvailable() {
                 emit BC_Comment(m_sSerialString.right(m_sSerialString.length()-1));
                 break;
 
+            case 'F':  // Print release cycle finished
+                emit BC_PrintReleaseCycleFinished();
+                break;
+
             case 'V':  // Version
                 m_Status.setVersion(m_sSerialString.right(m_sSerialString.length()-1));
                 emit BC_FirmVersion(m_Status.getVersion());
@@ -507,52 +520,6 @@ void B9PrinterComm::ReadAvailable() {
             default:
                 break;
             }
-
-/*
-            if(m_sSerialString.left(1) == "F"){
-                //if(m_iPrintState == PRINT_MOV2READY){
-                //    m_iPrintState = PRINT_WAITFORP;
-                //}
-                //else if(m_iPrintState == PRINT_MOV2NEXT){
-//				//	exposeLayer();
-                //    breatheLayer();
-                //}
-                //else if(m_iPrintState == PRINT_NO) {
-                //    sendCmd("p0");
-                //}
-            }
-
-            if(m_sSerialString.left(2) == "R0"){
-                //qDebug() << "R0:  Reset not Required.";
-            }
-            if(m_sSerialString.left(2) == "R1"){
-                //qDebug() << "R1:  Reset Required.";
-            }
-
-            if(m_sSerialString.left(2) == "PO"||m_sSerialString.left(2) == "P0"){
-                 //qDebug() << "P0:  Projector Power OFF.";
-            }
-            if(m_sSerialString.left(2) == "P1"){
-                 //qDebug() << "P0:  Projector Power ON.";
-            }
-
-            if(m_sSerialString.left(1) =="S"){
-                 //qDebug() << "Vat Position:" << m_sSerialString.right(m_sSerialString.length()-1);
-            }
-
-            if(m_sSerialString.left(1) =="I"){
-                //iPrinterUnits = m_sSerialString.right(m_sSerialString.length()-1).toInt();
-            }
-
-            if(m_sSerialString.left(1) =="Z"){
-                //ui.lineEditZPos->setText(m_sSerialString.right(m_sSerialString.length()-1));
-                //double dPos = m_sSerialString.right(m_sSerialString.length()-1).toInt();
-                //dPos *= iPrinterUnits;
-                //dPos /= 100000;
-                //ui.lineEditZPos->setText(QString::number(dPos,'g',8)+" mm");
-            }
-            */
-
             m_sSerialString=""; // Line processed, clear it for next line
         }
     }
@@ -682,6 +649,12 @@ bool B9PrinterComm::handleProjectorBC(int iBC){
             }
             break;
         case B9PrinterStatus::PS_OFF:
+            //User must have switched it on manually, we'll accept that and set the status to commanded on and Turning on
+            cmdProjectorPowerOn(true);
+            setProjectorPowerCmd(true);
+            bStatusChanged = true;
+            break;
+
         case B9PrinterStatus::PS_TURNINGON:
         case B9PrinterStatus::PS_WARMING:
         case B9PrinterStatus::PS_ON:

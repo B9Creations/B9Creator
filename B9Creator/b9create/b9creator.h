@@ -112,8 +112,6 @@ public slots:
 
 	void previewPrintJob();					// Signaled when user presses the Preview button
 
-	void setThisFocus();	
-
 	void updateGrid(bool bshow);			// Signaled when the show Grid check box changes
 	void getKey(int iKey);					// Signaled when we receive a (released) key from the projector
 	void hideProjector();					// Signal from the projector window that the use wishes to close it
@@ -128,8 +126,8 @@ public slots:
 	void startPrint();						// Signal that print is commanded
 	void exposureFinished();
 	void exposeLayer();
-	void resetPrinter();
-	void projPwrON();
+    void resetPrinter();
+    void projPwrON();
 	void projPwrOFF();
 	void vatOpen();
 	void vatClose();
@@ -138,8 +136,8 @@ public slots:
 
 
 signals:
-
     void setProjectorPowerCmd(bool bPwrFlag);
+    void findHome();
 
     void eventHiding();
     void showProjector(int x, int y, int w, int h);		// signal to the Projector window to show itself

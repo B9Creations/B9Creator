@@ -47,7 +47,7 @@ B9Creator::B9Creator(B9Terminal *pTerm, QWidget *parent, Qt::WFlags flags)
 
 	ui.setupUi(this);
 	setAttribute(Qt::WA_MacVariableSize,true);
-    pProjector = new B9Projector(this);
+    pProjector = new B9Projector(false, this);
 
 	m_iPrintState = PRINT_NO;
 	m_sSerialString = "";
@@ -86,7 +86,7 @@ B9Creator::B9Creator(B9Terminal *pTerm, QWidget *parent, Qt::WFlags flags)
 	m_bPaused = false;
 	m_bAbort = false;
 	m_bPrimaryScreen = false;
-
+    pDesktop = QApplication::desktop();
 }
 
 B9Creator::~B9Creator()
@@ -113,13 +113,10 @@ void B9Creator::closeEvent(QCloseEvent *e)
 void B9Creator::makeConnections()
 {
     // example of how to connect a signal to the printer's remote "terminal"...
-    connect(this, SIGNAL(setProjectorPowerCmd(bool)), pTerminal, SLOT(on_pushButtonProjPower_toggled(bool)));
+    connect(this, SIGNAL(setProjectorPowerCmd(bool)), pTerminal, SLOT(rcProjectorPwr(bool)));
+    connect(this, SIGNAL(findHome()), pTerminal, SLOT(rcResetHomePos()));
 
-
-
-	connect(this, SIGNAL(showProjector(int, int, int, int)),pProjector, SLOT(showProjector(int, int, int, int)));
-//	connect(this, SIGNAL(showProjector(const QByteArray &)),pProjector, SLOT(showProjector(const QByteArray &)));
-//    connect(this, SIGNAL(SetProjectorFullScreen(bool)),pProjector,SLOT(SetFullScreen(bool)));
+    connect(this, SIGNAL(showProjector(int, int, int, int)),pProjector, SLOT(showProjector(int, int, int, int)));
 	connect(this, SIGNAL(sendStatusMsg(QString)),pProjector, SLOT(setStatusMsg(QString)));
 	connect(this, SIGNAL(sendGrid(bool)),pProjector, SLOT(setShowGrid(bool)));
 	connect(this, SIGNAL(sendCPJ(CrushedPrintJob*)),pProjector, SLOT(setCPJ(CrushedPrintJob*)));
@@ -141,34 +138,35 @@ void B9Creator::makeConnections()
 ////////////////////////////////////////////////////////////////////
 
 void B9Creator::previewPrintJob(){
-	if(pProjector->isVisible())	{hideProjector(); return;}
+    if(pProjector->isVisible())	{hideProjector(); return;}
 	int i=0;
-	int primaryScreen = pDesktop->primaryScreen();
+//	int primaryScreen = pDesktop->primaryScreen();
 	int screenCount = pDesktop->screenCount();
-	bool bIsVirtualDesktop = pDesktop->isVirtualDesktop(); 
-	QRect availableGeometry;
+//	bool bIsVirtualDesktop = pDesktop->isVirtualDesktop();
+//	QRect availableGeometry;
 	QRect screenGeometry;
 	for(i=screenCount-1;i>= 0;i--) {
-		availableGeometry = pDesktop->availableGeometry(i);
+        //availableGeometry = pDesktop->availableGeometry(i);
 		screenGeometry = pDesktop->screenGeometry(i);
-		if(screenGeometry.width() == 1024 && screenGeometry.height() == 768) {
+        if(screenGeometry.width() == 1024 && screenGeometry.height() == 768) {
 			//Found the projector
 			break;
 		}
-	}
-	if(i<=0)m_bPrimaryScreen = true; else m_bPrimaryScreen = false;
+    }
+
+
+screenGeometry = pDesktop->screenGeometry(0);
+    if(i<=0)m_bPrimaryScreen = true; else m_bPrimaryScreen = false;
 
 	ui.pushButton_Preview->setText("Hide Display");
 	emit sendGrid(ui.checkBoxShowGrid->isChecked());
 	emit sendStatusMsg("B9Creator - Preview Mode");
-	//emit showProjector(mpSettings->value("Projector_geometry").toByteArray()); // Old method
-	emit showProjector(screenGeometry.left(), screenGeometry.top(), screenGeometry.width(), screenGeometry.height());
-	emit SetProjectorFullScreen(true);
+    emit showProjector(screenGeometry.left(), screenGeometry.top(), screenGeometry.width(), screenGeometry.height());
+    if(!m_bPrimaryScreen){ activateWindow(); // if not using primary monitor, take focus back to here.
+    }
+
 }
 
-void B9Creator::setThisFocus(){
-	setFocus();
-}
 void B9Creator::updateGrid(bool bshow){
 	mpSettings->setValue("ShowGridPattern",ui.checkBoxShowGrid->isChecked());
 	ui.checkBoxShowGrid->setChecked(bshow);
@@ -200,23 +198,27 @@ void B9Creator::getKey(int iKey)
 	case 66:		// 'B' Blank Screen
 		emit sendCPJ(NULL);
 		break;
-	case 70:		// 'F' Toggle Full Screen
-		/*
-		if(!pProjector->isFullScreen())
-			pProjector->setWindowState(Qt::WindowFullScreen);
-		else 
-			pProjector->setWindowState(Qt::WindowNoState);
-		*/
+/*
+    case 70:		// 'F' Toggle Full Screen
+        if(m_bPrimaryScreen){
+            if(!pProjector->isFullScreen())
+                pProjector->setWindowState(Qt::WindowFullScreen);
+            else
+                pProjector->setWindowState(Qt::WindowNoState);
+                //pProjector->hide();
+        }
 		break;
+*/
 	case 71:		// 'G' Toggle Grid
 		if(ui.checkBoxShowGrid->isChecked())
 			updateGrid(false);
 		else
 			updateGrid(true);
 		break;
-	case 16777216:	// Escape Key
-			hideProjector();
+/*	case 16777216:	// Escape Key
+            if(m_bPrimaryScreen) hideProjector();
 		break;
+        */
 	case 16777232: // HOME
 		ui.SliderCurSlice->setValue(homeIndex());
 		break;
@@ -314,8 +316,8 @@ void B9Creator::setSlice(int iSlice)
 
 void B9Creator::screenCountChanged(int i)
 {
-	previewPrintJob();
-	/*
+    previewPrintJob();
+/*
 	QMessageBox msgBox;
 	QString mText;
 
@@ -336,7 +338,7 @@ void B9Creator::screenCountChanged(int i)
 	
 	msgBox.setText(mText);
 	msgBox.exec();
-	*/
+*/
 }
 
 
@@ -379,7 +381,7 @@ void B9Creator::loadPrintJob()
 	ui.sliderXoff->setMaximum(512);
 	ui.sliderXoff->setMinimum(-512);
 	ui.sliderXoff->setValue(mpSettings->value(mCPJ.getName()+"XOffset","0").toInt());
-	ui.sliderYoff->setMaximum(384);
+    ui.sliderYoff->setMaximum(384);
 	ui.sliderYoff->setMinimum(-384);
 	ui.sliderYoff->setValue(mpSettings->value(mCPJ.getName()+"YOffset","0").toInt());
 
@@ -654,8 +656,9 @@ void B9Creator::onReadyRead()
 // TODO -  HACKED PRINT CYCLE REDO!
 void B9Creator::resetPrinter()
 {
-	sendCmd("r");
-	ui.lineEditPrinterStatus->setText("Standby");
+    emit findHome();
+    //sendCmd("r");
+    ui.lineEditPrinterStatus->setText("Standby");
 }
 
 void B9Creator::projPwrON()
