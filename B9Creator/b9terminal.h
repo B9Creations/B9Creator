@@ -42,6 +42,22 @@
 #include "logfilemanager.h"
 #include "b9projector.h"
 
+class PCycleSettings {
+public:
+    PCycleSettings(){loadSettings();}
+    ~PCycleSettings(){}
+    void updateValues(); // Opens a dialog and allows user to change settings
+
+    void loadSettings();
+    void saveSettings();
+    void setFactorySettings();
+    int m_iRSpd1, m_iLSpd1, m_iRSpd2, m_iLSpd2;
+    int m_iOpenSpd1, m_iCloseSpd1, m_iOpenSpd2, m_iCloseSpd2;
+    double m_dBreatheClosed1, m_dSettleOpen1, m_dBreatheClosed2, m_dSettleOpen2;
+    double m_dOverLift1, m_dOverLift2;
+    double m_dBTClearInMM;
+};
+
 namespace Ui {
 class B9Terminal;
 }
@@ -54,9 +70,9 @@ public:
     explicit B9Terminal(QWidget *parent = 0, Qt::WFlags flags = Qt::Widget);
     ~B9Terminal();
 
-    int getEstBaseCycleTime(int iDelta, int iDwnSpd=85, int iClsSpd=100, int iSettle=0);
-    int getEstNextCycleTime(int iDelta, int iUpSpd=85, int iDwnSpd=85, int iOpnSpd=100, int iClsSpd=100, int iBreathe=0, int iSettle=0, int iGap=0);
-    int getEstFinalCycleTime(int iDelta, int iUpSpd=85, int iClsSpd=100);
+    int getEstBaseCycleTime(int iCur, int iTgt);
+    int getEstNextCycleTime(int iCur, int iTgt);
+    int getEstFinalCycleTime(int iCur, int iTgt);
 
 public slots:
     void rcProjectorPwr(bool bPwrOn);
@@ -107,6 +123,9 @@ private slots:
     void onBC_UpperZLimPU(int iUpZLimPU);
     void onBC_CurrentZPosInPU(int iCZ);
     void onBC_CurrentVatPercentOpen(int iPO);
+    void onBC_NativeX(int iNX);
+    void onBC_NativeY(int iNY);
+    void onBC_XYPixelSize(int iPS);
 
     void setTgtAltitudePU(int iTgtPU);
     void setTgtAltitudeMM(double iTgtMM);
@@ -114,20 +133,6 @@ private slots:
 
     void onBC_PrintReleaseCycleFinished();
     void onReleaseCycleTimeout();
-
-    void on_lineEditZRaiseSpd_editingFinished();
-
-    void on_lineEditZLowerSpd_editingFinished();
-
-    void on_lineEditVatOpenSpeed_editingFinished();
-
-    void on_lineEditVatCloseSpeed_editingFinished();
-
-    void on_lineEditDelayClosedPos_editingFinished();
-
-    void on_lineEditDelayOpenPos_editingFinished();
-
-    void on_lineEditOverLift_editingFinished();
 
     void on_lineEditTgtZPU_editingFinished();
 
@@ -141,15 +146,11 @@ private slots:
 
     void on_lineEditCurZPosInInches_returnPressed();
 
-    void on_pushButtonStop_clicked();
-
-    void on_checkBoxVerbose_clicked(bool checked);
+    void on_spinBoxVatPercentOpen_editingFinished();
 
     void on_pushButtonVOpen_clicked();
 
     void on_pushButtonVClose_clicked();
-
-    void on_lineEditVatPercentOpen_returnPressed();
 
     void on_pushButtonPrintBase_clicked();
 
@@ -159,6 +160,14 @@ private slots:
 
     void SetCycleParameters();
 
+    void on_pushButtonStop_clicked();
+
+    void on_checkBoxVerbose_clicked(bool checked);
+
+    void on_pushButtonCycleSettings_clicked();
+
+    void on_comboBoxXPPixelSize_currentIndexChanged(int index);
+
 private:
     Ui::B9Terminal *ui;
     void hideEvent(QHideEvent *event);
@@ -166,6 +175,7 @@ private:
     int getZMoveTime(int iDelta, int iSpd);
     int getVatMoveTime(int iSpeed);
 
+    PCycleSettings *pSettings;
     B9PrinterComm *pPrinterComm;
     LogFileManager *pLogManager;
     B9Projector *pProjector;
@@ -177,6 +187,7 @@ private:
     QTimer *m_pVatTimer;
 
     void setEnabledWarned(); // Set the enabled status based on connection and user response
+    void warnSingleMonitor();
     bool m_bWaiverPresented;
     bool m_bWaiverAccepted;
     bool m_bWavierActive;

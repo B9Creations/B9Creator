@@ -33,13 +33,83 @@
 *************************************************************************************/
 #include <QtDebug>
 #include <QMessageBox>
+#include <QSettings>
 #include "b9terminal.h"
 #include "ui_b9terminal.h"
+#include "dlgcyclesettings.h"
+
+void PCycleSettings::updateValues()
+{
+    DlgCycleSettings dlg(this);
+    dlg.exec();
+}
+
+void PCycleSettings::loadSettings()
+{
+    QSettings settings;
+    m_iRSpd1 = settings.value("RSpd1",85).toInt();
+    m_iLSpd1 = settings.value("LSpd1",85).toInt();
+    m_iCloseSpd1 = settings.value("CloseSpd1",100).toInt();
+    m_iOpenSpd1 = settings.value("OpenSpd1",0).toInt();
+    m_dBreatheClosed1 = settings.value("BreatheClosed1",1).toDouble();
+    m_dSettleOpen1 = settings.value("SettleOpen1",1).toDouble();
+    m_dOverLift1 = settings.value("OverLift1",0).toDouble();
+
+    m_iRSpd2 = settings.value("RSpd2",85).toInt();
+    m_iLSpd2 = settings.value("LSpd2",85).toInt();
+    m_iCloseSpd2 = settings.value("CloseSpd2",100).toInt();
+    m_iOpenSpd2 = settings.value("OpenSpd2",100).toInt();
+    m_dBreatheClosed2 = settings.value("BreatheClosed2",0).toDouble();
+    m_dSettleOpen2 = settings.value("SettleOpen2",0).toDouble();
+    m_dOverLift2 = settings.value("OverLift2",0).toDouble();
+
+    m_dBTClearInMM = settings.value("BTClearInMM",5.0).toDouble();
+}
+
+void PCycleSettings::saveSettings()
+{
+    QSettings settings;
+    settings.setValue("RSpd1",m_iRSpd1);
+    settings.setValue("LSpd1",m_iLSpd1);
+    settings.setValue("CloseSpd1",m_iCloseSpd1);
+    settings.setValue("OpenSpd1",m_iOpenSpd1);
+    settings.setValue("BreatheClosed1",m_dBreatheClosed1);
+    settings.setValue("SettleOpen1",m_dSettleOpen1);
+    settings.setValue("OverLift1",m_dOverLift1);
+
+    settings.setValue("RSpd2",m_iRSpd2);
+    settings.setValue("LSpd2",m_iLSpd2);
+    settings.setValue("CloseSpd2",m_iCloseSpd2);
+    settings.setValue("OpenSpd2",m_iOpenSpd2);
+    settings.setValue("BreatheClosed2",m_dBreatheClosed2);
+    settings.setValue("SettleOpen2",m_dSettleOpen2);
+    settings.setValue("OverLift2",m_dOverLift2);
+
+    settings.setValue("BTClearInMM",m_dBTClearInMM);
+}
+
+void PCycleSettings::setFactorySettings()
+{
+    m_iRSpd1 = m_iLSpd1 = 85;
+    m_iRSpd2 = m_iLSpd2 = 85;
+    m_iOpenSpd1 = 0;
+    m_iCloseSpd1 = 100;
+    m_iOpenSpd2 = m_iCloseSpd2 = 100;
+    m_dBreatheClosed1 = 1;
+    m_dSettleOpen1 = 1;
+    m_dBreatheClosed2 = 0;
+    m_dSettleOpen2 = 0;
+    m_dOverLift1 = m_dOverLift2 = 0;
+    m_dBTClearInMM = 5.0;
+}
+
+
 
 B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     QWidget(parent, flags),
     ui(new Ui::B9Terminal)
 {
+    setWindowFlags(Qt::WindowContextHelpButtonHint);
     m_bWaiverPresented = false;
     m_bWaiverAccepted = false;
     m_bWavierActive = false;
@@ -49,6 +119,8 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
 
     qDebug() << "Terminal Start";
 
+    pSettings = new PCycleSettings;
+
     // Always set up the B9PrinterComm in the Terminal constructor
     pPrinterComm = new B9PrinterComm;
     pPrinterComm->enableBlankCloning(true); // Allow for firmware update of suspected "blank" B9Creator Arduino's
@@ -57,14 +129,6 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     m_pDesktop = QApplication::desktop();
     pProjector = NULL;
     m_bPrimaryScreen = false;
-    onScreenCountChanged(); // Determine if/where the projector is connected
-    if(m_bPrimaryScreen){
-        QMessageBox msg;
-        msg.setWindowTitle("Projector Connection?");
-        msg.setText("WARNING:  The printer's projector is not connected to a secondary video output?  Please check that all connections (VGA or HDMI) and system display settings are correct.  Disregard this message if your system has one video output and you will utilizes a splitter to provide video output to both monitor and Projector.");
-        msg.exec();
-    }
-
     connect(m_pDesktop, SIGNAL(screenCountChanged(int)),this, SLOT(onScreenCountChanged(int)));
 
     connect(pPrinterComm,SIGNAL(updateConnectionStatus(QString)), this, SLOT(onUpdateConnectionStatus(QString)));
@@ -88,6 +152,10 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     connect(m_pResetTimer, SIGNAL(timeout()), this, SLOT(onMotionResetTimeout()));
     connect(pPrinterComm, SIGNAL(BC_HomeFound()), this, SLOT(onMotionResetComplete()));
     connect(pPrinterComm, SIGNAL(BC_CurrentZPosInPU(int)), this, SLOT(onBC_CurrentZPosInPU(int)));
+    connect(pPrinterComm, SIGNAL(BC_NativeX(int)), this, SLOT(onBC_NativeX(int)));
+    connect(pPrinterComm, SIGNAL(BC_NativeY(int)), this, SLOT(onBC_NativeY(int)));
+    connect(pPrinterComm, SIGNAL(BC_XYPixelSize(int)), this, SLOT(onBC_XYPixelSize(int)));
+
 
     m_pVatTimer = new QTimer(this);
     connect(m_pVatTimer, SIGNAL(timeout()), this, SLOT(onMotionVatTimeout()));
@@ -116,6 +184,16 @@ void B9Terminal::makeProjectorConnections()
     connect(this, SIGNAL(sendYoff(int)),pProjector, SLOT(setYoff(int)));
 }
 
+
+void B9Terminal::warnSingleMonitor(){
+    if(m_bPrimaryScreen){
+        QMessageBox msg;
+        msg.setWindowTitle("Projector Connection?");
+        msg.setText("WARNING:  The printer's projector is not connected to a secondary video output.  Please check that all connections (VGA or HDMI) and system display settings are correct.  Disregard this message if your system has only one video output and will utilize a splitter to provide video output to both monitor and Projector.");
+        msg.exec();
+    }
+}
+
 void B9Terminal::setEnabledWarned(){
     if(isHidden())return;
     if(!m_bWaiverPresented||m_bWaiverAccepted==false){
@@ -134,9 +212,12 @@ void B9Terminal::setEnabledWarned(){
                                               "Do you want to enable manual control?"),
                                            QMessageBox::Yes | QMessageBox::No
                                            | QMessageBox::Cancel);
-            if(ret==QMessageBox::Cancel){hide();return;}
+
+            if(ret==QMessageBox::Cancel){m_bWavierActive = false;m_bWaiverPresented=false;hide();return;}
             else if(ret==QMessageBox::Yes)m_bWaiverAccepted=true;
-            m_bWavierActive = false;        }
+            warnSingleMonitor();
+            m_bWavierActive = false;
+        }
     }
     ui->groupBoxMain->setEnabled(m_bWaiverAccepted&&pPrinterComm->isConnected());
 }
@@ -197,6 +278,12 @@ void B9Terminal::on_pushButtonProjPower_toggled(bool checked)
     // if m_bPrimaryScreen is true, we need to show it before turning on projector!
     if(m_bPrimaryScreen) onScreenCountChanged();
     emit sendStatusMsg("B9Creator - Projector status: CMD ON");
+
+    // We always close the vat when powering up
+    if(checked){
+        emit onBC_CurrentVatPercentOpen(0);
+        emit on_spinBoxVatPercentOpen_editingFinished();
+    }
 }
 
 void B9Terminal::setProjectorPowerCmd(bool bPwrFlag){
@@ -327,7 +414,6 @@ void B9Terminal::onBC_FirmVersion(QString sVersion){
     ui->lineEditFirmVersion->setText(sVersion);
 }
 
-
 void B9Terminal::onBC_ProjectorRemoteCapable(bool bCapable){
     ui->groupBoxProjector->setEnabled(bCapable);
 }
@@ -338,6 +424,22 @@ void B9Terminal::onBC_HasShutter(bool bHS){
 void B9Terminal::onBC_PU(int iPU){
     double dPU = (double)iPU/100000.0;
     ui->lineEditPUinMicrons->setText(QString::number(dPU,'g',8));
+}
+
+void B9Terminal::onBC_NativeX(int iNX){
+    ui->lineEditNativeX->setText(QString::number(iNX));
+}
+
+void B9Terminal::onBC_NativeY(int iNY){
+    ui->lineEditNativeY->setText(QString::number(iNY));
+    if(pProjector == NULL)emit onScreenCountChanged();
+}
+
+void B9Terminal::onBC_XYPixelSize(int iPS){
+    int i=2;
+    if(iPS==50)i=0;
+    else if(iPS==75)i=1;
+    ui->comboBoxXPPixelSize->setCurrentIndex(i);
 }
 
 void B9Terminal::onBC_UpperZLimPU(int iUpZLimPU){
@@ -352,129 +454,6 @@ void B9Terminal::onBC_CurrentZPosInPU(int iCurZPU){
     ui->lineEditCurZPosInMM->setText(QString::number(dZPosMM,'g',8));
     ui->lineEditCurZPosInInches->setText(QString::number(dZPosMM/25.4,'g',8));
     ui->lineEditCurZPosInPU->setText(QString::number(iCurZPU,'g',8));
-}
-
-void B9Terminal::on_lineEditZRaiseSpd_editingFinished()
-{
-    int iValue=ui->lineEditZRaiseSpd->text().toInt();
-    if(QString::number(iValue)!=ui->lineEditZRaiseSpd->text()||
-            iValue<0 || iValue >100){
-        int ret = QMessageBox::information(this, tr("Z Print Raise Speed Out of Range"),
-                                       tr("Please enter an integer value between 0-100\n"
-                                          "With 0 for minimum and 100 for maximum. \n"
-                                          "Factory setting is 85.\n"),
-                                       QMessageBox::Ok);
-        iValue = 85;
-        ui->lineEditZRaiseSpd->setText(QString::number(iValue));
-        ui->lineEditZRaiseSpd->setFocus();
-        ui->lineEditZRaiseSpd->selectAll();
-    }
-}
-
-void B9Terminal::on_lineEditZLowerSpd_editingFinished()
-{
-    int iValue=ui->lineEditZLowerSpd->text().toInt();
-    if(QString::number(iValue)!=ui->lineEditZLowerSpd->text()||
-            iValue<0 || iValue >100){
-        int ret = QMessageBox::information(this, tr("Z Print Lower Speed Out of Range"),
-                                       tr("Please enter an integer value between 0-100\n"
-                                          "With 0 for minimum and 100 for maximum. \n"
-                                          "Factory setting is 85.\n"),
-                                       QMessageBox::Ok);
-        iValue = 85;
-        ui->lineEditZLowerSpd->setText(QString::number(iValue));
-        ui->lineEditZLowerSpd->setFocus();
-        ui->lineEditZLowerSpd->selectAll();
-    }
-}
-
-void B9Terminal::on_lineEditVatOpenSpeed_editingFinished()
-{
-    int iValue=ui->lineEditVatOpenSpeed->text().toInt();
-    if(QString::number(iValue)!=ui->lineEditVatOpenSpeed->text()||
-            iValue<0 || iValue >100){
-        int ret = QMessageBox::information(this, tr("VAT Open Speed Out of Range"),
-                                       tr("Please enter an integer value between 0-100\n"
-                                          "With 0 for minimum and 100 for maximum. \n"
-                                          "Factory setting is 100.\n"),
-                                       QMessageBox::Ok);
-        iValue = 100;
-        ui->lineEditVatOpenSpeed->setText(QString::number(iValue));
-        ui->lineEditVatOpenSpeed->setFocus();
-        ui->lineEditVatOpenSpeed->selectAll();
-    }
-}
-
-void B9Terminal::on_lineEditVatCloseSpeed_editingFinished()
-{
-    int iValue=ui->lineEditVatCloseSpeed->text().toInt();
-    if(QString::number(iValue)!=ui->lineEditVatCloseSpeed->text()||
-            iValue<0 || iValue >100){
-        int ret = QMessageBox::information(this, tr("VAT Close Speed Out of Range"),
-                                       tr("Please enter an integer value between 0-100\n"
-                                          "With 0 for minimum and 100 for maximum. \n"
-                                          "Factory setting is 100.\n"),
-                                       QMessageBox::Ok);
-        iValue = 100;
-        ui->lineEditVatCloseSpeed->setText(QString::number(iValue));
-        ui->lineEditVatCloseSpeed->setFocus();
-        ui->lineEditVatCloseSpeed->selectAll();
-    }
-}
-
-void B9Terminal::on_lineEditDelayClosedPos_editingFinished()
-{
-    int iValue=ui->lineEditDelayClosedPos->text().toInt();
-    if(QString::number(iValue)!=ui->lineEditDelayClosedPos->text()||
-            iValue<0 || iValue >10000){
-        int ret = QMessageBox::information(this, tr("Delay @ Closed Out of Range"),
-                                       tr("Please enter an integer value between 0-10000.\n"
-                                          "This is a delay time in milliseconds.\n"
-                                          "This 'Breathe' delay occurs in the VAT Closed position.\n"
-                                          "Factory setting is 0\n"),
-                                       QMessageBox::Ok);
-        iValue = 0;
-        ui->lineEditDelayClosedPos->setText(QString::number(iValue));
-        ui->lineEditDelayClosedPos->setFocus();
-        ui->lineEditDelayClosedPos->selectAll();
-    }
-}
-
-void B9Terminal::on_lineEditDelayOpenPos_editingFinished()
-{
-    int iValue=ui->lineEditDelayOpenPos->text().toInt();
-    if(QString::number(iValue)!=ui->lineEditDelayOpenPos->text()||
-            iValue<0 || iValue >10000){
-        int ret = QMessageBox::information(this, tr("Delay @ Opened Out of Range"),
-                                       tr("Please enter an integer value between 0-10000.\n"
-                                          "This is a delay time in milliseconds.\n"
-                                          "This 'Fill' delay occurs in the VAT Open position.\n"
-                                          "Factory setting is 0\n"),
-                                       QMessageBox::Ok);
-        iValue = 0;
-        ui->lineEditDelayOpenPos->setText(QString::number(iValue));
-        ui->lineEditDelayOpenPos->setFocus();
-        ui->lineEditDelayOpenPos->selectAll();
-    }
-}
-
-void B9Terminal::on_lineEditOverLift_editingFinished()
-{
-    int iValue=ui->lineEditOverLift->text().toInt();
-    if(QString::number(iValue)!=ui->lineEditOverLift->text()||
-            iValue<0 || iValue >1000){
-        int ret = QMessageBox::information(this, tr("Overlift Out of Range"),
-                                       tr("Please enter an integer value between 0-1000.\n"
-                                          "We 'overlift' the Build Table by this amount before opening\n"
-                                          "the VAT, then lower to the correct poition before exposure\n"
-                                          "Units are in Z Steps, for example: 1000 = 6.35mm or .25\"\n"
-                                          "Factory setting is 0\n"),
-                                       QMessageBox::Ok);
-        iValue = 0;
-        ui->lineEditOverLift->setText(QString::number(iValue));
-        ui->lineEditOverLift->setFocus();
-        ui->lineEditOverLift->selectAll();
-    }
 }
 
 void B9Terminal::on_lineEditTgtZPU_editingFinished()
@@ -611,50 +590,43 @@ void B9Terminal::on_checkBoxVerbose_clicked(bool checked)
     if(checked)pPrinterComm->SendCmd("T1"); else pPrinterComm->SendCmd("T0");
 }
 
+void B9Terminal::on_spinBoxVatPercentOpen_editingFinished()
+{
+    if(m_pVatTimer->isActive()) return;
+    m_pVatTimer->start(3000); //should never take that long, even at slow speed
+    int iValue = ui->spinBoxVatPercentOpen->value();
+    ui->groupBoxVAT->setEnabled(false);
+    pPrinterComm->SendCmd("V"+QString::number(iValue));
+}
+
 void B9Terminal::on_pushButtonVOpen_clicked()
 {
-    ui->lineEditVatPercentOpen->setText("In Motion...");
     ui->groupBoxVAT->setEnabled(false);
+    m_pVatTimer->start(3000); //should never take that long, even at slow speed
     pPrinterComm->SendCmd("V100");
-    m_pVatTimer->start(5000); //should never take that long, even at slow speed
 }
 
 void B9Terminal::on_pushButtonVClose_clicked()
 {
-    ui->lineEditVatPercentOpen->setText("In Motion...");
     ui->groupBoxVAT->setEnabled(false);
+    m_pVatTimer->start(3000); //should never take that long, even at slow speed
     pPrinterComm->SendCmd("V0");
-    m_pVatTimer->start(5000); //should never take that long, even at slow speed
 }
 
-void B9Terminal::on_lineEditVatPercentOpen_returnPressed()
-{
-    int iValue=ui->lineEditVatPercentOpen->text().toInt();
-    if(QString::number(iValue)!=ui->lineEditVatPercentOpen->text()|| iValue<0 || iValue >125){
-        // Bad Value, just return
-        ui->lineEditVatPercentOpen->setText("Bad Value");
-        return;
-    }
-    pPrinterComm->SendCmd("V"+QString::number(iValue));
-    ui->lineEditVatPercentOpen->setText("In Motion...");
-    ui->groupBoxVAT->setEnabled(false);
-    m_pVatTimer->start(5000); //should never take that long, even at slow speed
- }
 void B9Terminal::onMotionVatTimeout(){
-    on_pushButtonStop_clicked(); // STOP!
     m_pVatTimer->stop();
+    on_pushButtonStop_clicked(); // STOP!
     QMessageBox msg;
-    ui->lineEditVatPercentOpen->setText("ERROR");
     msg.setText("Vat Timed out");
     msg.exec();
     ui->groupBoxVAT->setEnabled(true);
 }
 void B9Terminal::onBC_CurrentVatPercentOpen(int iPO){
+    m_pVatTimer->stop();
     int iVPO = iPO;
     if (iVPO>-3 && iVPO<4)iVPO=0;
     if (iVPO>97 && iVPO<104)iVPO=100;
-    ui->lineEditVatPercentOpen->setText(QString::number(iVPO));
-    m_pVatTimer->stop();
+    ui->spinBoxVatPercentOpen->setValue(iVPO);
     ui->groupBoxVAT->setEnabled(true);
 }
 
@@ -686,15 +658,10 @@ void B9Terminal::on_pushButtonPrintBase_clicked()
     ui->pushButtonPrintFinal->setEnabled(false);
 
     SetCycleParameters();
+    int iTimeout = getEstBaseCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("B"+ui->lineEditTgtZPU->text());
-    int iTimeout = getEstBaseCycleTime(ui->lineEditCurZPosInPU->text().toInt()-ui->lineEditTgtZPU->text().toInt(),
-                                       ui->lineEditZLowerSpd->text().toInt(),ui->lineEditVatCloseSpeed->text().toInt(),
-                                       ui->lineEditDelayOpenPos->text().toInt());
-
     m_pPReleaseCycleTimer->start(iTimeout * 1.5); // Timeout after 150% of estimated time required
-
 }
-
 
 void B9Terminal::on_pushButtonPrintNext_clicked()
 {
@@ -704,12 +671,8 @@ void B9Terminal::on_pushButtonPrintNext_clicked()
     ui->pushButtonPrintFinal->setEnabled(false);
 
     SetCycleParameters();
+    int iTimeout = getEstNextCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("N"+ui->lineEditTgtZPU->text());
-    int iTimeout = getEstNextCycleTime(ui->lineEditCurZPosInPU->text().toInt()-ui->lineEditTgtZPU->text().toInt(),
-                                       ui->lineEditZRaiseSpd->text().toInt(),ui->lineEditZLowerSpd->text().toInt(),
-                                       ui->lineEditVatOpenSpeed->text().toInt(),ui->lineEditVatCloseSpeed->text().toInt(),
-                                       ui->lineEditDelayClosedPos->text().toInt(),ui->lineEditDelayOpenPos->text().toInt(),
-                                       ui->lineEditOverLift->text().toInt());
     m_pPReleaseCycleTimer->start(iTimeout * 4); // Timeout after 400% of estimated time required
 }
 
@@ -722,25 +685,38 @@ void B9Terminal::on_pushButtonPrintFinal_clicked()
     ui->pushButtonPrintFinal->setEnabled(false);
 
     SetCycleParameters();
+    int iTimeout = getEstFinalCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("F"+ui->lineEditTgtZPU->text());
-    int iTimeout = getEstFinalCycleTime(ui->lineEditCurZPosInPU->text().toInt()-ui->lineEditTgtZPU->text().toInt(),
-                                       ui->lineEditZRaiseSpd->text().toInt(),ui->lineEditVatCloseSpeed->text().toInt());
     m_pPReleaseCycleTimer->start(iTimeout * 4); // Timeout after 400% of estimated time required
 }
 
 void B9Terminal::SetCycleParameters(){
-    pPrinterComm->SendCmd("D"+ui->lineEditDelayClosedPos->text()); // Breathe delay time
-    pPrinterComm->SendCmd("E"+ui->lineEditDelayOpenPos->text()); // Settle delay time
 
-    pPrinterComm->SendCmd("J"+ui->lineEditOverLift->text()); // Overlift Raise Gap
+    if(pSettings->m_dBTClearInMM*100000/pPrinterComm->getPU()>ui->lineEditTgtZPU->text().toInt()){
+        pPrinterComm->SendCmd("D"+QString::number((int)(pSettings->m_dBreatheClosed1*1000))); // Breathe delay time
+        pPrinterComm->SendCmd("E"+QString::number((int)(pSettings->m_dSettleOpen1*1000))); // Settle delay time
 
-    pPrinterComm->SendCmd("K"+ui->lineEditZRaiseSpd->text()); // Raise Speed
-    pPrinterComm->SendCmd("L"+ui->lineEditZLowerSpd->text()); // Lower Speed
+        pPrinterComm->SendCmd("J"+QString::number((int)(pSettings->m_dOverLift1*100000/(double)pPrinterComm->getPU()))); // Overlift Raise Gap coverted to PU
 
-    pPrinterComm->SendCmd("W"+ui->lineEditVatOpenSpeed->text()); // Vat open speed
-    pPrinterComm->SendCmd("X"+ui->lineEditVatCloseSpeed->text()); // Vat close speed
+        pPrinterComm->SendCmd("K"+QString::number(pSettings->m_iRSpd1));  // Raise Speed
+        pPrinterComm->SendCmd("L"+QString::number(pSettings->m_iLSpd1));  // Lower Speed
+
+        pPrinterComm->SendCmd("W"+QString::number(pSettings->m_iOpenSpd1));  // Vat open speed
+        pPrinterComm->SendCmd("X"+QString::number(pSettings->m_iCloseSpd1)); // Vat close speed
+    }
+    else{
+        pPrinterComm->SendCmd("D"+QString::number((int)(pSettings->m_dBreatheClosed2*1000))); // Breathe delay time
+        pPrinterComm->SendCmd("E"+QString::number((int)(pSettings->m_dSettleOpen2*1000))); // Settle delay time
+
+        pPrinterComm->SendCmd("J"+QString::number((int)(pSettings->m_dOverLift2*100000/(double)pPrinterComm->getPU()))); // Overlift Raise Gap coverted to PU
+
+        pPrinterComm->SendCmd("K"+QString::number(pSettings->m_iRSpd2));  // Raise Speed
+        pPrinterComm->SendCmd("L"+QString::number(pSettings->m_iLSpd2));  // Lower Speed
+
+        pPrinterComm->SendCmd("W"+QString::number(pSettings->m_iOpenSpd2));  // Vat open speed
+        pPrinterComm->SendCmd("X"+QString::number(pSettings->m_iCloseSpd2)); // Vat close speed
+    }
 }
-
 
 void B9Terminal::rcProjectorPwr(bool bPwrOn){
     on_pushButtonProjPower_toggled(bPwrOn);
@@ -766,20 +742,46 @@ int B9Terminal::getVatMoveTime(int iSpeed){
     return 900 - dPercent*150.0;
 }
 
-int B9Terminal::getEstBaseCycleTime(int iDelta, int iDwnSpd, int iClsSpd, int iSettle){
-    // Time to move -iDelta
-    int iTimeReq = getZMoveTime(iDelta, iDwnSpd);
-    // Plus time to close vat, ~1000 ms
-    iTimeReq += getVatMoveTime(iClsSpd);
+int B9Terminal::getEstBaseCycleTime(int iCur, int iTgt){
+    int iDelta = abs(iTgt - iCur);
+    int iLowerSpd = pSettings->m_iLSpd1;
+    int iOpnSpd = pSettings->m_iOpenSpd1;
+    int iSettle = pSettings->m_dSettleOpen1*1000.0;
+    if(iTgt>pSettings->m_dBTClearInMM){
+        iLowerSpd = pSettings->m_iLSpd2;
+        iOpnSpd = pSettings->m_iOpenSpd2;
+        iSettle = pSettings->m_dSettleOpen2*1000.0;
+    }
+    // Time to move iDelta
+    int iTimeReq = getZMoveTime(iDelta, iLowerSpd);
+    // Plus time to open vat
+    iTimeReq += getVatMoveTime(iOpnSpd);
     // Plus settle time;
     iTimeReq += iSettle;
     return iTimeReq;
 }
 
-int B9Terminal::getEstNextCycleTime(int iDelta, int iUpSpd, int iDwnSpd, int iOpnSpd, int iClsSpd, int iBreathe, int iSettle, int iGap){
+int B9Terminal::getEstNextCycleTime(int iCur, int iTgt){
+    int iDelta = abs(iTgt - iCur);
+    int iRaiseSpd = pSettings->m_iRSpd1;
+    int iLowerSpd = pSettings->m_iLSpd1;
+    int iOpnSpd = pSettings->m_iOpenSpd1;
+    int iClsSpd = pSettings->m_iCloseSpd1;
+    int iGap = (int)(pSettings->m_dOverLift1*100000.0/(double)pPrinterComm->getPU());
+    int iBreathe = pSettings->m_dBreatheClosed1*1000.0;
+    int iSettle = pSettings->m_dSettleOpen1*1000.0;
+    if(iTgt>pSettings->m_dBTClearInMM){
+        iRaiseSpd = pSettings->m_iRSpd2;
+        iLowerSpd = pSettings->m_iLSpd2;
+        iOpnSpd = pSettings->m_iOpenSpd2;
+        iClsSpd = pSettings->m_iCloseSpd2;
+        iGap = (int)(pSettings->m_dOverLift2*100000.0/(double)pPrinterComm->getPU());
+        iBreathe = pSettings->m_dBreatheClosed2*1000.0;
+        iSettle = pSettings->m_dSettleOpen2*1000.0;
+    }
     // Time to move +iDelta + iGap, up and down
-    int iTimeReq = getZMoveTime(iDelta+iGap, iUpSpd);
-    iTimeReq += getZMoveTime(iDelta+iGap, iDwnSpd);
+    int iTimeReq = getZMoveTime(iDelta+iGap, iRaiseSpd);
+    iTimeReq += getZMoveTime(iDelta+iGap, iLowerSpd);
     // Plus time to close + open the vat
     iTimeReq += getVatMoveTime(iClsSpd)+getVatMoveTime(iOpnSpd);
     // Plus breathe & settle time;
@@ -787,10 +789,17 @@ int B9Terminal::getEstNextCycleTime(int iDelta, int iUpSpd, int iDwnSpd, int iOp
     return iTimeReq;
 }
 
-int B9Terminal::getEstFinalCycleTime(int iDelta, int iUpSpd, int iClsSpd){
+int B9Terminal::getEstFinalCycleTime(int iCur, int iTgt){
+    int iDelta = abs(iTgt - iCur);
+    int iRaiseSpd = pSettings->m_iRSpd1;
+    int iClsSpd = pSettings->m_iCloseSpd1;
+    if(iTgt>pSettings->m_dBTClearInMM){
+        iRaiseSpd = pSettings->m_iRSpd2;
+        iClsSpd = pSettings->m_iCloseSpd2;
+    }
     // Time to move +iDelta up
-    int iTimeReq = getZMoveTime(iDelta, iUpSpd);
-    // Plus time to close the vat
+    int iTimeReq = getZMoveTime(iDelta, iRaiseSpd);
+    // time to close the vat
     iTimeReq += getVatMoveTime(iClsSpd);
     return iTimeReq;
 }
@@ -804,9 +813,8 @@ void B9Terminal::onScreenCountChanged(int iCount){
     QRect screenGeometry;
     for(i=screenCount-1;i>= 0;i--) {
         screenGeometry = m_pDesktop->screenGeometry(i);
-        if(screenGeometry.width() == 1024 && screenGeometry.height() == 768) {
-            //Found the projector
-            //TODO use the calibrated resolution settings from the user input for xy
+        if(screenGeometry.width() == pPrinterComm->getNativeX() && screenGeometry.height() == pPrinterComm->getNativeY()) {
+            //Found the projector!
             break;
         }
     }
@@ -827,21 +835,41 @@ void B9Terminal::onScreenCountChanged(int iCount){
     }
 }
 
+void B9Terminal::on_comboBoxXPPixelSize_currentIndexChanged(int index)
+{
+    QString sCmd;
+    switch (index){
+        case 0: // 50 microns
+            sCmd = "U50";
+            break;
+        case 1: // 75 microns
+            sCmd = "U75";
+            break;
+        case 2: // 100 mircons
+            sCmd = "U100";
+        default:
+            break;
+    }
+    pPrinterComm->SendCmd(sCmd);
+    pPrinterComm->SendCmd("A"); // Force refresh of printer stats
+}
+
+void B9Terminal::on_pushButtonCycleSettings_clicked()
+{
+    pSettings->updateValues();
+}
+
 void B9Terminal::getKey(int iKey)
 {
     if(!m_bPrimaryScreen)return; // Ignore keystrokes from the print window unless we're using the primary monitor
-
-//	if(m_iPrintState!=PRINT_NO){
-//		if(m_iPrintState==PRINT_WAITFORP && iKey==80){
-//			exposeLayer();
-//			breatheLayer();
-//		}
-//		return;
-//	}
-
-    QMessageBox msgBox;
-    msgBox.setText(QString::number(iKey));
-    msgBox.exec();
+    if(isVisible()&&isEnabled())
+    {
+        // We must be "calibrating"  If we get any keypress we should close the projector window
+        pProjector->hide();
+        //QMessageBox msgBox;
+        //msgBox.setText(QString::number(iKey));
+        //msgBox.exec();
+    }
 
 /*
     switch(iKey){

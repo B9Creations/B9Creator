@@ -61,7 +61,8 @@ SOURCES += main.cpp\
     b9create/b9creator.cpp \
     b9slice/b9slice.cpp \
     helpsystem.cpp \
-    b9nativeapp.cpp
+    b9nativeapp.cpp \
+    dlgcyclesettings.cpp
 
 HEADERS  += mainwindow.h \
     b9plan.h \
@@ -79,7 +80,8 @@ HEADERS  += mainwindow.h \
     b9create/b9creator.h \
     b9slice/b9slice.h \
     helpsystem.h \
-    b9nativeapp.h
+    b9nativeapp.h \
+    dlgcyclesettings.h
 
 FORMS    += mainwindow.ui \
     b9plan.ui \
@@ -88,7 +90,8 @@ FORMS    += mainwindow.ui \
     b9edit/b9edit.ui \
     b9edit/aboutbox.ui \
     b9create/b9creator.ui \
-    b9slice/b9slice.ui
+    b9slice/b9slice.ui \
+    dlgcyclesettings.ui
 
 RESOURCES += \
     b9edit/sliceeditview.qrc \

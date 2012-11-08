@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DlgCycleSettings</class>
+ <widget class="QDialog" name="DlgCycleSettings">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>398</width>
+    <height>318</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_4">
+   <item row="0" column="0" colspan="2">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Printer Release Cycle Settings</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0" colspan="2">
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Inital Layer Settings</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Raise Speed (%)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QSpinBox" name="spinBoxRaiseSpd1">
+           <property name="toolTip">
+            <string>Build Table Raise Speed</string>
+           </property>
+           <property name="whatsThis">
+            <string>Build Table Raise Speed.  During the print release cycle, this variable controls the raise speed.  0 is slowest (but not stopped), 100 is fastest.</string>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+           <property name="value">
+            <number>85</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Lower Speed (%)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QSpinBox" name="spinBoxLowerSpd1">
+           <property name="toolTip">
+            <string>Build Table Lowering Speed</string>
+           </property>
+           <property name="whatsThis">
+            <string>Build Table Lowering Speed.  During the print release cycle, this variable controls the lowering speed.  0 is slowest (but not stopped), 100 is fastest.</string>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+           <property name="value">
+            <number>85</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Close Speed (%)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QSpinBox" name="spinBoxCloseSpd1">
+           <property name="toolTip">
+            <string>VAT close (or release) speed.</string>
+           </property>
+           <property name="whatsThis">
+            <string>VAT close (or release) speed.</string>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+           <property name="value">
+            <number>85</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Open Speed (%)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QSpinBox" name="spinBoxOpenSpd1">
+           <property name="toolTip">
+            <string>VAT opne (or repositioning) speed.</string>
+           </property>
+           <property name="whatsThis">
+            <string>VAT opne (or repositioning) speed.</string>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+           <property name="value">
+            <number>85</number>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_7">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Overlift (mm)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1" colspan="2">
+          <widget class="QDoubleSpinBox" name="doubleSpinBoxOverlift1">
+           <property name="toolTip">
+            <string>After release move up to next level plus this amount.</string>
+           </property>
+           <property name="whatsThis">
+            <string>After release move up to next level plus this amount. Once repositioned, we must lower back by this amount to target level</string>
+           </property>
+           <property name="decimals">
+            <number>5</number>
+           </property>
+           <property name="maximum">
+            <double>10.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0" colspan="2">
+          <widget class="QLabel" name="label_5">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Breathe (Seconds)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="2">
+          <widget class="QDoubleSpinBox" name="doubleSpinBoxBreathe1">
+           <property name="toolTip">
+            <string>Delay in the VAT closed position. </string>
+           </property>
+           <property name="whatsThis">
+            <string>Delay in the VAT closed position.  Allows time for Oxygen to replenish the VAT's PDMS coating.</string>
+           </property>
+           <property name="maximum">
+            <double>60.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Settle (Seconds)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1" colspan="2">
+          <widget class="QDoubleSpinBox" name="doubleSpinBoxSettle1">
+           <property name="toolTip">
+            <string>Delay in the VAT Open position.</string>
+           </property>
+           <property name="whatsThis">
+            <string>Delay in the VAT Open position.  Allows time for the resin to &quot;settle&quot; in before exposure begins.</string>
+           </property>
+           <property name="maximum">
+            <double>60.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="title">
+         <string>Subsequent Layer Settings</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>Raise Speed (%)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QSpinBox" name="spinBoxRaiseSpd2">
+           <property name="toolTip">
+            <string>Build Table Raise Speed</string>
+           </property>
+           <property name="whatsThis">
+            <string>Build Table Raise Speed.  During the print release cycle, this variable controls the raise speed.  0 is slowest (but not stopped), 100 is fastest.</string>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+           <property name="value">
+            <number>85</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_9">
+           <property name="text">
+            <string>Lower Speed (%)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QSpinBox" name="spinBoxLowerSpd2">
+           <property name="toolTip">
+            <string>Build Table Lowering Speed</string>
+           </property>
+           <property name="whatsThis">
+            <string>Build Table Lowering Speed.  During the print release cycle, this variable controls the lowering speed.  0 is slowest (but not stopped), 100 is fastest.</string>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+           <property name="value">
+            <number>85</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_10">
+           <property name="text">
+            <string>Close Speed (%)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QSpinBox" name="spinBoxCloseSpd2">
+           <property name="toolTip">
+            <string>VAT close (or release) speed.</string>
+           </property>
+           <property name="whatsThis">
+            <string>VAT close (or release) speed.</string>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+           <property name="value">
+            <number>85</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>Open Speed (%)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QSpinBox" name="spinBoxOpenSpd2">
+           <property name="toolTip">
+            <string>VAT opne (or repositioning) speed.</string>
+           </property>
+           <property name="whatsThis">
+            <string>VAT opne (or repositioning) speed.</string>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+           <property name="value">
+            <number>85</number>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_12">
+           <property name="text">
+            <string>Overlift (mm)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1" colspan="2">
+          <widget class="QDoubleSpinBox" name="doubleSpinBoxOverlift2">
+           <property name="toolTip">
+            <string>After release move up to next level plus this amount.</string>
+           </property>
+           <property name="whatsThis">
+            <string>After release move up to next level plus this amount. Once repositioned, we must lower back by this amount to target level</string>
+           </property>
+           <property name="decimals">
+            <number>5</number>
+           </property>
+           <property name="maximum">
+            <double>10.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0" colspan="2">
+          <widget class="QLabel" name="label_13">
+           <property name="text">
+            <string>Breathe (Seconds)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="2">
+          <widget class="QDoubleSpinBox" name="doubleSpinBoxBreathe2">
+           <property name="toolTip">
+            <string>Delay in the VAT closed position. </string>
+           </property>
+           <property name="whatsThis">
+            <string>Delay in the VAT closed position.  Allows time for Oxygen to replenish the VAT's PDMS coating.</string>
+           </property>
+           <property name="maximum">
+            <double>60.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="label_14">
+           <property name="text">
+            <string>Settle (Seconds)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="2">
+          <widget class="QDoubleSpinBox" name="doubleSpinBoxSettle2">
+           <property name="toolTip">
+            <string>Delay in the VAT Open position.</string>
+           </property>
+           <property name="whatsThis">
+            <string>Delay in the VAT Open position.  Allows time for the resin to &quot;settle&quot; in before exposure begins.</string>
+           </property>
+           <property name="maximum">
+            <double>60.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_15">
+        <property name="text">
+         <string>Inital Cutoff (mm)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="doubleSpinBoxBTCutoff">
+        <property name="toolTip">
+         <string>Use Initial settings when Build Table is at or below this value.</string>
+        </property>
+        <property name="whatsThis">
+         <string>Use Initial settings when Build Table is at or below this value.  At higher positions, use the subsequent settings.</string>
+        </property>
+        <property name="decimals">
+         <number>5</number>
+        </property>
+        <property name="maximum">
+         <double>10.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="pushButtonRestoreDefaults">
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Restore all values to factory defaults</string>
+        </property>
+        <property name="whatsThis">
+         <string>Restore all values to factory defaults.</string>
+        </property>
+        <property name="text">
+         <string>Restore Defaults</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
+     <property name="toolTip">
+      <string>Accept or Reject your changes.</string>
+     </property>
+     <property name="whatsThis">
+      <string>Accept or Reject your changes.</string>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>spinBoxRaiseSpd1</tabstop>
+  <tabstop>spinBoxLowerSpd1</tabstop>
+  <tabstop>spinBoxCloseSpd1</tabstop>
+  <tabstop>spinBoxOpenSpd1</tabstop>
+  <tabstop>doubleSpinBoxOverlift1</tabstop>
+  <tabstop>doubleSpinBoxBreathe1</tabstop>
+  <tabstop>doubleSpinBoxSettle1</tabstop>
+  <tabstop>spinBoxRaiseSpd2</tabstop>
+  <tabstop>spinBoxLowerSpd2</tabstop>
+  <tabstop>spinBoxCloseSpd2</tabstop>
+  <tabstop>spinBoxOpenSpd2</tabstop>
+  <tabstop>doubleSpinBoxOverlift2</tabstop>
+  <tabstop>doubleSpinBoxBreathe2</tabstop>
+  <tabstop>doubleSpinBoxSettle2</tabstop>
+  <tabstop>doubleSpinBoxBTCutoff</tabstop>
+  <tabstop>pushButtonRestoreDefaults</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

@@ -32,16 +32,23 @@
 //
 *************************************************************************************/
 #include <QtGui/QApplication>
+//#include <QSplashScreen>
 #include "b9nativeapp.h"
 #include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
-//    QApplication a(argc, argv);
     B9NativeApp a(argc, argv);
     MainWindow w;
-    //w.pDesktop = a.desktop();
+/*
+    QPixmap pixmap("splash.jpg");
+    QSplashScreen splash(pixmap,Qt::WindowStaysOnTopHint);
+    splash.show();
+    a.processEvents();
+    splash.showMessage("Version 1.0");
+    for(int i=0;i<900000000;i++)i=i;
+    splash.finish(&w);
+*/
     w.show();
-    
     return a.exec();
 }

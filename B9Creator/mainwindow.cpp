@@ -38,6 +38,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    // Set up Identity
+    QCoreApplication::setOrganizationName("B9Creations, LLC");
+    QCoreApplication::setOrganizationDomain("b9creations.com");
+    QCoreApplication::setApplicationName("B9Creator");
+
     ui->setupUi(this);
     this->setWindowFlags(Qt::MSWindowsFixedSizeDialogHint);
 

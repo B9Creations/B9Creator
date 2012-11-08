@@ -40,8 +40,8 @@
 // The Firmware version is tied to a specific version
 // These defines determine how we attempt to update Firmware
 // The correctly named current hex file MUST be in the application directory
-#define CURRENTFIRMWARE "v1.0.2"
-#define FIRMWAREHEXFILE "B9Firmware_1_0_2.hex"
+#define CURRENTFIRMWARE "v1.0.3"
+#define FIRMWAREHEXFILE "B9Firmware_1_0_3.hex"
 #define MSG_SEARCHING "Searching..."
 #define MSG_CONNECTED "Connected"
 #define MSG_FIRMUPDATE "Updating Firmware..."
@@ -91,6 +91,15 @@ public:
     void setPU(int iPU){m_iPU = iPU;}
     int getPU(){return m_iPU;}
 
+    void setNativeX(int iX){m_iNativeX = iX;}
+    int getNativeX(){return m_iNativeX;}
+
+    void setNativeY(int iY){m_iNativeY = iY;}
+    int getNativeY(){return m_iNativeY;}
+
+    void setXYPixelSize(int iPS){m_iXYPizelSize = iPS;}
+    int getXYPixelSize(){return m_iXYPizelSize;}
+
     void setUpperZLimPU(int iZLimPU){m_iUpperZLimPU = iZLimPU;}
     int getUpperZLimPU(){return m_iUpperZLimPU;}
 
@@ -134,6 +143,9 @@ private:
     int m_iUpperZLimPU;
     int m_iCurZPosInPU;
     int m_iCurVatPercentOpen;
+    int m_iNativeX;
+    int m_iNativeY;
+    int m_iXYPizelSize;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -175,6 +187,9 @@ public:
     int getLampHrs(){return m_Status.getLampHrs();}
     int getPU(){return m_Status.getPU();}
     int getUpperZLimPU(){return m_Status.getUpperZLimPU();}
+    int getNativeX(){return m_Status.getNativeX();}
+    int getNativeY(){return m_Status.getNativeY();}
+    int getXYPixelSize() {return m_Status.getXYPixelSize();}
     int getLastHomeDiff() {return m_Status.getLastHomeDiff();}
     B9PrinterStatus::HomeStatus getHomeStatus() {return m_Status.getHomeStatus();}
     void setHomeStatus(B9PrinterStatus::HomeStatus eHS) {m_Status.setHomeStatus(eHS);}
@@ -196,6 +211,9 @@ signals:
     void BC_HasShutter(bool hasShutter); // Projector has a mechanical shutter
     void BC_PU(int); //Update to Printer Units (Microns * 100)
     void BC_UpperZLimPU(int); //Update to Upper Z Limit in PU
+    void BC_NativeX(int); //Update to Native X resoltion
+    void BC_NativeY(int); //Update to Native Y resoltion
+    void BC_XYPixelSize(int); //Update to XY Pixel Size
 
     void BC_CurrentZPosInPU(int); //Broadcast whenever we get an update on the Z Position
     void BC_CurrentVatPercentOpen(int); //Broadcast whenever we get an update on the Vat Position

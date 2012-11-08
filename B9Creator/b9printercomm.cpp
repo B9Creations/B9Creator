@@ -54,6 +54,10 @@ void B9PrinterStatus::reset(){
     m_iCurVatPercentOpen = -1;
     m_iLastHomeDiff = 0;
 
+    m_iNativeX = 0;
+    m_iNativeY = 0;
+    m_iXYPizelSize = 0;
+
     lastMsgTime.start();
     bResetInProgress = false;
     bDoResume = false;
@@ -467,6 +471,21 @@ void B9PrinterComm::ReadAvailable() {
                 if(iInput==0) m_Status.setHomeStatus(B9PrinterStatus::HS_FOUND);
                 else m_Status.setHomeStatus(B9PrinterStatus::HS_UNKNOWN);
                 emit BC_HomeFound();
+                break;
+
+            case 'D':  // Current Native X Projector resolution
+                m_Status.setNativeX(m_sSerialString.right(m_sSerialString.length()-1).toInt());
+                emit BC_NativeX(m_Status.getNativeX());
+                break;
+
+            case 'E':  // Current Native Y Projector resolution
+                m_Status.setNativeY(m_sSerialString.right(m_sSerialString.length()-1).toInt());
+                emit BC_NativeY(m_Status.getNativeY());
+                break;
+
+            case 'H':  // Current XY Pixel Size
+                m_Status.setXYPixelSize(m_sSerialString.right(m_sSerialString.length()-1).toInt());
+                emit BC_XYPixelSize(m_Status.getXYPixelSize());
                 break;
 
             case 'I':  // Current PU
