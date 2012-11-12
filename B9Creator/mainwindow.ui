@@ -254,7 +254,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="actionSettings"/>
-    <addaction name="actionTesting_Calibration"/>
+    <addaction name="actionMaterialsCatalog"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -289,9 +289,9 @@
     <string>Index</string>
    </property>
   </action>
-  <action name="actionTesting_Calibration">
+  <action name="actionMaterialsCatalog">
    <property name="text">
-    <string>Testing &amp;&amp; Calibration...</string>
+    <string>&amp;Materials Catalog...</string>
    </property>
   </action>
   <action name="actionExit">
@@ -396,6 +396,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionMaterialsCatalog</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showCatalog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>101</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>myOpen()</slot>
@@ -403,5 +419,6 @@
   <slot>showLogAndExit()</slot>
   <slot>showTerminal()</slot>
   <slot>showHelp()</slot>
+  <slot>showCatalog()</slot>
  </slots>
 </ui>

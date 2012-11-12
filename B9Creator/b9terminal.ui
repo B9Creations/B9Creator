@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>596</width>
-    <height>685</height>
+    <width>607</width>
+    <height>596</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -416,7 +416,7 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0" colspan="2">
+         <item row="4" column="0" colspan="2">
           <widget class="QGroupBox" name="groupBoxZLimits">
            <property name="toolTip">
             <string>Maximum vertical build table position, provided by printer.</string>
@@ -734,7 +734,7 @@
            </layout>
           </widget>
          </item>
-         <item row="4" column="0" colspan="2">
+         <item row="5" column="0" colspan="2">
           <widget class="QGroupBox" name="groupBox_7">
            <property name="toolTip">
             <string>Information about the printer's projector setup.</string>
@@ -742,8 +742,122 @@
            <property name="title">
             <string>Projector Calibration</string>
            </property>
-           <layout class="QGridLayout" name="gridLayout_14">
+           <layout class="QGridLayout" name="gridLayout_11">
             <item row="0" column="0">
+             <widget class="QLabel" name="label_32">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Lamp 1/2 Life:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineEditHalfLife">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>65</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>40</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="palette">
+               <palette>
+                <active>
+                 <colorrole role="Text">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>127</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>195</red>
+                    <green>195</green>
+                    <blue>195</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </active>
+                <inactive>
+                 <colorrole role="Text">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>0</red>
+                    <green>0</green>
+                    <blue>127</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>195</red>
+                    <green>195</green>
+                    <blue>195</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </inactive>
+                <disabled>
+                 <colorrole role="Text">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>120</red>
+                    <green>120</green>
+                    <blue>120</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                 <colorrole role="Base">
+                  <brush brushstyle="SolidPattern">
+                   <color alpha="255">
+                    <red>240</red>
+                    <green>240</green>
+                    <blue>240</blue>
+                   </color>
+                  </brush>
+                 </colorrole>
+                </disabled>
+               </palette>
+              </property>
+              <property name="toolTip">
+               <string>Hours before Projector's output drops to half its original value</string>
+              </property>
+              <property name="whatsThis">
+               <string>Hours before Projector's output drops to half its original value</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
              <widget class="QLabel" name="label_29">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -756,7 +870,7 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="1" colspan="2">
+            <item row="1" column="1">
              <widget class="QLineEdit" name="lineEditNativeX">
               <property name="enabled">
                <bool>true</bool>
@@ -857,7 +971,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
+            <item row="2" column="0">
              <widget class="QLabel" name="label_30">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -870,7 +984,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1" colspan="2">
+            <item row="2" column="1">
              <widget class="QLineEdit" name="lineEditNativeY">
               <property name="enabled">
                <bool>true</bool>
@@ -971,7 +1085,7 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
+            <item row="3" column="0">
              <widget class="QLabel" name="label_31">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -984,7 +1098,7 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="3" column="1">
              <widget class="QComboBox" name="comboBoxXPPixelSize">
               <property name="toolTip">
                <string>The current XY pixel size, determined by projector position and calibration</string>
@@ -1010,6 +1124,13 @@
              </widget>
             </item>
            </layout>
+          </widget>
+         </item>
+         <item row="3" column="0" colspan="2">
+          <widget class="QPushButton" name="pushButtonModMatCat">
+           <property name="text">
+            <string>Modify Materials Catalog...</string>
+           </property>
           </widget>
          </item>
         </layout>
@@ -1960,22 +2081,6 @@
        </widget>
       </item>
       <item row="4" column="0" colspan="3">
-       <widget class="QPushButton" name="pushButtonStop">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="toolTip">
-         <string>Send a STOP command to the printer. </string>
-        </property>
-        <property name="whatsThis">
-         <string>Send a STOP command to the printer.  Printer will stop any mechanical motion currently in progress.</string>
-        </property>
-        <property name="text">
-         <string>STOP!</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0" colspan="3">
        <widget class="QGroupBox" name="groupBox_5">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1986,30 +2091,30 @@
         <property name="title">
          <string>Serial Communications Data Stream Monitor</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout_12">
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="lineEditCommand">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+        <layout class="QGridLayout" name="gridLayout_6">
+         <item row="0" column="0" colspan="2">
+          <widget class="QPushButton" name="pushButtonStop">
+           <property name="enabled">
+            <bool>true</bool>
            </property>
            <property name="toolTip">
-            <string>Send text commands to the printer.  Refer to &quot;DLP 3DP API&quot; docs.</string>
+            <string>Send a STOP command to the printer. </string>
            </property>
            <property name="whatsThis">
-            <string>Send text commands to the printer.  Refer to &quot;DLP 3DP API&quot; documents for details on valid commands.  Sending invalid commands will have unpredicatable results!</string>
+            <string>Send a STOP command to the printer.  Printer will stop any mechanical motion currently in progress.</string>
+           </property>
+           <property name="text">
+            <string>Send STOP Command</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="0" colspan="4">
+         <item row="0" column="2" rowspan="3">
           <widget class="QTextEdit" name="textEditCommOut">
            <property name="enabled">
             <bool>true</bool>
            </property>
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -2031,7 +2136,36 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="2">
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_25">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Send:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="lineEditCommand">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>Send text commands to the printer.  Refer to &quot;DLP 3DP API&quot; docs.</string>
+           </property>
+           <property name="whatsThis">
+            <string>Send text commands to the printer.  Refer to &quot;DLP 3DP API&quot; documents for details on valid commands.  Sending invalid commands will have unpredicatable results!</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" colspan="2">
           <widget class="QCheckBox" name="checkBoxVerbose">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2047,19 +2181,6 @@
            </property>
            <property name="text">
             <string>Enable Verbose PrinterComments</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_25">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Send:</string>
            </property>
           </widget>
          </item>
@@ -2079,6 +2200,7 @@
   <tabstop>lineEditUpperZLimPU</tabstop>
   <tabstop>lineEditUpperZLimMM</tabstop>
   <tabstop>lineEditUpperZLimInches</tabstop>
+  <tabstop>lineEditHalfLife</tabstop>
   <tabstop>lineEditNativeX</tabstop>
   <tabstop>lineEditNativeY</tabstop>
   <tabstop>comboBoxXPPixelSize</tabstop>

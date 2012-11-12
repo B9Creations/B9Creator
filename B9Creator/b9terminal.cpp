@@ -37,6 +37,7 @@
 #include "b9terminal.h"
 #include "ui_b9terminal.h"
 #include "dlgcyclesettings.h"
+#include "dlgmaterialsmanager.h"
 
 void PCycleSettings::updateValues()
 {
@@ -119,6 +120,9 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
 
     qDebug() << "Terminal Start";
 
+    m_pCatalog = new B9MatCat;
+    onBC_ModelInfo("B9C1");
+
     pSettings = new PCycleSettings;
 
     // Always set up the B9PrinterComm in the Terminal constructor
@@ -152,6 +156,7 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     connect(m_pResetTimer, SIGNAL(timeout()), this, SLOT(onMotionResetTimeout()));
     connect(pPrinterComm, SIGNAL(BC_HomeFound()), this, SLOT(onMotionResetComplete()));
     connect(pPrinterComm, SIGNAL(BC_CurrentZPosInPU(int)), this, SLOT(onBC_CurrentZPosInPU(int)));
+    connect(pPrinterComm, SIGNAL(BC_HalfLife(int)), this, SLOT(onBC_HalfLife(int)));
     connect(pPrinterComm, SIGNAL(BC_NativeX(int)), this, SLOT(onBC_NativeX(int)));
     connect(pPrinterComm, SIGNAL(BC_NativeY(int)), this, SLOT(onBC_NativeY(int)));
     connect(pPrinterComm, SIGNAL(BC_XYPixelSize(int)), this, SLOT(onBC_XYPixelSize(int)));
@@ -172,6 +177,18 @@ B9Terminal::~B9Terminal()
     delete pPrinterComm;
     qDebug() << "Terminal End";
 }
+
+void B9Terminal::dlgEditMatCat()
+{
+    DlgMaterialsManager dlgMatMan(m_pCatalog,0);
+    dlgMatMan.exec();
+}
+
+void B9Terminal::on_pushButtonModMatCat_clicked()
+{
+    dlgEditMatCat();
+}
+
 
 void B9Terminal::makeProjectorConnections()
 {
@@ -407,7 +424,9 @@ void B9Terminal::onMotionResetTimeout(){
 
 
 void B9Terminal::onBC_ModelInfo(QString sModel){
-    ui->lineEditModelInfo->setText(sModel);
+    m_sModelName = sModel;
+    m_pCatalog->load(m_sModelName);
+    ui->lineEditModelInfo->setText(m_sModelName);
 }
 
 void B9Terminal::onBC_FirmVersion(QString sVersion){
@@ -424,6 +443,10 @@ void B9Terminal::onBC_HasShutter(bool bHS){
 void B9Terminal::onBC_PU(int iPU){
     double dPU = (double)iPU/100000.0;
     ui->lineEditPUinMicrons->setText(QString::number(dPU,'g',8));
+}
+
+void B9Terminal::onBC_HalfLife(int iHL){
+    ui->lineEditHalfLife->setText(QString::number(iHL));
 }
 
 void B9Terminal::onBC_NativeX(int iNX){
@@ -931,3 +954,4 @@ void B9Terminal::getKey(int iKey)
     }
 */
 }
+

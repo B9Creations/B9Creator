@@ -91,6 +91,11 @@ void MainWindow::showTerminal()
     pTerminal->showIt();
 }
 
+void MainWindow::showCatalog()
+{
+    pTerminal->dlgEditMatCat();
+}
+
 void MainWindow::showHelp()
 {
     m_HelpSystem.showHelpFile("index.html");

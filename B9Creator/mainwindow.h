@@ -67,6 +67,7 @@ public slots:
 
     void showLogAndExit();
     void showTerminal();
+    void showCatalog();
 
 private slots:
     void on_commandLayout_clicked(bool checked);

@@ -40,8 +40,8 @@
 // The Firmware version is tied to a specific version
 // These defines determine how we attempt to update Firmware
 // The correctly named current hex file MUST be in the application directory
-#define CURRENTFIRMWARE "v1.0.3"
-#define FIRMWAREHEXFILE "B9Firmware_1_0_3.hex"
+#define CURRENTFIRMWARE "v1.0.4"
+#define FIRMWAREHEXFILE "B9Firmware_1_0_4.hex"
 #define MSG_SEARCHING "Searching..."
 #define MSG_CONNECTED "Connected"
 #define MSG_FIRMUPDATE "Updating Firmware..."
@@ -90,6 +90,9 @@ public:
 
     void setPU(int iPU){m_iPU = iPU;}
     int getPU(){return m_iPU;}
+
+    void setHalfLife(int iHL){m_iHalfLife = iHL;}
+    int getHalfLife(){return m_iHalfLife;}
 
     void setNativeX(int iX){m_iNativeX = iX;}
     int getNativeX(){return m_iNativeX;}
@@ -146,6 +149,7 @@ private:
     int m_iNativeX;
     int m_iNativeY;
     int m_iXYPizelSize;
+    int m_iHalfLife;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -187,6 +191,7 @@ public:
     int getLampHrs(){return m_Status.getLampHrs();}
     int getPU(){return m_Status.getPU();}
     int getUpperZLimPU(){return m_Status.getUpperZLimPU();}
+    int getHalfLife(){return m_Status.getHalfLife();}
     int getNativeX(){return m_Status.getNativeX();}
     int getNativeY(){return m_Status.getNativeY();}
     int getXYPixelSize() {return m_Status.getXYPixelSize();}
@@ -211,6 +216,7 @@ signals:
     void BC_HasShutter(bool hasShutter); // Projector has a mechanical shutter
     void BC_PU(int); //Update to Printer Units (Microns * 100)
     void BC_UpperZLimPU(int); //Update to Upper Z Limit in PU
+    void BC_HalfLife(int); //Update to Projector Lamp HalfLife
     void BC_NativeX(int); //Update to Native X resoltion
     void BC_NativeY(int); //Update to Native Y resoltion
     void BC_XYPixelSize(int); //Update to XY Pixel Size

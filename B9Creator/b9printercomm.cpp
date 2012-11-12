@@ -57,6 +57,7 @@ void B9PrinterStatus::reset(){
     m_iNativeX = 0;
     m_iNativeY = 0;
     m_iXYPizelSize = 0;
+    m_iHalfLife = 2000;
 
     lastMsgTime.start();
     bResetInProgress = false;
@@ -473,6 +474,11 @@ void B9PrinterComm::ReadAvailable() {
                 emit BC_HomeFound();
                 break;
 
+            case 'K':  // Current Lamp 1/2 life
+                m_Status.setHalfLife(m_sSerialString.right(m_sSerialString.length()-1).toInt());
+                emit BC_HalfLife(m_Status.getHalfLife());
+                break;
+
             case 'D':  // Current Native X Projector resolution
                 m_Status.setNativeX(m_sSerialString.right(m_sSerialString.length()-1).toInt());
                 emit BC_NativeX(m_Status.getNativeX());
@@ -527,12 +533,12 @@ void B9PrinterComm::ReadAvailable() {
                 break;
 
             case 'V':  // Version
-                m_Status.setVersion(m_sSerialString.right(m_sSerialString.length()-1));
+                m_Status.setVersion(m_sSerialString.right(m_sSerialString.length()-1).trimmed());
                 emit BC_FirmVersion(m_Status.getVersion());
                 break;
 
             case 'W':  // Model
-                m_Status.setModel(m_sSerialString.right(m_sSerialString.length()-1));
+                m_Status.setModel(m_sSerialString.right(m_sSerialString.length()-1).trimmed());
                 emit BC_ModelInfo(m_Status.getModel());
                 break;
 

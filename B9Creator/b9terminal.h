@@ -41,6 +41,8 @@
 #include "b9printercomm.h"
 #include "logfilemanager.h"
 #include "b9projector.h"
+#include "b9matcat.h"
+
 
 class PCycleSettings {
 public:
@@ -74,7 +76,11 @@ public:
     int getEstNextCycleTime(int iCur, int iTgt);
     int getEstFinalCycleTime(int iCur, int iTgt);
 
+    B9MatCat* getMatCat() {return m_pCatalog;}
+
 public slots:
+    void dlgEditMatCat();
+
     void rcProjectorPwr(bool bPwrOn);
     void rcResetHomePos();
 
@@ -123,6 +129,7 @@ private slots:
     void onBC_UpperZLimPU(int iUpZLimPU);
     void onBC_CurrentZPosInPU(int iCZ);
     void onBC_CurrentVatPercentOpen(int iPO);
+    void onBC_HalfLife(int iHL);
     void onBC_NativeX(int iNX);
     void onBC_NativeY(int iNY);
     void onBC_XYPixelSize(int iPS);
@@ -168,6 +175,8 @@ private slots:
 
     void on_comboBoxXPPixelSize_currentIndexChanged(int index);
 
+    void on_pushButtonModMatCat_clicked();
+
 private:
     Ui::B9Terminal *ui;
     void hideEvent(QHideEvent *event);
@@ -175,6 +184,8 @@ private:
     int getZMoveTime(int iDelta, int iSpd);
     int getVatMoveTime(int iSpeed);
 
+    B9MatCat* m_pCatalog;
+    QString m_sModelName;
     PCycleSettings *pSettings;
     B9PrinterComm *pPrinterComm;
     LogFileManager *pLogManager;
