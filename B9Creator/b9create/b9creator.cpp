@@ -400,6 +400,18 @@ void B9Creator::newFirstLayer()
 	updateSliceSlider();
 }
 
+void B9Creator::newLastLayer()
+{
+    QString sNumber = ui.lineEditLastLayer->text();
+    int iLayer = sNumber.toInt();
+    if(iLayer < 1) iLayer = 1;
+    if(iLayer > mCPJ.getTotalLayers()) iLayer = mCPJ.getTotalLayers();
+    sNumber = QString::number(iLayer);
+    ui.lineEditLastLayer->setText(sNumber);
+    mpSettings->setValue(mCPJ.getName()+"LastLayer",sNumber);
+    analyzeEstimates();
+    updateSliceSlider();
+}
 void B9Creator::setXoff(int xOff)
 {
 	if(mCPJ.getName().isEmpty())return;
@@ -420,18 +432,7 @@ void B9Creator::centerOffsets()
 	ui.sliderYoff->setValue(0);
 }
 
-void B9Creator::newLastLayer()
-{
-	QString sNumber = ui.lineEditLastLayer->text();
-	int iLayer = sNumber.toInt();
-	if(iLayer < 1) iLayer = 1;
-	if(iLayer > mCPJ.getTotalLayers()) iLayer = mCPJ.getTotalLayers();
-	sNumber = QString::number(iLayer);
-	ui.lineEditLastLayer->setText(sNumber);
-	mpSettings->setValue(mCPJ.getName()+"LastLayer",sNumber);
-	analyzeEstimates();
-	updateSliceSlider();
-}
+
 
 void B9Creator::newExposure()
 {

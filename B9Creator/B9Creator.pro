@@ -64,7 +64,8 @@ SOURCES += main.cpp\
     b9nativeapp.cpp \
     dlgcyclesettings.cpp \
     dlgmaterialsmanager.cpp \
-    b9matcat.cpp
+    b9matcat.cpp \
+    b9print.cpp
 
 HEADERS  += mainwindow.h \
     b9plan.h \
@@ -85,7 +86,8 @@ HEADERS  += mainwindow.h \
     b9nativeapp.h \
     dlgcyclesettings.h \
     dlgmaterialsmanager.h \
-    b9matcat.h
+    b9matcat.h \
+    b9print.h
 
 FORMS    += mainwindow.ui \
     b9plan.ui \
@@ -96,7 +98,8 @@ FORMS    += mainwindow.ui \
     b9create/b9creator.ui \
     b9slice/b9slice.ui \
     dlgcyclesettings.ui \
-    dlgmaterialsmanager.ui
+    dlgmaterialsmanager.ui \
+    b9print.ui
 
 RESOURCES += \
     b9edit/sliceeditview.qrc \

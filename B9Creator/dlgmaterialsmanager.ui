@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>386</width>
-    <height>482</height>
+    <height>484</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,7 +29,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Material</string>
+         <string>Material ID:</string>
         </property>
        </widget>
       </item>
@@ -40,6 +40,12 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Select a Material from the Catalog</string>
+        </property>
+        <property name="whatsThis">
+         <string>Select a Material from the Catalog to view/edit exposure timing</string>
         </property>
        </widget>
       </item>
@@ -52,7 +58,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Description</string>
+         <string>Description:</string>
         </property>
        </widget>
       </item>
@@ -128,6 +134,12 @@
           </disabled>
          </palette>
         </property>
+        <property name="toolTip">
+         <string>Description of the selected Material</string>
+        </property>
+        <property name="whatsThis">
+         <string>Description of the selected Material</string>
+        </property>
         <property name="readOnly">
          <bool>true</bool>
         </property>
@@ -135,6 +147,12 @@
       </item>
       <item row="2" column="0">
        <widget class="QPushButton" name="pushButtonAdd">
+        <property name="toolTip">
+         <string>Add a new Material to the Catalog</string>
+        </property>
+        <property name="whatsThis">
+         <string>Add a new Material to the Catalog</string>
+        </property>
         <property name="text">
          <string>Add...</string>
         </property>
@@ -147,6 +165,12 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Add a duplicate of the selected material to the Catalog.</string>
+        </property>
+        <property name="whatsThis">
+         <string>Add a duplicate of the selected material to the Catalog.  This is good if you wish to modify an existing material.</string>
         </property>
         <property name="text">
          <string>Duplicate...</string>
@@ -161,6 +185,12 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Remove the selected material from the Catalog.  Default entries can not be deleted.</string>
+        </property>
+        <property name="whatsThis">
+         <string>Remove the selected material from the Catalog.  Default entries can not be deleted.</string>
+        </property>
         <property name="text">
          <string>Delete Selected</string>
         </property>
@@ -171,6 +201,12 @@
    </item>
    <item row="2" column="0">
     <widget class="QDialogButtonBox" name="buttonBoxSaveCancel">
+     <property name="toolTip">
+      <string>Click Save All to save your changes or Cancel to discard them.</string>
+     </property>
+     <property name="whatsThis">
+      <string>Click Save All to save your changes or Cancel to discard them.</string>
+     </property>
      <property name="layoutDirection">
       <enum>Qt::LeftToRight</enum>
      </property>
@@ -196,7 +232,14 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="comboBoxXY"/>
+       <widget class="QComboBox" name="comboBoxXY">
+        <property name="toolTip">
+         <string>Select the xy resolution table to view below.</string>
+        </property>
+        <property name="whatsThis">
+         <string>Select the xy resolution table to view below.  The printer can be calibrated to these xy pixel sizes. </string>
+        </property>
+       </widget>
       </item>
       <item row="1" column="0" colspan="2">
        <widget class="QLabel" name="label_4">
@@ -210,6 +253,12 @@
       </item>
       <item row="2" column="0" colspan="2">
        <widget class="QTableWidget" name="tableWidget">
+        <property name="toolTip">
+         <string>Exposure settings for a given material and xy pixel size.</string>
+        </property>
+        <property name="whatsThis">
+         <string>Exposure settings for a given material and xy pixel size.  Each possible layer thickness and it's associated timing is shown.</string>
+        </property>
         <column>
          <property name="text">
           <string>T-Base (sec)</string>
@@ -227,6 +276,16 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>comboBoxMaterial</tabstop>
+  <tabstop>lineEditDescription</tabstop>
+  <tabstop>pushButtonAdd</tabstop>
+  <tabstop>pushButtonDuplicate</tabstop>
+  <tabstop>pushButtonDelete</tabstop>
+  <tabstop>comboBoxXY</tabstop>
+  <tabstop>tableWidget</tabstop>
+  <tabstop>buttonBoxSaveCancel</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

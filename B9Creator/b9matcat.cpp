@@ -17,8 +17,27 @@ void B9MatCatItem::initDefaults()
 
 }
 
+bool B9MatCatItem::isFactoryEntry()
+{
+    return m_sMaterialLabel.left(2)=="!@";
+}
 
+QString B9MatCatItem::getMaterialLabel()
+{
+    if(isFactoryEntry())return m_sMaterialLabel.right(m_sMaterialLabel.count()-2);
+    return m_sMaterialLabel;
+}
 
+bool MatLessThan::operator()(const B9MatCatItem *left, const B9MatCatItem *right ) const
+{
+    QString sL = left->m_sMaterialLabel;
+    QString sR = right->m_sMaterialLabel;
+    if(sL.left(2)=="!@") sL.right(sL.count()-2);
+    if(sR.left(2)=="!@") sR.right(sL.count()-2);
+    return sL.toLower() < sR.toLower();
+}
+
+//////////////////////////////
 B9MatCat::B9MatCat(QObject *parent) :
     QObject(parent)
 {
@@ -27,6 +46,8 @@ B9MatCat::B9MatCat(QObject *parent) :
 
 bool B9MatCat::load(QString sModelName)
 {
+    clear();
+    m_Materials.clear();
     m_sModelName = sModelName;
     QString sPath = m_sModelName+".b9m";
 
@@ -51,9 +72,10 @@ bool B9MatCat::save()
 
 void B9MatCat::streamOut(QDataStream* pOut)
 {
+    qSort(m_Materials.begin(), m_Materials.end(), MatLessThan());
     *pOut << (quint32)m_Materials.count();
     for(int i=0; i<m_Materials.count(); i++){
-        *pOut << m_Materials[i]->getMaterialLabel() << m_Materials[i]->getMaterialDescription();
+        *pOut << m_Materials[i]->getFactoryMaterialLabel() << m_Materials[i]->getMaterialDescription();
         for(int xy = 0; xy < XYCOUNT; xy++)
             for(int z = 0; z < ZCOUNT; z++)
                 *pOut << m_Materials[i]->getTbase(xy,z) << m_Materials[i]->getTover(xy,z);

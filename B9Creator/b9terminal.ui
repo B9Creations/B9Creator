@@ -2197,6 +2197,7 @@
   <tabstop>lineEditModelInfo</tabstop>
   <tabstop>lineEditFirmVersion</tabstop>
   <tabstop>lineEditPUinMicrons</tabstop>
+  <tabstop>pushButtonModMatCat</tabstop>
   <tabstop>lineEditUpperZLimPU</tabstop>
   <tabstop>lineEditUpperZLimMM</tabstop>
   <tabstop>lineEditUpperZLimInches</tabstop>
@@ -2226,8 +2227,8 @@
   <tabstop>pushButtonPrintFinal</tabstop>
   <tabstop>pushButtonStop</tabstop>
   <tabstop>lineEditCommand</tabstop>
-  <tabstop>checkBoxVerbose</tabstop>
   <tabstop>textEditCommOut</tabstop>
+  <tabstop>checkBoxVerbose</tabstop>
  </tabstops>
  <resources/>
  <connections>

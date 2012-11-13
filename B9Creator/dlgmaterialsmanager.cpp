@@ -55,13 +55,57 @@ DlgMaterialsManager::~DlgMaterialsManager()
     delete ui;
 }
 
+void DlgMaterialsManager::updateEnabledStates()
+{
+    // Disable everything first
+    ui->groupBox_ExposureSettings->setEnabled(false);
+    ui->pushButtonDuplicate->setEnabled(false);
+    ui->pushButtonDelete->setEnabled(false);
+    ui->tableWidget->setEnabled(false);
+    //ui->tableWidget->setColumnHidden(0,true);
+    //ui->tableWidget->setColumnHidden(1,true);
+    if(m_pCatalog->getMaterialCount()>0)
+    {
+        // There are materials avaialable.
+        if(!m_pCatalog->isFactoryEntry(ui->comboBoxMaterial->currentIndex())){
+            ui->pushButtonDelete->setEnabled(true);
+            ui->tableWidget->setEnabled(true);
+            //ui->tableWidget->setColumnHidden(0,false);
+            //ui->tableWidget->setColumnHidden(1,false);
+        }
+        ui->groupBox_ExposureSettings->setEnabled(true);
+        ui->pushButtonDuplicate->setEnabled(true);
+
+    }
+}
+
+void DlgMaterialsManager::addMaterial(int iMatIndex)
+{
+    ui->comboBoxMaterial->insertItem(iMatIndex,m_pCatalog->getMaterialLabel(iMatIndex));
+}
+
+void DlgMaterialsManager::removeMaterial(int iMatIndex)
+{
+    ui->comboBoxMaterial->removeItem(iMatIndex);
+}
+
 void DlgMaterialsManager::setUp()
 {
+    m_bLoading = true;
     if(m_pCatalog->getMaterialCount()<1){
         m_pCatalog->setCurMatIndex(-1);
         ui->groupBox_ExposureSettings->setEnabled(false);
         ui->pushButtonDuplicate->setEnabled(false);
         ui->pushButtonDelete->setEnabled(false);
+        ui->comboBoxMaterial->clear();
+        ui->tableWidget->clear();
+        ui->lineEditDescription->clear();
+        return;
+    }
+    else if(m_pCatalog->isFactoryEntry(m_pCatalog->getCurMatIndex())){
+        ui->groupBox_ExposureSettings->setEnabled(false);
+        ui->pushButtonDuplicate->setEnabled(true);
+        ui->pushButtonDelete->setEnabled(true);
     }
     else
     {
@@ -84,21 +128,31 @@ void DlgMaterialsManager::setUp()
     }
 
     // Fill Materials Combo Box
+    ui->comboBoxMaterial->setEnabled(false);
     ui->comboBoxMaterial->clear();
     for(int i=0; i<m_pCatalog->getMaterialCount();i++){
         ui->comboBoxMaterial->addItem(m_pCatalog->getMaterialLabel(i));
     }
+    ui->comboBoxMaterial->setEnabled(true);
 
     // Fill XY Select Combo Box
     ui->comboBoxXY->clear();
     for(int i=0; i<m_pCatalog->getXYCount();i++){
         ui->comboBoxXY->addItem(m_pCatalog->getXYLabel(i));
     }
-}
+    m_bLoading = false;
+ }
 
 
 void DlgMaterialsManager::fillData(int iMatIndex, int iXYIndex)
 {
+    if(m_pCatalog->getMaterialCount()<=0){
+        ui->tableWidget->clearContents();
+        return;
+    }
+    if(m_bLoading)return;
+    if(iMatIndex<0||iXYIndex<0)return;
+    m_bLoading = true;
     m_pCatalog->setCurMatIndex(iMatIndex);
     m_pCatalog->setCurXYIndex(iXYIndex);
     m_pCatalog->setCurZIndex(0);
@@ -117,10 +171,13 @@ void DlgMaterialsManager::fillData(int iMatIndex, int iXYIndex)
     }
     ui->tableWidget->resizeRowsToContents();
     ui->tableWidget->resizeColumnsToContents();
+    m_bLoading = false;
 }
 
 void DlgMaterialsManager::stuffData()
 {
+    if(m_bLoading)return;
+    if(m_pCatalog->getMaterialCount()<1)return;
     for(int r=0; r<ui->tableWidget->rowCount();r++){
         m_pCatalog->setTbase(m_pCatalog->getCurMatIndex(),m_pCatalog->getCurXYIndex(),r,ui->tableWidget->item(r,0)->text().toDouble());
         m_pCatalog->setTover(m_pCatalog->getCurMatIndex(),m_pCatalog->getCurXYIndex(),r,ui->tableWidget->item(r,1)->text().toDouble());
@@ -130,17 +187,36 @@ void DlgMaterialsManager::stuffData()
 void DlgMaterialsManager::on_comboBoxMaterial_currentIndexChanged(int index)
 {
     if(index<0)return;
-    if(m_pCatalog->getMaterialCount()<1){
-        ui->lineEditDescription->setText("Empty Catalog");
-        return;
-    }
+    if(m_pCatalog->getMaterialCount()<1)return;
+
     ui->lineEditDescription->setText(m_pCatalog->getMaterialDescription(index));
+    stuffData();
     fillData(index, m_pCatalog->getCurXYIndex());
+    if(m_pCatalog->getMaterialCount()<1){
+        m_pCatalog->setCurMatIndex(-1);
+        ui->groupBox_ExposureSettings->setEnabled(false);
+        ui->pushButtonDuplicate->setEnabled(false);
+        ui->pushButtonDelete->setEnabled(false);
+    }
+    else if(m_pCatalog->isFactoryEntry(m_pCatalog->getCurMatIndex())){
+        ui->groupBox_ExposureSettings->setEnabled(true);
+        ui->tableWidget->setEnabled(false);
+        ui->pushButtonDuplicate->setEnabled(true);
+        ui->pushButtonDelete->setEnabled(false);
+    }
+    else
+    {
+        ui->groupBox_ExposureSettings->setEnabled(true);
+        ui->tableWidget->setEnabled(true);
+        ui->pushButtonDuplicate->setEnabled(true);
+        ui->pushButtonDelete->setEnabled(true);
+    }
 }
 
 void DlgMaterialsManager::on_comboBoxXY_currentIndexChanged(int index)
 {
     if(index<0)return;
+    if(m_pCatalog->getMaterialCount()<1)return;
     stuffData();
     fillData(m_pCatalog->getCurMatIndex(), index);
 }
@@ -149,15 +225,20 @@ void DlgMaterialsManager::on_comboBoxXY_currentIndexChanged(int index)
 void DlgMaterialsManager::on_pushButtonDelete_clicked()
 {
     if(QMessageBox::warning(this, tr("Delete Material"),tr("Are you sure you wish to delete this material from the Catalog?"),QMessageBox::Yes|QMessageBox::No)==QMessageBox::No)return;
-    m_pCatalog->deleteMaterial(m_pCatalog->getCurMatIndex());
+    m_bLoading=true;
+    int iC = m_pCatalog->getCurMatIndex();
+    m_pCatalog->deleteMaterial(iC);
     m_pCatalog->setCurMatIndex(0);
-    m_pCatalog->setCurXYIndex(0);
-    m_pCatalog->setCurZIndex(0);
-    setUp();
+    ui->comboBoxMaterial->setCurrentIndex(0);
+    ui->comboBoxMaterial->removeItem(iC);
+    updateEnabledStates();
+    m_bLoading=false;
+    fillData(0,m_pCatalog->getCurXYIndex());
 }
 
 void DlgMaterialsManager::on_pushButtonAdd_clicked()
 {
+    stuffData();
     bool ok;
     QString sMatID = QInputDialog::getText(this, tr("Material ID"),
                                          tr("Enter a short unique Identifier for this Material:"), QLineEdit::Normal,
@@ -173,12 +254,54 @@ void DlgMaterialsManager::on_pushButtonAdd_clicked()
                                              "Material Description", &ok);
         if (!ok) return;
 
-    stuffData();
     m_pCatalog->addMaterial(sMatID, sDecrip);
+    m_bLoading=true;
+    ui->comboBoxMaterial->addItem(m_pCatalog->getMaterialLabel(m_pCatalog->getMaterialCount()-1));
+    ui->comboBoxMaterial->setCurrentIndex(m_pCatalog->getMaterialCount());
+    m_bLoading=false;
+    fillData(m_pCatalog->getMaterialCount()-1,m_pCatalog->getCurXYIndex());
+}
 
-    setUp();
-    m_pCatalog->setCurMatIndex(m_pCatalog->getMaterialCount()-1);
-    ui->comboBoxMaterial->setCurrentIndex(m_pCatalog->getCurMatIndex());
+void DlgMaterialsManager::on_pushButtonDuplicate_clicked()
+{
+    stuffData();
+    QString sID = m_pCatalog->getMaterialLabel(ui->comboBoxMaterial->currentIndex())+"-Duplicate";
+    bool ok;
+    QString sMatID = QInputDialog::getText(this, tr("Material ID"),
+                                         tr("Enter a short, unique Identifier for this Material:"), QLineEdit::Normal,
+                                         sID, &ok);
+    if (!(ok && !sMatID.isEmpty())) return;
+    if(ui->comboBoxMaterial->findText(sMatID,Qt::MatchFixedString)!=-1){
+        QMessageBox::warning(this,tr("Duplicate Material ID!"),sMatID+" already exists in the Catalog.  Please enter a unique ID.",QMessageBox::Ok);
+        return;
+    }
+
+    if(sMatID=="DELETEFACTORY"){
+        if(QMessageBox::warning(this, tr("Delete Factory Material"),tr("Are you SURE you wish to delete this factory material from the Catalog?"),QMessageBox::Yes|QMessageBox::No)==QMessageBox::No)return;
+        m_bLoading=true;
+        int iC = m_pCatalog->getCurMatIndex();
+        m_pCatalog->deleteMaterial(iC);
+        m_pCatalog->setCurMatIndex(0);
+        ui->comboBoxMaterial->setCurrentIndex(0);
+        ui->comboBoxMaterial->removeItem(iC);
+        m_bLoading=false;
+        fillData(0,m_pCatalog->getCurXYIndex());
+        return;
+    }
+
+    QString sDecrip = QInputDialog::getText(this, tr("Material ID"),
+                                             tr("Enter a short unique Identifier for this Material:"), QLineEdit::Normal,
+                                             m_pCatalog->getMaterialDescription(ui->comboBoxMaterial->currentIndex()), &ok);
+        if (!ok) return;
+
+
+    m_pCatalog->addDupMat(sMatID, sDecrip, ui->comboBoxMaterial->currentIndex());
+    m_bLoading=true;
+    ui->comboBoxMaterial->addItem(m_pCatalog->getMaterialLabel(m_pCatalog->getMaterialCount()-1));
+    ui->comboBoxMaterial->setCurrentIndex(m_pCatalog->getMaterialCount()-1);
+    updateEnabledStates();
+    m_bLoading=false;
+    fillData(m_pCatalog->getMaterialCount()-1,m_pCatalog->getCurXYIndex());
 }
 
 
@@ -191,34 +314,5 @@ void DlgMaterialsManager::on_buttonBoxSaveCancel_accepted()
 void DlgMaterialsManager::on_buttonBoxSaveCancel_rejected()
 {
     m_pCatalog->load(m_pCatalog->getModelName());
-}
-
-void DlgMaterialsManager::on_pushButtonDuplicate_clicked()
-{
-    stuffData();
-
-    QString sID = m_pCatalog->getMaterialLabel(ui->comboBoxMaterial->currentIndex())+"-Duplicate";
-    bool ok;
-    QString sMatID = QInputDialog::getText(this, tr("Material ID"),
-                                         tr("Enter a short, unique Identifier for this Material:"), QLineEdit::Normal,
-                                         sID, &ok);
-    if (!(ok && !sMatID.isEmpty())) return;
-    if(ui->comboBoxMaterial->findText(sMatID,Qt::MatchFixedString)!=-1){
-        QMessageBox::warning(this,tr("Duplicate Material ID!"),sMatID+" already exists in the Catalog.  Please enter a unique ID.",QMessageBox::Ok);
-        return;
-    }
-
-    QString sDecrip = QInputDialog::getText(this, tr("Material ID"),
-                                             tr("Enter a short unique Identifier for this Material:"), QLineEdit::Normal,
-                                             m_pCatalog->getMaterialDescription(ui->comboBoxMaterial->currentIndex()), &ok);
-        if (!ok) return;
-
-
-    m_pCatalog->addDupMat(sMatID, sDecrip, ui->comboBoxMaterial->currentIndex());
-
-    setUp();
-    m_pCatalog->setCurMatIndex(m_pCatalog->getMaterialCount()-1);
-    ui->comboBoxMaterial->setCurrentIndex(m_pCatalog->getCurMatIndex());
-
 }
 

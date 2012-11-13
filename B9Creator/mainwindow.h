@@ -42,6 +42,7 @@
 #include "b9plan.h"
 #include "b9slice.h"
 #include "b9edit/b9edit.h"
+#include "b9print.h"
 #include "b9create/b9creator.h"
 #include "b9terminal.h"
 #include "helpsystem.h"
@@ -57,7 +58,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-//    QDesktopWidget *pDesktop;
 
 public slots:
     void handleW1Hide();
@@ -85,7 +85,8 @@ private:
     B9Plan *pMW1;
     B9Slice *pMW2;
     B9Edit *pMW3;
-    B9Creator *pMW4;
+    B9Print *pMW4;
+    CrushedPrintJob *m_pCPJ;
     B9Terminal *pTerminal;
 
     void closeEvent(QCloseEvent *event);

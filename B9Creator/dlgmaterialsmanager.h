@@ -34,6 +34,7 @@ public:
     
 public slots:
 
+    void setXY(int iXY){fillData(m_pCatalog->getCurMatIndex(),iXY);}
 
 private slots:
 
@@ -56,8 +57,11 @@ private:
     void setUp();
     void fillData(int iMatIndex, int iXYIndex);
     void stuffData();
+    void updateEnabledStates();
+    void addMaterial(int iMatIndex);
+    void removeMaterial(int iMatIndex);
     B9MatCat* m_pCatalog;
-    bool m_bNotLoaded;
+    bool m_bLoading;
 };
 
 #endif // DLGMATERIALSMANAGER_H

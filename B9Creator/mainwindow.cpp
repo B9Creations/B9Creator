@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     // Set up Identity
     QCoreApplication::setOrganizationName("B9Creations, LLC");
-    QCoreApplication::setOrganizationDomain("b9creations.com");
+    QCoreApplication::setOrganizationDomain("b9creator.com");
     QCoreApplication::setApplicationName("B9Creator");
 
     ui->setupUi(this);
@@ -62,7 +62,9 @@ MainWindow::MainWindow(QWidget *parent) :
     pMW1->setWindowTitle("Layout");
     pMW2 = new B9Slice(0);
     pMW3 = new B9Edit(0);
-    pMW4 = new B9Creator(pTerminal, 0);
+    pMW4 = new B9Print(pTerminal, 0);
+
+    m_pCPJ = new CrushedPrintJob;
 
     connect(pMW1, SIGNAL(eventHiding()),this, SLOT(handleW1Hide()));
     connect(pMW2, SIGNAL(eventHiding()),this, SLOT(handleW2Hide()));
@@ -72,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete m_pCPJ;
     delete pTerminal;
     qDebug() << "Program End";
     if(m_bOpenLogOnExit)
@@ -161,10 +164,28 @@ void MainWindow::on_commandPrint_clicked(bool checked)
 {
     if(checked) {
         pTerminal->setEnabled(false);
-        pMW4->show();
-        //pMW4->pDesktop = pDesktop;
-        pMW4->makeConnections();
+        /////////////////////////////////////////////////
+        //  Stubbing in wizard's job for now
+        // Open the .b9j file
+        m_pCPJ->clearAll();
+        QFileDialog dialog(0);
+        QString openFile = dialog.getOpenFileName(this,"Open B9Creator Job File", QDir::currentPath(), tr("B9Creator Job Files (*.b9j);;All files (*.*)"));
+        if(openFile.isEmpty()) return;
         this->hide(); // Comment this out if not hiding mainwindow while showing this window
-    }
+        pMW4->show();
+        QFile file(openFile);
+        if(!m_pCPJ->loadCPJ(&file)) {
+            QMessageBox msgBox;
+            msgBox.setText("Error Loading File.  Unknown Version?");
+            msgBox.exec();
+            return;
+        }
+        m_pCPJ->showSupports(true);
+
+
+        pMW4->print3D(m_pCPJ, 0, 0, 5000, 5000);
+
+        /////////////////////////////////////
+     }
     else pMW4->hide();
 }

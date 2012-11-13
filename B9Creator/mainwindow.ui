@@ -420,5 +420,6 @@
   <slot>showTerminal()</slot>
   <slot>showHelp()</slot>
   <slot>showCatalog()</slot>
+  <slot>showPrintWiz()</slot>
  </slots>
 </ui>

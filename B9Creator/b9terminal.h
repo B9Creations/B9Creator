@@ -84,10 +84,22 @@ public slots:
     void rcProjectorPwr(bool bPwrOn);
     void rcResetHomePos();
 
+    void rcBasePrint(double dBaseMM); // Position for Base Layer Exposure.
+    void rcNextPrint(double dNextMM); // Position for Next Layer Exposure.
+    void rcFinishPrint(double dDeltaMM); // Calculates a final Z position at current + dDelta, closes vat, raises z, turns off projector.
+
+    void rcSetCPJ(CrushedPrintJob *pCPJ); // Set the pointer to the CMB to be displayed, NULL if blank
+
+
     void showIt(){show();setEnabledWarned();}
 
 signals:
     void signalAbortPrint(QString sMessage);
+    void updateConnectionStatus(QString sText); // Connected or Searching
+    void updateProjectorOutput(QString sText);  // Data on video to projector connection
+    void updateProjectorStatus(QString sText);  // Projector Power Status Changes
+    void updateProjector(B9PrinterStatus::ProjectorStatus eStatus);
+    void PrintReleaseCycleFinished();
 
     void sendStatusMsg(QString text);					// signal to the Projector window to change the status msg
     void sendGrid(bool bshow);							// signal to the Projector window to update the grid display
@@ -95,7 +107,6 @@ signals:
     void sendXoff(int xOff);							// signal to the Projector window to update the X offset
     void sendYoff(int yOff);							// signal to the Projector window to update the Y offset
 
-    void updateConnectionStatus(QString sText); // Connected or Searching
     void eventHiding();
 
 private slots:
@@ -177,6 +188,7 @@ private slots:
 
     void on_pushButtonModMatCat_clicked();
 
+
 private:
     Ui::B9Terminal *ui;
     void hideEvent(QHideEvent *event);
@@ -202,6 +214,7 @@ private:
     bool m_bWaiverPresented;
     bool m_bWaiverAccepted;
     bool m_bWavierActive;
+    bool m_bNeedsWarned;
 };
 
 #endif // B9TERMINAL_H

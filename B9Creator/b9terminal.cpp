@@ -114,6 +114,7 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     m_bWaiverPresented = false;
     m_bWaiverAccepted = false;
     m_bWavierActive = false;
+    m_bNeedsWarned = true;
 
     ui->setupUi(this);
     ui->commStatus->setText("Searching for B9Creator...");
@@ -181,6 +182,10 @@ B9Terminal::~B9Terminal()
 void B9Terminal::dlgEditMatCat()
 {
     DlgMaterialsManager dlgMatMan(m_pCatalog,0);
+    int index = pPrinterComm->getXYPixelSize();
+    index /= 25;
+    index -= 2;
+    dlgMatMan.setXY(index);
     dlgMatMan.exec();
 }
 
@@ -203,7 +208,8 @@ void B9Terminal::makeProjectorConnections()
 
 
 void B9Terminal::warnSingleMonitor(){
-    if(m_bPrimaryScreen){
+    if(m_bPrimaryScreen && m_bNeedsWarned){
+        m_bNeedsWarned = false;
         QMessageBox msg;
         msg.setWindowTitle("Projector Connection?");
         msg.setText("WARNING:  The printer's projector is not connected to a secondary video output.  Please check that all connections (VGA or HDMI) and system display settings are correct.  Disregard this message if your system has only one video output and will utilize a splitter to provide video output to both monitor and Projector.");
@@ -373,6 +379,8 @@ void B9Terminal::onBC_ProjStatusChanged()
         break;
     }
     emit sendStatusMsg("B9Creator - Projector status: "+sText);
+    emit updateProjectorStatus(sText);
+    emit updateProjector(pPrinterComm->getProjectorStatus());
 
     ui->lineEditProjState->setText(sText);
     sText = "UNKNOWN";
@@ -660,6 +668,7 @@ void B9Terminal::onBC_PrintReleaseCycleFinished()
     ui->pushButtonPrintBase->setEnabled(true);
     ui->pushButtonPrintNext->setEnabled(true);
     ui->pushButtonPrintFinal->setEnabled(true);
+    emit PrintReleaseCycleFinished();
 }
 
 void B9Terminal::onReleaseCycleTimeout()
@@ -748,6 +757,34 @@ void B9Terminal::rcProjectorPwr(bool bPwrOn){
 void B9Terminal::rcResetHomePos(){
     on_pushButtonCmdReset_clicked();
 }
+void B9Terminal::rcBasePrint(double dBaseMM)
+{
+    setTgtAltitudeMM(dBaseMM);
+    on_pushButtonPrintBase_clicked();
+}
+
+void B9Terminal::rcNextPrint(double dNextMM)
+{
+    setTgtAltitudeMM(dNextMM);
+    on_pushButtonPrintNext_clicked();
+}
+
+void B9Terminal::rcFinishPrint(double dDeltaMM)
+{
+    // Calculates final position based on current + dDeltaMM
+    int newPos = dDeltaMM*100000.0/(double)pPrinterComm->getPU();
+    newPos += ui->lineEditCurZPosInPU->text().toInt();
+    if(newPos>ui->lineEditUpperZLimPU->text().toInt())newPos = ui->lineEditUpperZLimPU->text().toInt();
+    setTgtAltitudePU(newPos);
+    on_pushButtonPrintFinal_clicked();
+    rcProjectorPwr(false);
+}
+
+void B9Terminal::rcSetCPJ(CrushedPrintJob *pCPJ)
+{
+    // Set the pointer to the CMB to be displayed, NULL if blank
+    emit sendCPJ(pCPJ);
+}
 
 int B9Terminal::getZMoveTime(int iDelta, int iSpd){
     // returns time to travel iDelta distance in milliseconds
@@ -828,7 +865,12 @@ int B9Terminal::getEstFinalCycleTime(int iCur, int iTgt){
 }
 
 void B9Terminal::onScreenCountChanged(int iCount){
-    if(pProjector) delete pProjector;
+    QString sVideo = "Disconnected or Primary Monitor";
+    if(pProjector) {
+        delete pProjector;
+        if(pPrinterComm->getProjectorStatus()==B9PrinterStatus::PS_ON)
+            emit signalAbortPrint("Print Aborted:  Connection to Projector Lost or Changed During Print Cycle");
+    }
     pProjector = new B9Projector(true, this);
     makeProjectorConnections();
     int i=0;
@@ -838,9 +880,12 @@ void B9Terminal::onScreenCountChanged(int iCount){
         screenGeometry = m_pDesktop->screenGeometry(i);
         if(screenGeometry.width() == pPrinterComm->getNativeX() && screenGeometry.height() == pPrinterComm->getNativeY()) {
             //Found the projector!
+            sVideo = "Connected to Monitor: " + QString::number(i+1);
+            m_bNeedsWarned = true;
             break;
         }
     }
+    emit updateProjectorOutput(sVideo);
     if(i<=0)m_bPrimaryScreen = true; else m_bPrimaryScreen = false;
     pProjector->setShowGrid(true);
     pProjector->setCPJ(NULL);
@@ -856,6 +901,7 @@ void B9Terminal::onScreenCountChanged(int iCount){
         // if the projector is not turned off, we better put up the blank screen now!
         pProjector->showFullScreen();
     }
+    else warnSingleMonitor();
 }
 
 void B9Terminal::on_comboBoxXPPixelSize_currentIndexChanged(int index)

@@ -13,7 +13,9 @@ class B9MatCatItem
 public:
     B9MatCatItem();
 
-    QString getMaterialLabel(){return m_sMaterialLabel;}
+    QString getMaterialLabel();
+    bool isFactoryEntry();
+    QString getFactoryMaterialLabel(){return m_sMaterialLabel;}
     QString getMaterialDescription(){return m_sMaterialDescription;}
     void setMaterialLabel(QString sLabel){m_sMaterialLabel = sLabel;}
     void setMaterialDescription(QString sLabel){m_sMaterialDescription = sLabel;}
@@ -27,6 +29,15 @@ private:
     void initDefaults();
     double m_aTimes [XYCOUNT][ZCOUNT][TCOUNT]; // Cure times in seconds
     QString m_sMaterialLabel, m_sMaterialDescription;
+
+public: // sorting friends
+    friend class MatLessThan;
+};
+class MatLessThan
+{
+public:
+    MatLessThan(  ){}
+    bool operator()(const B9MatCatItem *left, const B9MatCatItem *right ) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -40,17 +51,19 @@ public:
     int getXYCount(){return XYCOUNT;}
     int getZCount(){return ZCOUNT;}
 
-    QString getMaterialLabel(int index){return m_Materials.at(index)->getMaterialLabel();}
-    QString getMaterialDescription(int index){return m_Materials.at(index)->getMaterialDescription();}
+    QString getFactoryMaterialLabel(int index){return m_Materials[index]->getFactoryMaterialLabel();}
+    QString getMaterialLabel(int index){return m_Materials[index]->getMaterialLabel();}
+    bool isFactoryEntry(int iMat){return m_Materials[iMat]->isFactoryEntry();}
+    QString getMaterialDescription(int index){return m_Materials[index]->getMaterialDescription();}
 
-    QString getTbase(int iMat, int iXY, int iZ){return QString::number(m_Materials.at(iMat)->getTbase(iXY, iZ));}
-    QString getTover(int iMat, int iXY, int iZ){return QString::number(m_Materials.at(iMat)->getTover(iXY, iZ));}
+    QString getTbase(int iMat, int iXY, int iZ){return QString::number(m_Materials[iMat]->getTbase(iXY, iZ));}
+    QString getTover(int iMat, int iXY, int iZ){return QString::number(m_Materials[iMat]->getTover(iXY, iZ));}
 
-    void setTbase(int iMat, int iXY, int iZ, double dT){m_Materials.at(iMat)->setTbase(iXY, iZ, dT);}
-    void setTover(int iMat, int iXY, int iZ, double dT){m_Materials.at(iMat)->setTover(iXY, iZ, dT);}
+    void setTbase(int iMat, int iXY, int iZ, double dT){m_Materials[iMat]->setTbase(iXY, iZ, dT);}
+    void setTover(int iMat, int iXY, int iZ, double dT){m_Materials[iMat]->setTover(iXY, iZ, dT);}
 
-    QString getCurTbaseAtZ(int iZ){return QString::number(m_Materials.at(m_iCurMatIndex)->getTbase(m_iCurXYIndex, iZ));}
-    QString getCurToverAtZ(int iZ){return QString::number(m_Materials.at(m_iCurMatIndex)->getTover(m_iCurXYIndex, iZ));}
+    QString getCurTbaseAtZ(int iZ){return QString::number(m_Materials[m_iCurMatIndex]->getTbase(m_iCurXYIndex, iZ));}
+    QString getCurToverAtZ(int iZ){return QString::number(m_Materials[m_iCurMatIndex]->getTover(m_iCurXYIndex, iZ));}
 
     QString getModelName(){return m_sModelName;}
 
