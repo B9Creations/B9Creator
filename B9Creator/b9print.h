@@ -22,6 +22,9 @@ public:
 signals:
     void eventHiding();
 
+public slots:
+    void setProjMessage(QString sText);
+
 private slots:
     void showHelp();
     void on_updateConnectionStatus(QString sText);
@@ -38,11 +41,10 @@ private slots:
     void on_pushButtonAbort_clicked();
 
 private:
-    enum {PRINT_NO, PRINT_TURNON, PRINT_MOV2READY, PRINT_WAITFORP, PRINT_EXPOSING, PRINT_MOV2NEXT};
+    enum {PRINT_NO, PRINT_RELEASING, PRINT_EXPOSING};
 
     void hideEvent(QHideEvent *event);
-    void makeConnections();
-    void breakConnections();
+    void closeEvent ( QCloseEvent * event );
 
     double curLayerIndexMM();
     void setSlice(int iSlice);

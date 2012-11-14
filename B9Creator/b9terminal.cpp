@@ -104,8 +104,6 @@ void PCycleSettings::setFactorySettings()
     m_dBTClearInMM = 5.0;
 }
 
-
-
 B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     QWidget(parent, flags),
     ui(new Ui::B9Terminal)
@@ -394,14 +392,6 @@ void B9Terminal::onBC_ProjStatusChanged()
 
 void B9Terminal::on_pushButtonCmdReset_clicked()
 {
-    /*
-    int ret = QMessageBox::information(this, tr("Initialize Home Positions?"),
-                                   tr("This command will move the Build Table and VAT to their home locations.\n"
-                                      "Are you sure you wish to proceed?"),
-                                   QMessageBox::Yes | QMessageBox::Cancel);
-    if(ret==QMessageBox::Cancel){return;}
-    */
-
     int iTimeoutEstimate = 80000; // 80 seconds (should never take longer than 75 secs from upper limit)
 
     ui->groupBoxMain->setEnabled(false);
@@ -428,7 +418,6 @@ void B9Terminal::onMotionResetTimeout(){
     msg.setText("ERROR: TIMEOUT attempting to locate home position.  Check connections.");
     msg.exec();
 }
-
 
 
 void B9Terminal::onBC_ModelInfo(QString sModel){
@@ -611,7 +600,11 @@ void B9Terminal::on_lineEditCurZPosInInches_returnPressed()
 void B9Terminal::on_pushButtonStop_clicked()
 {
     pPrinterComm->SendCmd("S");
-    onBC_PrintReleaseCycleFinished();
+    m_pPReleaseCycleTimer->stop();
+    ui->lineEditCycleStatus->setText("Cycle Stopped.");
+    ui->pushButtonPrintBase->setEnabled(true);
+    ui->pushButtonPrintNext->setEnabled(true);
+    ui->pushButtonPrintFinal->setEnabled(true);
     m_pVatTimer->stop();
     ui->groupBoxVAT->setEnabled(true);
 }
@@ -791,6 +784,55 @@ void B9Terminal::rcSetCPJ(CrushedPrintJob *pCPJ)
     emit sendCPJ(pCPJ);
 }
 
+void B9Terminal::rcSetProjMessage(QString sMsg)
+{
+    // Pass along the message for the projector screen
+    pProjector->setStatusMsg(sMsg);
+}
+
+QTime B9Terminal::getEstCompeteTime(int iCurLayer, int iTotLayers, double dLayerThicknessMM, int iExposeMS)
+{
+    return QTime::currentTime().addMSecs(getEstCompeteTimeMS(iCurLayer, iTotLayers, dLayerThicknessMM, iExposeMS));
+}
+
+int B9Terminal::getEstCompeteTimeMS(int iCurLayer, int iTotLayers, double dLayerThicknessMM, int iExposeMS)
+{
+    //return estimated completion time
+    int iTransitionPointLayer = (int)(pSettings->m_dBTClearInMM/dLayerThicknessMM);
+
+    int iLowerCount = (int)(pSettings->m_dBTClearInMM/dLayerThicknessMM);
+    int iUpperCount = iTotLayers - iLowerCount;
+
+    if(iCurLayer<iTransitionPointLayer)iLowerCount = iLowerCount-iCurLayer; else iLowerCount = 0;
+    if(iCurLayer>=iTransitionPointLayer) iUpperCount = iTotLayers - iCurLayer;
+
+    int iTotalTimeMS = iExposeMS*iLowerCount + iExposeMS*iUpperCount;
+
+    // Add Breathe and Settle
+    iTotalTimeMS += iLowerCount*(pSettings->m_dBreatheClosed1 + pSettings->m_dSettleOpen1);
+    iTotalTimeMS += iUpperCount*(pSettings->m_dBreatheClosed2 + pSettings->m_dSettleOpen2);
+
+    // Z Travel Time
+    int iGap1 = iLowerCount*(int)(pSettings->m_dOverLift1*100000.0/(double)pPrinterComm->getPU());
+    int iGap2 = iUpperCount*(int)(pSettings->m_dOverLift2*100000.0/(double)pPrinterComm->getPU());
+
+    int iZRaiseDistance1 = iGap1 + iLowerCount*(int)(dLayerThicknessMM*100000.0/(double)pPrinterComm->getPU());
+    int iZLowerDistance1 = iGap1;
+
+    int iZRaiseDistance2 = iGap2 + iUpperCount*(int)(dLayerThicknessMM*100000.0/(double)pPrinterComm->getPU());
+    int iZLowerDistance2 = iGap2;
+
+    iTotalTimeMS += getZMoveTime(iZRaiseDistance1,pSettings->m_iRSpd1);
+    iTotalTimeMS += getZMoveTime(iZRaiseDistance2,pSettings->m_iRSpd2);
+    iTotalTimeMS += getZMoveTime(iZLowerDistance1,pSettings->m_iLSpd1);
+    iTotalTimeMS += getZMoveTime(iZLowerDistance2,pSettings->m_iLSpd2);
+
+    // Vat movement Time
+    iTotalTimeMS += iLowerCount*getVatMoveTime(pSettings->m_iOpenSpd1) + iLowerCount*getVatMoveTime(pSettings->m_iCloseSpd1);
+    iTotalTimeMS += iUpperCount*getVatMoveTime(pSettings->m_iOpenSpd2) + iUpperCount*getVatMoveTime(pSettings->m_iCloseSpd2);
+    return iTotalTimeMS;
+}
+
 int B9Terminal::getZMoveTime(int iDelta, int iSpd){
     // returns time to travel iDelta distance in milliseconds
     if(iDelta==0)return 0;
@@ -952,69 +994,16 @@ void B9Terminal::getKey(int iKey)
     {
         // We must be "calibrating"  If we get any keypress we should close the projector window
         pProjector->hide();
-        //QMessageBox msgBox;
-        //msgBox.setText(QString::number(iKey));
-        //msgBox.exec();
     }
-
-/*
     switch(iKey){
-    case 85:		// 'U' Increase Y Offset
-        ui.sliderYoff->setValue(ui.sliderYoff->value()-2);
+    case 80:		// 'P' Pause/Resume
+        emit pausePrint();
         break;
-    case 68:		// 'D' Decrease Y Offset
-        ui.sliderYoff->setValue(ui.sliderYoff->value()+2);
-        break;
-    case 82:		// 'R' Increase X Offset
-        ui.sliderXoff->setValue(ui.sliderXoff->value()+2);
-        break;
-    case 76:		// 'L' Decrease X Offset
-        ui.sliderXoff->setValue(ui.sliderXoff->value()-2);
-        break;
-    case 66:		// 'B' Blank Screen
-        emit sendCPJ(NULL);
-        break;
-    case 70:		// 'F' Toggle Full Screen
-        if(m_bPrimaryScreen){
-            if(!pProjector->isFullScreen())
-                pProjector->setWindowState(Qt::WindowFullScreen);
-            else
-                pProjector->setWindowState(Qt::WindowNoState);
-                //pProjector->hide();
-        }
-        break;
-    case 71:		// 'G' Toggle Grid
-        if(ui.checkBoxShowGrid->isChecked())
-            updateGrid(false);
-        else
-            updateGrid(true);
-        break;
-    case 16777216:	// Escape Key
-            if(m_bPrimaryScreen) hideProjector();
-        break;
-    case 16777232: // HOME
-        ui.SliderCurSlice->setValue(homeIndex());
-        break;
-    case 16777233: // END
-        ui.SliderCurSlice->setValue(endIndex());
-        break;
-    case 16777238: // Page Up
-        ui.SliderCurSlice->setValue(getNextIndex(ui.SliderCurSlice->value(),10));
-        break;
-    case 16777239: // Page Down
-        ui.SliderCurSlice->setValue(getNextIndex(ui.SliderCurSlice->value(),-10));
-        break;
-    case 16777235: // Arrow Up
-    case 16777236: // Arrow Right
-        ui.SliderCurSlice->setValue(getNextIndex(ui.SliderCurSlice->value(),1));
-        break;
-    case 16777237: // Arrow Down
-    case 16777234: // Arrow Left
-        ui.SliderCurSlice->setValue(getNextIndex(ui.SliderCurSlice->value(),-1));
+    case 16777216:	// Escape Key ABORT PRINT
+        emit signalAbortPrint("User Directed Abort (ESC Key Pressed)");
         break;
     default:
         break;
     }
-*/
 }
 

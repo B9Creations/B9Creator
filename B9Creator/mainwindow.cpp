@@ -163,7 +163,7 @@ void MainWindow::on_commandEdit_clicked(bool checked)
 void MainWindow::on_commandPrint_clicked(bool checked)
 {
     if(checked && pTerminal->isConnected()) {
-        pTerminal->setEnabled(false);
+
         /////////////////////////////////////////////////
         //  Stubbing in wizard's job for now
         // Open the .b9j file
@@ -171,6 +171,7 @@ void MainWindow::on_commandPrint_clicked(bool checked)
         QFileDialog dialog(0);
         QString openFile = dialog.getOpenFileName(this,"Open B9Creator Job File", QDir::currentPath(), tr("B9Creator Job Files (*.b9j);;All files (*.*)"));
         if(openFile.isEmpty()) return;
+        pTerminal->setEnabled(false);
         this->hide(); // Comment this out if not hiding mainwindow while showing this window
         pMW4->show();
         QFile file(openFile);

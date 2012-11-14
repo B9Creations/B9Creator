@@ -38,6 +38,7 @@
 #include <QtGui/QWidget>
 #include <QHideEvent>
 #include <QTimer>
+#include <QTime>
 #include "b9printercomm.h"
 #include "logfilemanager.h"
 #include "b9projector.h"
@@ -78,26 +79,29 @@ public:
     int getEstNextCycleTime(int iCur, int iTgt);
     int getEstFinalCycleTime(int iCur, int iTgt);
 
+    QTime getEstCompeteTime(int iCurLayer, int iTotLayers, double dLayerThicknessMM, int iExposeMS);
+    int getEstCompeteTimeMS(int iCurLayer, int iTotLayers, double dLayerThicknessMM, int iExposeMS);
+
     B9MatCat* getMatCat() {return m_pCatalog;}
 
 public slots:
     void dlgEditMatCat();
 
-    void rcProjectorPwr(bool bPwrOn);
     void rcResetHomePos();
-
     void rcBasePrint(double dBaseMM); // Position for Base Layer Exposure.
     void rcNextPrint(double dNextMM); // Position for Next Layer Exposure.
     void rcFinishPrint(double dDeltaMM); // Calculates a final Z position at current + dDelta, closes vat, raises z, turns off projector.
-
-    void rcSetCPJ(CrushedPrintJob *pCPJ); // Set the pointer to the CMB to be displayed, NULL if blank
-
     void rcSTOP();
+
+    void rcProjectorPwr(bool bPwrOn);
+    void rcSetCPJ(CrushedPrintJob *pCPJ); // Set the pointer to the CMB to be displayed, NULL if blank
+    void rcSetProjMessage(QString sMsg);
 
     void showIt(){show();setEnabledWarned();}
 
 signals:
     void signalAbortPrint(QString sMessage);
+    void pausePrint();
     void updateConnectionStatus(QString sText); // Connected or Searching
     void updateProjectorOutput(QString sText);  // Data on video to projector connection
     void updateProjectorStatus(QString sText);  // Projector Power Status Changes
