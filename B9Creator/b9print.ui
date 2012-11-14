@@ -386,6 +386,19 @@
     <string>Pause</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="pushButtonAbort">
+   <property name="geometry">
+    <rect>
+     <x>175</x>
+     <y>210</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Abort</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

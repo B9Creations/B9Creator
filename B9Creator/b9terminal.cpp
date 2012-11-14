@@ -692,7 +692,7 @@ void B9Terminal::on_pushButtonPrintBase_clicked()
     SetCycleParameters();
     int iTimeout = getEstBaseCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("B"+ui->lineEditTgtZPU->text());
-    m_pPReleaseCycleTimer->start(iTimeout * 1.5); // Timeout after 150% of estimated time required
+    m_pPReleaseCycleTimer->start(iTimeout * 1.1); // Timeout after 110% of estimated time required
 }
 
 void B9Terminal::on_pushButtonPrintNext_clicked()
@@ -705,7 +705,7 @@ void B9Terminal::on_pushButtonPrintNext_clicked()
     SetCycleParameters();
     int iTimeout = getEstNextCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("N"+ui->lineEditTgtZPU->text());
-    m_pPReleaseCycleTimer->start(iTimeout * 4); // Timeout after 400% of estimated time required
+    m_pPReleaseCycleTimer->start(iTimeout * 1.5); // Timeout after 150% of estimated time required
 }
 
 void B9Terminal::on_pushButtonPrintFinal_clicked()
@@ -719,7 +719,7 @@ void B9Terminal::on_pushButtonPrintFinal_clicked()
     SetCycleParameters();
     int iTimeout = getEstFinalCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("F"+ui->lineEditTgtZPU->text());
-    m_pPReleaseCycleTimer->start(iTimeout * 4); // Timeout after 400% of estimated time required
+    m_pPReleaseCycleTimer->start(iTimeout * 1.5); // Timeout after 150% of estimated time required
 }
 
 void B9Terminal::SetCycleParameters(){
@@ -769,6 +769,11 @@ void B9Terminal::rcNextPrint(double dNextMM)
     on_pushButtonPrintNext_clicked();
 }
 
+void B9Terminal::rcSTOP()
+{
+    on_pushButtonStop_clicked();
+}
+
 void B9Terminal::rcFinishPrint(double dDeltaMM)
 {
     // Calculates final position based on current + dDeltaMM
@@ -804,10 +809,14 @@ int B9Terminal::getVatMoveTime(int iSpeed){
 
 int B9Terminal::getEstBaseCycleTime(int iCur, int iTgt){
     int iDelta = abs(iTgt - iCur);
-    int iLowerSpd = pSettings->m_iLSpd1;
-    int iOpnSpd = pSettings->m_iOpenSpd1;
-    int iSettle = pSettings->m_dSettleOpen1*1000.0;
-    if(iTgt>pSettings->m_dBTClearInMM){
+    int iLowerSpd,iOpnSpd,iSettle;
+    int cutOffPU = (int)(pSettings->m_dBTClearInMM*100000.0/(double)pPrinterComm->getPU());
+    if(iTgt<=cutOffPU){
+        iLowerSpd = pSettings->m_iLSpd1;
+        iOpnSpd = pSettings->m_iOpenSpd1;
+        iSettle = pSettings->m_dSettleOpen1*1000.0;
+    }
+    else{
         iLowerSpd = pSettings->m_iLSpd2;
         iOpnSpd = pSettings->m_iOpenSpd2;
         iSettle = pSettings->m_dSettleOpen2*1000.0;
@@ -823,14 +832,18 @@ int B9Terminal::getEstBaseCycleTime(int iCur, int iTgt){
 
 int B9Terminal::getEstNextCycleTime(int iCur, int iTgt){
     int iDelta = abs(iTgt - iCur);
-    int iRaiseSpd = pSettings->m_iRSpd1;
-    int iLowerSpd = pSettings->m_iLSpd1;
-    int iOpnSpd = pSettings->m_iOpenSpd1;
-    int iClsSpd = pSettings->m_iCloseSpd1;
-    int iGap = (int)(pSettings->m_dOverLift1*100000.0/(double)pPrinterComm->getPU());
-    int iBreathe = pSettings->m_dBreatheClosed1*1000.0;
-    int iSettle = pSettings->m_dSettleOpen1*1000.0;
-    if(iTgt>pSettings->m_dBTClearInMM){
+    int iRaiseSpd,iLowerSpd,iOpnSpd,iClsSpd,iGap,iBreathe,iSettle;
+    int cutOffPU = (int)(pSettings->m_dBTClearInMM*100000.0/(double)pPrinterComm->getPU());
+    if(iTgt<=cutOffPU){
+        iRaiseSpd = pSettings->m_iRSpd1;
+        iLowerSpd = pSettings->m_iLSpd1;
+        iOpnSpd = pSettings->m_iOpenSpd1;
+        iClsSpd = pSettings->m_iCloseSpd1;
+        iGap = (int)(pSettings->m_dOverLift1*100000.0/(double)pPrinterComm->getPU());
+        iBreathe = pSettings->m_dBreatheClosed1*1000.0;
+        iSettle = pSettings->m_dSettleOpen1*1000.0;
+    }
+    else{
         iRaiseSpd = pSettings->m_iRSpd2;
         iLowerSpd = pSettings->m_iLSpd2;
         iOpnSpd = pSettings->m_iOpenSpd2;
@@ -851,9 +864,13 @@ int B9Terminal::getEstNextCycleTime(int iCur, int iTgt){
 
 int B9Terminal::getEstFinalCycleTime(int iCur, int iTgt){
     int iDelta = abs(iTgt - iCur);
-    int iRaiseSpd = pSettings->m_iRSpd1;
-    int iClsSpd = pSettings->m_iCloseSpd1;
-    if(iTgt>pSettings->m_dBTClearInMM){
+    int iRaiseSpd,iClsSpd;
+    int cutOffPU = (int)(pSettings->m_dBTClearInMM*100000.0/(double)pPrinterComm->getPU());
+    if(iTgt<=cutOffPU){
+        iRaiseSpd = pSettings->m_iRSpd1;
+        iClsSpd = pSettings->m_iCloseSpd1;
+    }
+    else{
         iRaiseSpd = pSettings->m_iRSpd2;
         iClsSpd = pSettings->m_iCloseSpd2;
     }

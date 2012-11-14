@@ -35,11 +35,14 @@ private slots:
 
     void on_pushButtonPauseResume_clicked();
 
+    void on_pushButtonAbort_clicked();
+
 private:
     enum {PRINT_NO, PRINT_TURNON, PRINT_MOV2READY, PRINT_WAITFORP, PRINT_EXPOSING, PRINT_MOV2NEXT};
 
     void hideEvent(QHideEvent *event);
     void makeConnections();
+    void breakConnections();
 
     double curLayerIndexMM();
     void setSlice(int iSlice);

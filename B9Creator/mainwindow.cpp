@@ -162,7 +162,7 @@ void MainWindow::on_commandEdit_clicked(bool checked)
 }
 void MainWindow::on_commandPrint_clicked(bool checked)
 {
-    if(checked) {
+    if(checked && pTerminal->isConnected()) {
         pTerminal->setEnabled(false);
         /////////////////////////////////////////////////
         //  Stubbing in wizard's job for now

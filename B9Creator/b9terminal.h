@@ -72,6 +72,8 @@ public:
     explicit B9Terminal(QWidget *parent = 0, Qt::WFlags flags = Qt::Widget);
     ~B9Terminal();
 
+    bool isConnected(){return pPrinterComm->isConnected();}
+
     int getEstBaseCycleTime(int iCur, int iTgt);
     int getEstNextCycleTime(int iCur, int iTgt);
     int getEstFinalCycleTime(int iCur, int iTgt);
@@ -90,6 +92,7 @@ public slots:
 
     void rcSetCPJ(CrushedPrintJob *pCPJ); // Set the pointer to the CMB to be displayed, NULL if blank
 
+    void rcSTOP();
 
     void showIt(){show();setEnabledWarned();}
 
