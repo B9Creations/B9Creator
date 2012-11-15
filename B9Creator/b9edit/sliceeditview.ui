@@ -292,7 +292,7 @@
   </action>
   <action name="actionPrepare_Base_Gap">
    <property name="text">
-    <string>Base...</string>
+    <string>Attachment Base...</string>
    </property>
    <property name="shortcut">
     <string>B</string>

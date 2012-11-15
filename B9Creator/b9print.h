@@ -43,6 +43,7 @@ private slots:
 
 private:
     enum {PRINT_NO, PRINT_RELEASING, PRINT_EXPOSING, PRINT_ABORT};
+    enum {PAUSE_NO, PAUSE_WAIT, PAUSE_YES};
 
     void keyPressEvent(QKeyEvent * pEvent);		// Handle key press events
     void hideEvent(QHideEvent *event);
@@ -60,9 +61,9 @@ private:
     int m_iXOff, m_iYOff;
     int m_iPrintState;
     int m_iCurLayerNumber;
-    int m_LastLayer;
+    int m_iLastLayer;
     double m_dLayerThickness;
-    bool m_bPaused;
+    int m_iPaused;
     bool m_bAbort;
     QString m_sAbortMessage;
 };

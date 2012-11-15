@@ -822,6 +822,9 @@ int B9Terminal::getEstCompleteTimeMS(int iCurLayer, int iTotLayers, double dLaye
     int iLowerCount = (int)(pSettings->m_dBTClearInMM/dLayerThicknessMM);
     int iUpperCount = iTotLayers - iLowerCount;
 
+    if(iLowerCount>iTotLayers)iLowerCount=iTotLayers;
+    if(iUpperCount<0)iUpperCount=0;
+
     if(iCurLayer<iTransitionPointLayer)iLowerCount = iLowerCount-iCurLayer; else iLowerCount = 0;
     if(iCurLayer>=iTransitionPointLayer) iUpperCount = iTotLayers - iCurLayer;
 

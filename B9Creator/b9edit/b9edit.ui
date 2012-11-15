@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>411</width>
+    <width>365</width>
     <height>238</height>
    </rect>
   </property>
@@ -85,100 +85,80 @@
       <property name="title">
        <string>Job Properties</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Job Name:</string>
-           </property>
-           <property name="textFormat">
-            <enum>Qt::AutoText</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineEdit_4"/>
-         </item>
-        </layout>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0" colspan="2">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Job Name:</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::AutoText</enum>
+         </property>
+        </widget>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Job Description:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineEdit_5"/>
-         </item>
-        </layout>
+       <item row="0" column="2" colspan="3">
+        <widget class="QLineEdit" name="lineEdit_4"/>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
-         <item>
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>X-Y Pixels (µm):</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineEdit_6"/>
-         </item>
-         <item>
-          <widget class="QLabel" name="xyinfo">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
+       <item row="1" column="0" colspan="4">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Job Description:</string>
+         </property>
+        </widget>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_7">
-         <item>
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>Z Layer (µm):</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineEdit_7"/>
-         </item>
-         <item>
-          <widget class="QLabel" name="zinfo">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
+       <item row="1" column="4">
+        <widget class="QLineEdit" name="lineEdit_5"/>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_9">
-         <item>
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>Slices :</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineEdit_8">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
+       <item row="2" column="0" colspan="4">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>X-Y Pixels (µm):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="4">
+        <widget class="QLineEdit" name="lineEdit_6"/>
+       </item>
+       <item row="2" column="5">
+        <widget class="QLabel" name="xyinfo">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="3">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Z Layer (µm):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3" colspan="2">
+        <widget class="QLineEdit" name="lineEdit_7"/>
+       </item>
+       <item row="3" column="5">
+        <widget class="QLabel" name="zinfo">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Slices :</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1" colspan="4">
+        <widget class="QLineEdit" name="lineEdit_8">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -203,7 +183,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>411</width>
+     <width>365</width>
      <height>21</height>
     </rect>
    </property>
