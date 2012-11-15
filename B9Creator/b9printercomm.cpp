@@ -35,7 +35,6 @@
 #include <QDir>
 #include <QProcess>
 #include <QTimer>
-#include <QMessageBox>
 #include "b9printercomm.h"
 #include "qextserialport.h"
 #include "qextserialenumerator.h"
@@ -471,7 +470,6 @@ void B9PrinterComm::ReadAvailable() {
                 iInput = m_sSerialString.right(m_sSerialString.length()-1).toInt();
                 if(iInput==0) m_Status.setHomeStatus(B9PrinterStatus::HS_FOUND);
                 else m_Status.setHomeStatus(B9PrinterStatus::HS_UNKNOWN);
-                emit BC_HomeFound();
                 break;
 
             case 'K':  // Current Lamp 1/2 life
@@ -580,20 +578,18 @@ bool B9PrinterComm::handleProjectorBC(int iBC){
             if(m_Status.getLastProjCmdElapsedTime()>45000){
                 // Taking too long to turn on, something is wrong!
                 m_Status.setProjectorStatus(B9PrinterStatus::PS_TIMEOUT);
-                m_Status.cmdProjectorPowerOn(false);
-                emit BC_ProjectorStatusChanged();
-                bStatusChanged = true;
                 emit BC_ProjectorFAIL();
+                m_Status.cmdProjectorPowerOn(false);
+                bStatusChanged = true;
             }
             break;
         case B9PrinterStatus::PS_WARMING:
         case B9PrinterStatus::PS_ON:
             // Uncommanded Power off!  Lost power or bulb failure?
             m_Status.setProjectorStatus(B9PrinterStatus::PS_FAIL);
-            m_Status.cmdProjectorPowerOn(false);
-            emit BC_ProjectorStatusChanged();
-            bStatusChanged = true;
             emit BC_ProjectorFAIL();
+            m_Status.cmdProjectorPowerOn(false);
+            bStatusChanged = true;
             break;
         case B9PrinterStatus::PS_COOLING:
             // Done cooling off
@@ -644,11 +640,11 @@ bool B9PrinterComm::handleProjectorBC(int iBC){
     else if(!m_Status.isProjectorPowerCmdOn() && iBC == 0){
         // Projector commanded OFF and current report is OFF
         switch(m_Status.getProjectorStatus()){
+        case B9PrinterStatus::PS_UNKNOWN:
         case B9PrinterStatus::PS_TURNINGON:
         case B9PrinterStatus::PS_WARMING:
         case B9PrinterStatus::PS_ON:
         case B9PrinterStatus::PS_COOLING:
-        case B9PrinterStatus::PS_UNKNOWN:
         case B9PrinterStatus::PS_TIMEOUT:
         case B9PrinterStatus::PS_FAIL:
             // We were turning on, warming up, on, cooling off, unknown, timed out or failed and now we're off

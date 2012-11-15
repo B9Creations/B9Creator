@@ -98,6 +98,7 @@ public slots:
     void rcSetProjMessage(QString sMsg);
 
     void showIt(){show();setEnabledWarned();}
+    void onScreenCountChanged(int iCount = 0);  // Signal that the number of monitors has changed
 
 signals:
     void signalAbortPrint(QString sMessage);
@@ -117,7 +118,6 @@ signals:
     void eventHiding();
 
 private slots:
-    void onScreenCountChanged(int iCount = 0);  // Signal that the number of monitors has changed
     void makeProjectorConnections();
     void getKey(int iKey);					    // Signal that we received a (released) key from the projector
 

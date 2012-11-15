@@ -133,7 +133,6 @@ void MainWindow::handleW4Hide()
 {
     this->show();  // Comment this out if not hiding mainwindow while showing this window
     ui->commandPrint->setChecked(false);
-    pTerminal->setEnabled(true);
 }
 
 void MainWindow::on_commandLayout_clicked(bool checked)
@@ -171,7 +170,6 @@ void MainWindow::on_commandPrint_clicked(bool checked)
         QFileDialog dialog(0);
         QString openFile = dialog.getOpenFileName(this,"Open B9Creator Job File", QDir::currentPath(), tr("B9Creator Job Files (*.b9j);;All files (*.*)"));
         if(openFile.isEmpty()) return;
-        pTerminal->setEnabled(false);
         this->hide(); // Comment this out if not hiding mainwindow while showing this window
         pMW4->show();
         QFile file(openFile);

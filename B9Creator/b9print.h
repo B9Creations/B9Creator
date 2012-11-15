@@ -24,6 +24,7 @@ signals:
 
 public slots:
     void setProjMessage(QString sText);
+    QString updateTimes();
 
 private slots:
     void showHelp();
@@ -31,18 +32,19 @@ private slots:
     void on_updateProjectorOutput(QString sText);
     void on_updateProjectorStatus(QString sText);
     void on_updateProjector(B9PrinterStatus::ProjectorStatus eStatus);
-    void on_signalAbortPrint(QString sText);
+    void on_signalAbortPrint();
 
     void exposeLayer();
     void exposureFinished();
 
     void on_pushButtonPauseResume_clicked();
 
-    void on_pushButtonAbort_clicked();
+    void on_pushButtonAbort_clicked(QString sAbortText="User Directed Abort.");
 
 private:
-    enum {PRINT_NO, PRINT_RELEASING, PRINT_EXPOSING};
+    enum {PRINT_NO, PRINT_RELEASING, PRINT_EXPOSING, PRINT_ABORT};
 
+    void keyPressEvent(QKeyEvent * pEvent);		// Handle key press events
     void hideEvent(QHideEvent *event);
     void closeEvent ( QCloseEvent * event );
 
@@ -61,6 +63,7 @@ private:
     double m_dLayerThickness;
     bool m_bPaused;
     bool m_bAbort;
+    QString m_sAbortMessage;
 };
 
 #endif // B9PRINT_H

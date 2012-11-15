@@ -211,7 +211,7 @@ void B9Terminal::warnSingleMonitor(){
         QMessageBox msg;
         msg.setWindowTitle("Projector Connection?");
         msg.setText("WARNING:  The printer's projector is not connected to a secondary video output.  Please check that all connections (VGA or HDMI) and system display settings are correct.  Disregard this message if your system has only one video output and will utilize a splitter to provide video output to both monitor and Projector.");
-        msg.exec();
+        if(isEnabled())msg.exec();
     }
 }
 
@@ -257,7 +257,7 @@ void B9Terminal::sendCommand()
 
 void B9Terminal::onBC_LostCOMM(){
     //Broadcast an alert
-    emit signalAbortPrint("ERROR: Lost Printer Connection.  Possible reasons: Power Loss, USB cord unplugged.");
+    if(!isEnabled())emit signalAbortPrint("ERROR: Lost Printer Connection.  Possible reasons: Power Loss, USB cord unplugged.");
 }
 
 void B9Terminal::onBC_ConnectionStatusDetailed(QString sText)
@@ -298,7 +298,7 @@ void B9Terminal::on_pushButtonProjPower_toggled(bool checked)
 
     // if m_bPrimaryScreen is true, we need to show it before turning on projector!
     if(m_bPrimaryScreen) onScreenCountChanged();
-    emit sendStatusMsg("B9Creator - Projector status: CMD ON");
+    emit sendStatusMsg("B9Creator - Projector status: TURN ON");
 
     // We always close the vat when powering up
     if(checked){
@@ -314,25 +314,8 @@ void B9Terminal::setProjectorPowerCmd(bool bPwrFlag){
 
 void B9Terminal::onBC_ProjStatusFAIL()
 {
-    // First, update the interface
+    onBC_ProjStatusChanged();
     on_pushButtonProjPower_toggled(pPrinterComm->isProjectorPowerCmdOn());
-    onBC_ProjStatusChanged();  
-
-    // Now let the user know something bad happened...
-    QMessageBox msg;
-    msg.setIcon(QMessageBox::Warning);
-    msg.setFixedWidth(100);
-    msg.setWhatsThis("This is a warning message to let you know that the Projector is not performing as expected.");
-    msg.setWindowTitle("Projector Error");
-    if(pPrinterComm->getProjectorStatus() == B9PrinterStatus::PS_TIMEOUT)
-        msg.setText("Timed out while attempting to turn on projector.  Check Projector's Power Cord and RS-232 cable.");
-    else if(pPrinterComm->getProjectorStatus() == B9PrinterStatus::PS_FAIL)
-        msg.setText("Lost Communications with Projector.  Possible Causes:  Manually powered off, Power Failure, Cord Disconnected or Projector Lamp Failure");
-    else
-        msg.setText("Unknown Projector FAIL Mode Encountered.  Check all connections.");
-
-    qDebug() << "Projector FAIL broadcast: " << msg.text();
-    //msg.exec();
 }
 
 void B9Terminal::onBC_ProjStatusChanged()
@@ -345,7 +328,7 @@ void B9Terminal::onBC_ProjStatusChanged()
         break;
     case B9PrinterStatus::PS_TURNINGON:
         ui->pushButtonProjPower->setEnabled(false);
-        sText = "CMD ON";
+        sText = "TURN ON";
         break;
     case B9PrinterStatus::PS_WARMING:
         ui->pushButtonProjPower->setEnabled(true);
@@ -362,16 +345,15 @@ void B9Terminal::onBC_ProjStatusChanged()
     case B9PrinterStatus::PS_TIMEOUT:
         ui->pushButtonProjPower->setEnabled(false);
         sText = "TIMEOUT";
-        emit signalAbortPrint("Timed out while attempting to turn on projector.  Check Projector's Power Cord and RS-232 cable.");
+        if(!isEnabled())emit signalAbortPrint("Timed out while attempting to turn on projector.  Check Projector's Power Cord and RS-232 cable.");
         break;
     case B9PrinterStatus::PS_FAIL:
         ui->pushButtonProjPower->setEnabled(false);
         sText = "FAIL";
-        emit signalAbortPrint("Lost Communications with Projector.  Possible Causes:  Manually powered off, Power Failure, Cord Disconnected or Projector Lamp Failure");
+        if(!isEnabled())emit signalAbortPrint("Lost Communications with Projector.  Possible Causes:  Manually powered off, Power Failure, Cord Disconnected or Projector Lamp Failure");
         break;
     case B9PrinterStatus::PS_UNKNOWN:
         ui->pushButtonProjPower->setEnabled(true);
-        emit signalAbortPrint("Unknown Projector FAIL Mode Encountered.  Check all connections.");
     default:
         sText = "UNKNOWN";
         break;
@@ -416,7 +398,7 @@ void B9Terminal::onMotionResetTimeout(){
     m_pResetTimer->stop();
     QMessageBox msg;
     msg.setText("ERROR: TIMEOUT attempting to locate home position.  Check connections.");
-    msg.exec();
+    if(isEnabled())msg.exec();
 }
 
 
@@ -481,7 +463,7 @@ void B9Terminal::on_lineEditTgtZPU_editingFinished()
     int iValue=ui->lineEditTgtZPU->text().toInt();
     if(QString::number(iValue)!=ui->lineEditTgtZPU->text()||
             iValue<0 || iValue >31497){
-        int ret = QMessageBox::information(this, tr("Target Level (Z steps) Out of Range"),
+        QMessageBox::information(this, tr("Target Level (Z steps) Out of Range"),
                                        tr("Please enter an integer value between 0-31497.\n"
                                           "This will be the altitude for the next layer.\n"),
                                        QMessageBox::Ok);
@@ -599,13 +581,13 @@ void B9Terminal::on_lineEditCurZPosInInches_returnPressed()
 
 void B9Terminal::on_pushButtonStop_clicked()
 {
-    pPrinterComm->SendCmd("S");
     m_pPReleaseCycleTimer->stop();
+    m_pVatTimer->stop();
+    pPrinterComm->SendCmd("S");
     ui->lineEditCycleStatus->setText("Cycle Stopped.");
     ui->pushButtonPrintBase->setEnabled(true);
     ui->pushButtonPrintNext->setEnabled(true);
     ui->pushButtonPrintFinal->setEnabled(true);
-    m_pVatTimer->stop();
     ui->groupBoxVAT->setEnabled(true);
 }
 
@@ -642,7 +624,7 @@ void B9Terminal::onMotionVatTimeout(){
     on_pushButtonStop_clicked(); // STOP!
     QMessageBox msg;
     msg.setText("Vat Timed out");
-    msg.exec();
+    if(isEnabled())msg.exec();
     ui->groupBoxVAT->setEnabled(true);
 }
 void B9Terminal::onBC_CurrentVatPercentOpen(int iPO){
@@ -672,7 +654,7 @@ void B9Terminal::onReleaseCycleTimeout()
     ui->pushButtonPrintBase->setEnabled(true);
     ui->pushButtonPrintNext->setEnabled(true);
     ui->pushButtonPrintFinal->setEnabled(true);
-    emit signalAbortPrint("ERROR: Cycle Timed Out.  Possible reasons: Power Loss, Jammed Mechanism.");
+    if(!isEnabled())emit signalAbortPrint("ERROR: Cycle Timed Out.  Possible reasons: Power Loss, Jammed Mechanism.");
 }
 
 void B9Terminal::on_pushButtonPrintBase_clicked()
@@ -787,7 +769,7 @@ void B9Terminal::rcSetCPJ(CrushedPrintJob *pCPJ)
 void B9Terminal::rcSetProjMessage(QString sMsg)
 {
     // Pass along the message for the projector screen
-    pProjector->setStatusMsg(sMsg);
+    pProjector->setStatusMsg("B9Creator  -  "+sMsg);
 }
 
 QTime B9Terminal::getEstCompeteTime(int iCurLayer, int iTotLayers, double dLayerThicknessMM, int iExposeMS)
@@ -928,7 +910,7 @@ void B9Terminal::onScreenCountChanged(int iCount){
     if(pProjector) {
         delete pProjector;
         if(pPrinterComm->getProjectorStatus()==B9PrinterStatus::PS_ON)
-            emit signalAbortPrint("Print Aborted:  Connection to Projector Lost or Changed During Print Cycle");
+            if(!isEnabled())emit signalAbortPrint("Print Aborted:  Connection to Projector Lost or Changed During Print Cycle");
     }
     pProjector = new B9Projector(true, this);
     makeProjectorConnections();
@@ -956,6 +938,7 @@ void B9Terminal::onScreenCountChanged(int iCount){
         activateWindow(); // if not using primary monitor, take focus back to here.
     }
     else if(pPrinterComm->getProjectorStatus() != B9PrinterStatus::PS_OFF &&
+            pPrinterComm->getProjectorStatus() != B9PrinterStatus::PS_COOLING &&
             pPrinterComm->getProjectorStatus() != B9PrinterStatus::PS_UNKNOWN) {
         // if the projector is not turned off, we better put up the blank screen now!
         pProjector->showFullScreen();
@@ -1000,7 +983,7 @@ void B9Terminal::getKey(int iKey)
         emit pausePrint();
         break;
     case 16777216:	// Escape Key ABORT PRINT
-        emit signalAbortPrint("User Directed Abort (ESC Key Pressed)");
+        if(!isEnabled())emit signalAbortPrint("User Directed Abort.");
         break;
     default:
         break;
