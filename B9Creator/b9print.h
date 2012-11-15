@@ -17,7 +17,7 @@ class B9Print : public QDialog
 public:
     explicit B9Print(B9Terminal *pTerm, QWidget *parent = 0);
     ~B9Print();
-    void print3D(CrushedPrintJob *pCPJ, int iXOff, int iYOff, int iTbase, int iTover);
+    void print3D(CrushedPrintJob *pCPJ, int iXOff, int iYOff, int iTbase, int iTover, int iLastLayer = 0, bool bPrintPreview = false);
     
 signals:
     void eventHiding();
@@ -60,6 +60,7 @@ private:
     int m_iXOff, m_iYOff;
     int m_iPrintState;
     int m_iCurLayerNumber;
+    int m_LastLayer;
     double m_dLayerThickness;
     bool m_bPaused;
     bool m_bAbort;

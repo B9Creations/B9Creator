@@ -155,6 +155,7 @@ B9PrinterComm::B9PrinterComm()
     m_serialDevice = NULL;
     m_bCloneBlanks = false;
     m_Status.reset();
+    m_iWarmUpDelayMS = 15000;
     qDebug() << "B9Creator COMM Start";
     QTimer::singleShot(2000, this, SLOT(RefreshCommPortItems())); // Check in 2 seconds
 }
@@ -624,7 +625,7 @@ bool B9PrinterComm::handleProjectorBC(int iBC){
             bStatusChanged = true;
             break;
         case B9PrinterStatus::PS_WARMING:
-            if(startWarmingTime.elapsed()>15000){
+            if(startWarmingTime.elapsed()>m_iWarmUpDelayMS){
                 // All warmed up now, ready to use.
                 m_Status.setProjectorStatus(B9PrinterStatus::PS_ON);
                 emit BC_ProjectorStatusChanged();

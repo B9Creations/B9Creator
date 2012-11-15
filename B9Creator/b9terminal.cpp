@@ -54,7 +54,7 @@ void PCycleSettings::loadSettings()
     m_iOpenSpd1 = settings.value("OpenSpd1",0).toInt();
     m_dBreatheClosed1 = settings.value("BreatheClosed1",1).toDouble();
     m_dSettleOpen1 = settings.value("SettleOpen1",1).toDouble();
-    m_dOverLift1 = settings.value("OverLift1",0).toDouble();
+    m_dOverLift1 = settings.value("OverLift1",5).toDouble();
 
     m_iRSpd2 = settings.value("RSpd2",85).toInt();
     m_iLSpd2 = settings.value("LSpd2",85).toInt();
@@ -100,7 +100,8 @@ void PCycleSettings::setFactorySettings()
     m_dSettleOpen1 = 1;
     m_dBreatheClosed2 = 0;
     m_dSettleOpen2 = 0;
-    m_dOverLift1 = m_dOverLift2 = 0;
+    m_dOverLift1 = 5.0;
+    m_dOverLift2 = 0.0;
     m_dBTClearInMM = 5.0;
 }
 
@@ -196,6 +197,7 @@ void B9Terminal::on_pushButtonModMatCat_clicked()
 void B9Terminal::makeProjectorConnections()
 {
     // should be called any time we create a new projector object
+    if(pProjector==NULL)return;
     connect(pProjector, SIGNAL(keyReleased(int)),this, SLOT(getKey(int)));
     connect(this, SIGNAL(sendStatusMsg(QString)),pProjector, SLOT(setStatusMsg(QString)));
     connect(this, SIGNAL(sendGrid(bool)),pProjector, SLOT(setShowGrid(bool)));
@@ -358,9 +360,20 @@ void B9Terminal::onBC_ProjStatusChanged()
         sText = "UNKNOWN";
         break;
     }
-    emit sendStatusMsg("B9Creator - Projector status: "+sText);
-    emit updateProjectorStatus(sText);
-    emit updateProjector(pPrinterComm->getProjectorStatus());
+
+    // Update the power button state
+    if(pPrinterComm->isProjectorPowerCmdOn()){
+        ui->pushButtonProjPower->setChecked(true);
+        ui->pushButtonProjPower->setText("ON");
+    }
+    else{
+        ui->pushButtonProjPower->setChecked(false);
+        ui->pushButtonProjPower->setText("OFF");
+    }
+
+    if(!isEnabled())emit sendStatusMsg("B9Creator - Projector status: "+sText);
+    if(!isEnabled())emit updateProjectorStatus(sText);
+    if(!isEnabled())emit updateProjector(pPrinterComm->getProjectorStatus());
 
     ui->lineEditProjState->setText(sText);
     sText = "UNKNOWN";
@@ -749,6 +762,17 @@ void B9Terminal::rcSTOP()
     on_pushButtonStop_clicked();
 }
 
+void B9Terminal::rcCloseVat()
+{
+    on_pushButtonVClose_clicked();
+}
+
+void B9Terminal::rcSetWarmUpDelay(int iDelayMS)
+{
+    pPrinterComm->setWarmUpDelay(iDelayMS);
+}
+
+
 void B9Terminal::rcFinishPrint(double dDeltaMM)
 {
     // Calculates final position based on current + dDeltaMM
@@ -768,16 +792,29 @@ void B9Terminal::rcSetCPJ(CrushedPrintJob *pCPJ)
 
 void B9Terminal::rcSetProjMessage(QString sMsg)
 {
+    if(pProjector==NULL)return;
     // Pass along the message for the projector screen
     pProjector->setStatusMsg("B9Creator  -  "+sMsg);
 }
 
-QTime B9Terminal::getEstCompeteTime(int iCurLayer, int iTotLayers, double dLayerThicknessMM, int iExposeMS)
+int B9Terminal::getLampAdjustedExposureTime(int iBaseTimeMS)
 {
-    return QTime::currentTime().addMSecs(getEstCompeteTimeMS(iCurLayer, iTotLayers, dLayerThicknessMM, iExposeMS));
+    if(pPrinterComm==NULL||pPrinterComm->getLampHrs()<0||pPrinterComm->getHalfLife()<0)return iBaseTimeMS;
+
+    //  dLife = 0.0 at zero lamp hours and 1.0 at or above halflife hours.
+    //  We multiply the base time by dLife and return the original amount + the product.
+    //  So at Halflife, we've doubled the standard exposure time.
+    double dLife = (double)pPrinterComm->getLampHrs()/(double)pPrinterComm->getHalfLife();
+    if(dLife > 1.0)dLife = 1.0; // Limit to 100% the amount of applied bulb degradation (reached at HalfLife)
+    return iBaseTimeMS + (double)iBaseTimeMS*dLife;
 }
 
-int B9Terminal::getEstCompeteTimeMS(int iCurLayer, int iTotLayers, double dLayerThicknessMM, int iExposeMS)
+QTime B9Terminal::getEstCompleteTime(int iCurLayer, int iTotLayers, double dLayerThicknessMM, int iExposeMS)
+{
+    return QTime::currentTime().addMSecs(getEstCompleteTimeMS(iCurLayer, iTotLayers, dLayerThicknessMM, iExposeMS));
+}
+
+int B9Terminal::getEstCompleteTimeMS(int iCurLayer, int iTotLayers, double dLayerThicknessMM, int iExposeMS)
 {
     //return estimated completion time
     int iTransitionPointLayer = (int)(pSettings->m_dBTClearInMM/dLayerThicknessMM);
@@ -789,6 +826,8 @@ int B9Terminal::getEstCompeteTimeMS(int iCurLayer, int iTotLayers, double dLayer
     if(iCurLayer>=iTransitionPointLayer) iUpperCount = iTotLayers - iCurLayer;
 
     int iTotalTimeMS = iExposeMS*iLowerCount + iExposeMS*iUpperCount;
+
+    iTotalTimeMS = getLampAdjustedExposureTime(iTotalTimeMS);
 
     // Add Breathe and Settle
     iTotalTimeMS += iLowerCount*(pSettings->m_dBreatheClosed1 + pSettings->m_dSettleOpen1);
@@ -816,7 +855,10 @@ int B9Terminal::getEstCompeteTimeMS(int iCurLayer, int iTotLayers, double dLayer
 }
 
 int B9Terminal::getZMoveTime(int iDelta, int iSpd){
-    // returns time to travel iDelta distance in milliseconds
+    // returns time to travel iDelta PUs distance in milliseconds
+    // Accurate but assumes that 100% is 140rpm and 0% is 10rpm
+    // Also assumes 200 PU (Steps) per revolution
+    // returns milliseconds required to move iDelta PU's
     if(iDelta==0)return 0;
     double dPUms; // printer units per millisecond
     dPUms = ((double)iSpd/100.0)*130.0 + 10.0;
@@ -828,7 +870,7 @@ int B9Terminal::getZMoveTime(int iDelta, int iSpd){
 
 int B9Terminal::getVatMoveTime(int iSpeed){
     double dPercent = (double)iSpeed/100.0;
-    return 900 - dPercent*150.0;
+    return 999 - dPercent*229.0; // based on speed tests of B9C1 on 11/14/2012
 }
 
 int B9Terminal::getEstBaseCycleTime(int iCur, int iTgt){
@@ -909,6 +951,7 @@ void B9Terminal::onScreenCountChanged(int iCount){
     QString sVideo = "Disconnected or Primary Monitor";
     if(pProjector) {
         delete pProjector;
+        pProjector = NULL;
         if(pPrinterComm->getProjectorStatus()==B9PrinterStatus::PS_ON)
             if(!isEnabled())emit signalAbortPrint("Print Aborted:  Connection to Projector Lost or Changed During Print Cycle");
     }
@@ -976,13 +1019,13 @@ void B9Terminal::getKey(int iKey)
     if(isVisible()&&isEnabled())
     {
         // We must be "calibrating"  If we get any keypress we should close the projector window
-        pProjector->hide();
+        if(pProjector!=NULL) pProjector->hide();
     }
     switch(iKey){
-    case 80:		// 'P' Pause/Resume
+    case 112:		// 'p' Pause/Resume
         emit pausePrint();
         break;
-    case 16777216:	// Escape Key ABORT PRINT
+    case 65:        // Capital 'A' to abort
         if(!isEnabled())emit signalAbortPrint("User Directed Abort.");
         break;
     default:

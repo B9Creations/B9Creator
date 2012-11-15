@@ -79,8 +79,9 @@ public:
     int getEstNextCycleTime(int iCur, int iTgt);
     int getEstFinalCycleTime(int iCur, int iTgt);
 
-    QTime getEstCompeteTime(int iCurLayer, int iTotLayers, double dLayerThicknessMM, int iExposeMS);
-    int getEstCompeteTimeMS(int iCurLayer, int iTotLayers, double dLayerThicknessMM, int iExposeMS);
+    QTime getEstCompleteTime(int iCurLayer, int iTotLayers, double dLayerThicknessMM, int iExposeMS);
+    int getEstCompleteTimeMS(int iCurLayer, int iTotLayers, double dLayerThicknessMM, int iExposeMS);
+    int getLampAdjustedExposureTime(int iBaseTimeMS);
 
     B9MatCat* getMatCat() {return m_pCatalog;}
 
@@ -92,6 +93,8 @@ public slots:
     void rcNextPrint(double dNextMM); // Position for Next Layer Exposure.
     void rcFinishPrint(double dDeltaMM); // Calculates a final Z position at current + dDelta, closes vat, raises z, turns off projector.
     void rcSTOP();
+    void rcCloseVat();
+    void rcSetWarmUpDelay(int iDelayMS);
 
     void rcProjectorPwr(bool bPwrOn);
     void rcSetCPJ(CrushedPrintJob *pCPJ); // Set the pointer to the CMB to be displayed, NULL if blank

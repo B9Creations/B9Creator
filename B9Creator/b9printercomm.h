@@ -229,6 +229,7 @@ signals:
 public slots:
     void SendCmd(QString sCmd);
     void setProjectorPowerCmd(bool bPwrFlag); // call to send projector power on/off command
+    void setWarmUpDelay(int iDelayMS){m_iWarmUpDelayMS = iDelayMS;}
 
 private slots:
     void ReadAvailable();
@@ -251,5 +252,6 @@ private:
     void handleLostComm();
     bool handleProjectorBC(int iBC);
     QTime startWarmingTime;
+    int m_iWarmUpDelayMS;
 };
 #endif // B9PRINTERCOMM_H

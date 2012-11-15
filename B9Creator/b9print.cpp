@@ -15,7 +15,6 @@ B9Print::B9Print(B9Terminal *pTerm, QWidget *parent) :
     // Clear old messages
     ui->lineEditSerialStatus->setText("");
     ui->lineEditProjectorOutput->setText("");
-    ui->lineEditAbortMsgs->setText("");
 
     m_iTbase = m_iTover = 0;
     m_iXOff = m_iYOff =0;
@@ -25,6 +24,7 @@ B9Print::B9Print(B9Terminal *pTerm, QWidget *parent) :
     m_sAbortMessage = "Unknown Abort";
     m_iCurLayerNumber = 0;
     m_dLayerThickness = 0.0;
+    m_LastLayer = 0;
 
     connect(m_pTerminal, SIGNAL(updateConnectionStatus(QString)), this, SLOT(on_updateConnectionStatus(QString)));
     connect(m_pTerminal, SIGNAL(updateProjectorOutput(QString)), this, SLOT(on_updateProjectorOutput(QString)));
@@ -36,9 +36,8 @@ B9Print::B9Print(B9Terminal *pTerm, QWidget *parent) :
     connect(m_pTerminal, SIGNAL(sendStatusMsg(QString)),this, SLOT(setProjMessage(QString)));
 
     QString sTime = QDateTime::currentDateTime().toString("hh:mm");
-    ui->lcdNumberTime->setDigitCount(5);
+    ui->lcdNumberTime->setDigitCount(9);
     ui->lcdNumberTime->display(sTime);
-
 }
 
 B9Print::~B9Print()
@@ -87,13 +86,12 @@ void B9Print::on_updateProjectorStatus(QString sText)
 void B9Print::setProjMessage(QString sText)
 {
     m_pTerminal->rcSetProjMessage(sText);
-    ui->lineEditPrintCycleUpdates->setText(sText);
 }
 
 QString B9Print::updateTimes()
 {
     QTime vTimeFinished, vTimeRemains, t;
-    int iTime = m_pTerminal->getEstCompeteTimeMS(m_iCurLayerNumber,m_pCPJ->getTotalLayers(),m_pCPJ->getZLayermm(),m_iTbase+m_iTover);
+    int iTime = m_pTerminal->getEstCompleteTimeMS(m_iCurLayerNumber,m_pCPJ->getTotalLayers(),m_pCPJ->getZLayermm(),m_iTbase+m_iTover);
     int iM = iTime/60000;
     int iH = iM/60;
     iM = (int)((double)iM+0.5) - iH*60;
@@ -101,7 +99,7 @@ QString B9Print::updateTimes()
     QString sTimeRemaining = QString::number(iH)+sLZ+QString::number(iM);
     t.setHMS(0,0,0); vTimeRemains = t.addMSecs(iTime);
     vTimeFinished = QTime::currentTime().addMSecs(iTime);
-    ui->lcdNumberTime->display(vTimeFinished.toString("hh:mm"));
+    ui->lcdNumberTime->display(vTimeFinished.toString("hh:mm AP"));
     ui->lcdNumberTimeRemaining->display(sTimeRemaining);
     return "Estimated time remaining: "+sTimeRemaining+"  Estimated Completion Time: "+vTimeFinished.toString("hh:mm AP");
 }
@@ -114,16 +112,10 @@ double B9Print::curLayerIndexMM()
 
 void B9Print::on_signalAbortPrint()
 {
-    if(m_iPrintState==PRINT_NO)
-    {
-        m_pTerminal->setEnabled(true);
-        return;
-    }
-
+    if(m_iPrintState!=PRINT_ABORT) return;
     m_iPrintState=PRINT_NO;
 
     // Handle Abort Signals Here
-    ui->lineEditAbortMsgs->setText(m_sAbortMessage);
     if(m_sAbortMessage.contains("Jammed Mechanism"))
         m_pTerminal->rcProjectorPwr(false); // Don't try to release if possibly jammed!
     else
@@ -135,10 +127,14 @@ void B9Print::on_signalAbortPrint()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, int iTover)
+void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, int iTover, int iLastLayer, bool bPrintPreview)
 {
-    bool bActivateProjector = true;
+    // Note if, iLastLayer < 1, print ALL layers.
+    // if bPrintPreview, run without turning on the projector
 
+    bPrintPreview = true;
+
+    m_iPrintState = PRINT_NO;
     m_pTerminal->setEnabled(false);
     m_pCPJ = pCPJ;
     m_iTbase = iTbase; m_iTover = iTover;
@@ -146,20 +142,22 @@ void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, i
     m_iCurLayerNumber = 0;
     m_bPaused = false;
     m_bAbort = false;
-    m_iPrintState = PRINT_NO;
+    m_LastLayer = iLastLayer;
+    if(m_LastLayer<1)m_LastLayer = m_pCPJ->getTotalLayers();
 
-    ui->lineEditAbortMsgs->setText("");
-    ui->progressBarPrintProgress->setMinimum(0);
-    ui->progressBarPrintProgress->setMaximum(m_pCPJ->getTotalLayers()-1);
-    ui->progressBarPrintProgress->setValue(0);
+    ui->progressBarPrintProgress->setMinimum(1);
+    ui->progressBarPrintProgress->setMaximum(m_pCPJ->getTotalLayers());
+    ui->progressBarPrintProgress->setValue(1);
 
-    ui->lcdNumberTime->display(m_pTerminal->getEstCompeteTime(m_iCurLayerNumber,m_pCPJ->getTotalLayers(),m_pCPJ->getZLayermm(),m_iTbase+m_iTover).toString("hh:mm"));
+    ui->lcdNumberTime->display(m_pTerminal->getEstCompleteTime(m_iCurLayerNumber,m_pCPJ->getTotalLayers(),m_pCPJ->getZLayermm(),m_iTbase+m_iTover).toString("hh:mm"));
     QString sTimeUpdate = updateTimes();
     setProjMessage("Total Layers to print: "+QString::number(m_pCPJ->getTotalLayers())+"  "+sTimeUpdate);
 
-    if(bActivateProjector){
+    if(!bPrintPreview){
+        // Turn on the projector and set the warm up time in ms
         ui->pushButtonPauseResume->setEnabled(false);
         ui->pushButtonAbort->setEnabled(false);
+        m_pTerminal->rcSetWarmUpDelay(20000);
         m_pTerminal->rcProjectorPwr(true);
     }
     else {
@@ -211,17 +209,15 @@ void B9Print::on_pushButtonAbort_clicked(QString sAbortText)
         // Special cases, always handle it asap.
         m_pTerminal->rcSetCPJ(NULL); //blank
         ui->pushButtonAbort->setText("Abort");
-        m_bAbort = false;
         m_iPrintState = PRINT_ABORT;
         on_signalAbortPrint();
         return;
     }
 
-    if(m_iPrintState == PRINT_NO||m_bPaused) return; // no abort if paused or not printing
+    if(m_iPrintState == PRINT_NO||m_iPrintState == PRINT_ABORT||m_bPaused) return; // no abort if paused, not printing or already aborting
     ui->pushButtonAbort->setText("Aborting...");
     ui->pushButtonPauseResume->setEnabled(false);
     ui->pushButtonAbort->setEnabled(false);
-    m_iPrintState = PRINT_ABORT;
     setProjMessage("Aborting...");
     m_bAbort = true;
 }
@@ -243,43 +239,44 @@ void B9Print::exposeLayer(){
         // We're done, release and raise
         m_pTerminal->rcSetCPJ(NULL); //blank
         ui->pushButtonAbort->setText("Abort");
-         m_bAbort = false;
+         m_iPrintState = PRINT_ABORT;
         on_signalAbortPrint();
         return;
     }
 
     //Start Print exposure
+    ui->progressBarPrintProgress->setValue(m_iCurLayerNumber);
     setSlice(m_iCurLayerNumber);
     QString sTimeUpdate = updateTimes();
     if(m_bPaused)
         setProjMessage("Pausing...");
     else
-        setProjMessage(sTimeUpdate+"          Exposing Layer "+QString::number(m_iCurLayerNumber+1)+" of "+QString::number(m_pCPJ->getTotalLayers()));
+        setProjMessage("(Press'p' to pause, 'A' to ABORT)  " + sTimeUpdate+"  Exposing Layer "+QString::number(m_iCurLayerNumber+1)+" of "+QString::number(m_pCPJ->getTotalLayers()));
     m_iPrintState = PRINT_EXPOSING;
-    //set timer
-    QTimer::singleShot(m_iTbase, this, SLOT(exposureFinished()));
+    // set timer TODO Change exposure method here!
+    int iAdjExposure = m_pTerminal->getLampAdjustedExposureTime(m_iTbase + m_iTover);
+    QTimer::singleShot(iAdjExposure, this, SLOT(exposureFinished()));
 }
 
 void B9Print::exposureFinished(){
     if(m_iPrintState==PRINT_NO)return;
     m_pTerminal->rcSetCPJ(NULL); //blank
-    ui->progressBarPrintProgress->setValue(m_iCurLayerNumber);
 
     //Cycle to next layer or finish
     if(m_bPaused){
         m_pTerminal->rcSTOP();
+        m_pTerminal->rcCloseVat();
         ui->pushButtonPauseResume->setText("Resume");
         ui->pushButtonPauseResume->setEnabled(true);
-        m_pTerminal->rcSetProjMessage("Paused.  Manual Positioning Toggles Enabled.  Press 'P' when ready to resume Printing.");
-        ui->lineEditPrintCycleUpdates->setText("Paused.");
+        m_pTerminal->rcSetProjMessage(" Paused.  Manual positioning toggle switches are enabled.  Press 'p' when ready to resume printing.");
         return;
     }
 
     if(m_bAbort){
-        // We're done, release and raise
+        // We're done
         m_pTerminal->rcSetCPJ(NULL); //blank
         ui->pushButtonAbort->setText("Abort");
-        m_bAbort = false;
+        m_iPrintState = PRINT_ABORT;
         on_signalAbortPrint();
         return;
     }
@@ -298,6 +295,6 @@ void B9Print::exposureFinished(){
         m_pTerminal->rcNextPrint(curLayerIndexMM());
         m_iPrintState = PRINT_RELEASING;
         QString sTimeUpdate = updateTimes();
-        setProjMessage(sTimeUpdate+"          Release and cycle to Layer "+QString::number(m_iCurLayerNumber+1)+" of "+QString::number(m_pCPJ->getTotalLayers()));
+        setProjMessage("(Press'p' to pause, 'A' to ABORT)  " + sTimeUpdate+"  Release and cycle to Layer "+QString::number(m_iCurLayerNumber+1)+" of "+QString::number(m_pCPJ->getTotalLayers()));
      }
 }
