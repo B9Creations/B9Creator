@@ -87,7 +87,7 @@ public:
 	CrushedBitMap() {mIndex = 0; uiWhitePixels=0;m_bIsBaseLayer=false; m_iWidth=0; m_iHeight=0;}
 	CrushedBitMap(QImage* pImage);
 	CrushedBitMap(QPixmap* pPixmap);
-	~CrushedBitMap(){};
+    ~CrushedBitMap(){}
     friend class CrushedPrintJob;
 
 private:
@@ -128,34 +128,29 @@ public:
 	CrushedPrintJob();
 	~CrushedPrintJob() {}
 
-	void clearAll();
-	bool addImage(QImage* pImage);
+    void clearAll();    // removes all slices and resets all variables
 
-	CrushedBitMap* getCBMSlice(int i);
-
-	
-
-	int getTotalLayers() {return mSlices.size() + mBase;}
-	uint getTotalWhitePixels() {return mTotalWhitePixels;}
-	uint getTotalWhitePixels(int iFirst, int iLast);
+    int getTotalLayers() {return mSlices.size() + mBase;}  // total layers including the base standoff offset layers
+    uint getTotalWhitePixels() {return mTotalWhitePixels;} // returns all white pixels (fast)
+    uint getTotalWhitePixels(int iFirst, int iLast); // sums the layer range of white pixels (slower)
 
 	bool loadCPJ(QFile* pFile); // returns false if unknown version or opening error
 	bool saveCPJ(QFile* pFile); // returns false if unable to write to file.
 
-	void setBase(int iBase) {mBase = iBase;}
-	void setFilled(int iFilled) {mFilled = iFilled; if(mFilled>mBase)mFilled=mBase;}
+    void setBase(int iBase) {mBase = iBase;}  // set the base standoff offset layers
+    void setFilled(int iFilled) {mFilled = iFilled; if(mFilled>mBase)mFilled=mBase;} // Number of base offset layers where extents are filled
 	int  getBase() {return mBase;}
 	int  getFilled() {return mFilled;}
 
-	void showSupports(bool bShow) {mShowSupports = bShow;}
+    void showSupports(bool bShow) {mShowSupports = bShow;}  // Set the support rendering flag
 	bool renderingSupports() {return mShowSupports;}
 
-	QString getVersion(){return mVersion;}
-	QString getName(){return mName;}
-	QString getDescription(){return mDescription;}
-	QString getXYPixel(){return mXYPixel;}
+    QString getVersion(){return mVersion;}  // Version for file loads and saves
+    QString getName(){return mName;}        // Short name for job
+    QString getDescription(){return mDescription;}  // Job description
+    QString getXYPixel(){return mXYPixel;}          // The xy pixel size in millimeters, for scaling purposes, set when sliced
     double getXYPixelmm(){return mXYPixel.toDouble();}
-	QString getZLayer(){return mZLayer;}
+    QString getZLayer(){return mZLayer;}            // The z layer thickness in millimeters, for scaling purposes, set when sliced
     double getZLayermm(){return mZLayer.toDouble();}
 
 	void setVersion(QString s){mVersion = s;}
@@ -164,24 +159,37 @@ public:
 	void setXYPixel(QString s){mXYPixel = s;}
 	void setZLayer(QString s){mZLayer = s;}
 
+    // render the current slice (m_CurrentSlice) centered (shifted by Offsets) into pImage
+    // if bUseNaturalSize, replace the pImage with one sized to this slice's size (offsets may cause clipping!)
+    // inflates the raw image and then renders supports, filled base extents, etc.
 	void inflateCurrentSlice(QImage* pImage, int xOffset = 0, int yOffset = 0, bool bUseNaturalSize = false);
-	bool crushCurrentSlice(QImage* pImage);
 
-	int getCurrentSlice() {return m_CurrentSlice;}
+    // attempts to replace the current slice with the crushed version of pImage stored at m_CurrentSlice.  Adjusts the job's width and height if needed
+    bool crushCurrentSlice(QImage* pImage);
+
+    // attempts to crushe and append pImage to the CBM array
+    bool addImage(QImage* pImage);
+
+    // Internal position index used for "current" function calls: m_CurrentSlice
+    int getCurrentSlice() {return m_CurrentSlice;}
 	void setCurrentSlice(int iSlice) {m_CurrentSlice = iSlice;}
 
+    // Manage job supports
 	void AddSupport(int iEndSlice, QPoint qCenter, int iSize = 10, SupportType eType=st_CIRCLE, int fastmode = true);
-	bool DeleteSupport(int iSlice, QPoint qCenter, int iRadius = 0);
-	void DeleteAllSupports();
+    bool DeleteSupport(int iSlice, QPoint qCenter, int iRadius = 0);
+    void DeleteAllSupports(){mSupports.clear();}
 
 private:
-	bool isWhitePixel(QPoint qPoint, int iSlice = -1);
+    CrushedBitMap* getCBMSlice(int i);  // gets the zero based index CBM
+    bool isWhitePixel(QPoint qPoint, int iSlice = -1);
+
+    // Job file load/save
 	void streamInCPJ(QDataStream* pIn);
 	void streamOutCPJ(QDataStream* pOut);
 
-	QList <CrushedBitMap> mSlices;
-	QList <SimpleSupport> mSupports;
-	void addCBM(CrushedBitMap mCBM);
+    QList <CrushedBitMap> mSlices;   // Slices, not including base offset layers
+    QList <SimpleSupport> mSupports; // Supports to be rendered
+    void addCBM(CrushedBitMap mCBM){mSlices.append(mCBM);}
 	uint mTotalWhitePixels;
 	QString mVersion, mName, mDescription, mXYPixel, mZLayer;
 	QString mReserved1, mReserved2, mReserved3, mReserved4, mReserved5;

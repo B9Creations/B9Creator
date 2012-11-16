@@ -160,16 +160,17 @@ void CrushedBitMap::streamInCMB(QDataStream* pIn)
 void CrushedBitMap::inflateSlice(QImage* pImage, int xOffset, int yOffset, bool bUseNaturalSize)
 {
 	if(pImage == NULL) return; // No image to draw
-	if(!bUseNaturalSize && (pImage->width()<=0 || pImage->height()<=0)) return; 
+    if(!bUseNaturalSize && (pImage->width()<=0 || pImage->height()<=0)) return; // Not using the slice's natural size, so pImage should have some size greater than zero!
 
 	mIndex = 0; // Reset to start
 	bool bCurColorIsWhite = false;
 	unsigned uCurrentPos = 0;
 	unsigned uImageSize = 0;
 	unsigned uData = 0;
-	int iKey;
+    int iKey;
 
 	if(!m_bIsBaseLayer){
+        // not a fake base layer, so inflate the natural width and height info and the first color (white or not?)
 		m_iWidth = popBits(16);
 		m_iHeight = popBits(16);
 		bCurColorIsWhite = (popBits(1)==1);
@@ -177,28 +178,33 @@ void CrushedBitMap::inflateSlice(QImage* pImage, int xOffset, int yOffset, bool 
 	}
 
 	if(bUseNaturalSize){
-		*pImage = QImage(m_iWidth,m_iHeight,QImage::Format_RGB32);
-		pImage->fill(qRgb(0,0,0));
+        // Using the slice's natural size, so we create a new QImage of this size and fill it with black pixels
+        *pImage = QImage(m_iWidth,m_iHeight,QImage::Format_ARGB32_Premultiplied);
+        pImage->fill(qRgba(0,0,0,255));
 	}
 
+    // note, WinXXX will equal SliceXXX if natural sized
 	float WinWidth = pImage->width()/2.0;
 	float WinHeight= pImage->height()/2.0;
 	float SliceWidth = m_iWidth/2.0;
 	float SliceHeight = m_iHeight/2.0;
+    // Find centering offsets (zero if equal sizes
 	int widthOff = (int)(WinWidth - SliceWidth);
 	int heightOff = (int)(WinHeight - SliceHeight);
+    // Find adjusted offsets (from centered) based on input parameters
 	m_xOffset = widthOff  + xOffset;
 	m_yOffset = heightOff + yOffset;
 
-	if(m_bIsBaseLayer) return;
+    if(m_bIsBaseLayer) return;  // If it's a base layer, we're done (no "non-support" image to inflate)
 
+    // inflate the first pixel run info (uData = run length)
 	iKey = popBits(5);
 	uData = popBits(iKey+1);
 
-	while((uData > 0) && (uCurrentPos < uImageSize)) {
+    while((uData > 0) && (uCurrentPos < uImageSize)) {  //if uData <= 0, we're done.  if uCurrentPos >= uImage Size we've set the last pixel
 		for(unsigned ui=0; ui<uData; ui++) {
-			if(bCurColorIsWhite) setWhiteImagePixel(pImage, uCurrentPos);
-			uCurrentPos++;
+            if(bCurColorIsWhite) setWhiteImagePixel(pImage, uCurrentPos);  // Set the corresponding pixel in pImage
+            uCurrentPos++; //Note we could exceed uImageSize but setWhiteImagePixel above will safely ignore this error
 		}
 		// pop length of next run of pixels
 		iKey = popBits(5);
@@ -213,15 +219,17 @@ void CrushedBitMap::inflateSlice(QImage* pImage, int xOffset, int yOffset, bool 
 void CrushedBitMap::setWhiteImagePixel(QImage* pImage, unsigned uCurPos)
 {
 	// define a white pixel
-	QRgb whitePixel = QColor(255,255,255).rgb();
+    QRgb whitePixel = qRgb(255,255,255);
+    // determine it's location x,y
 	int x, y;
 	y = uCurPos / m_iWidth;
 	x = uCurPos - y*m_iWidth;
 	x += m_xOffset;
 	y += m_yOffset;
+    // set it to white, if valid x,y
 	if(x>=0 && y>=0 && x<pImage->width() && y<pImage->height()) {
 		pImage->setPixel(x,y,whitePixel);
-	}
+    }
 }
 
 bool CrushedBitMap::crushSlice(QPixmap* pPixmap)
@@ -381,8 +389,9 @@ CrushedPrintJob::CrushedPrintJob() {
 }
 
 CrushedBitMap* CrushedPrintJob::getCBMSlice(int i) {
-	if(i > mBase + mSlices.size()) return NULL;
-	if(i>=mBase) return &mSlices[i-mBase];
+    // i is zero based index, values of 0 to mSlices.size()-1 inclusive
+    if(i >= mBase + mSlices.size()) return NULL;
+    if(i>=mBase) return &mSlices[i-mBase];  //mSlices[] does not store blank base offset layers, we fake those by always returning the same mBaseLayer CBM
 	mBaseLayer.setWidth(m_Width);
 	mBaseLayer.setHeight(m_Height);
 	mBaseLayer.setIsBaseLayer(true);
@@ -390,10 +399,6 @@ CrushedBitMap* CrushedPrintJob::getCBMSlice(int i) {
 }
 
 
-void CrushedPrintJob::addCBM(CrushedBitMap mCBM)
-{
-	mSlices.append(mCBM);
-}
 
 void CrushedPrintJob::streamOutCPJ(QDataStream* pOut)
 {
@@ -438,7 +443,7 @@ void CrushedPrintJob::streamInCPJ(QDataStream* pIn)
 		if(m_Width<mSlices[i].getWidth())m_Width=mSlices[i].getWidth();
 		if(m_Height<mSlices[i].getHeight())m_Height=mSlices[i].getHeight();
 	}
-    //int x = mJobExtents.left();
+    // Initialize the generic base layer CBM for use with all "base" layers
 	mBaseLayer.setWidth(m_Width);
 	mBaseLayer.setHeight(m_Height);
 	mBaseLayer.setIsBaseLayer(true);
@@ -511,7 +516,6 @@ uint CrushedPrintJob::getTotalWhitePixels(int iFirst, int iLast)
 }
 
 void CrushedPrintJob::clearAll() {
-
     mTotalWhitePixels=0;
 	mBase=0; 
 	mFilled=0; 
@@ -532,7 +536,7 @@ void CrushedPrintJob::inflateCurrentSlice(QImage* pImage, int xOffset, int yOffs
 	int heightOff;
 	SimpleSupport sSimple;
 
-	if(m_CurrentSlice < 0 || m_CurrentSlice > getTotalLayers()) return;
+    if(m_CurrentSlice < 0 || m_CurrentSlice >= getTotalLayers()) return;
 	getCBMSlice(m_CurrentSlice)->inflateSlice(pImage, xOffset, yOffset, bUseNaturalSize);
 
 	//Todo Render filled Extent && Supports
@@ -589,7 +593,9 @@ bool CrushedPrintJob::addImage(QImage* pImage){
 }
 
 bool CrushedPrintJob::crushCurrentSlice(QImage* pImage){
-	bool bResult = getCBMSlice(m_CurrentSlice)->crushSlice(pImage);
+    // Crushes the pImage and stores at m_CurrentSlice.  Adjusts the job's width and height if needed
+    if(getCBMSlice(m_CurrentSlice)==NULL)return false;
+    bool bResult=getCBMSlice(m_CurrentSlice)->crushSlice(pImage);
 	if(m_Width<getCBMSlice(m_CurrentSlice)->getWidth())m_Width=getCBMSlice(m_CurrentSlice)->getWidth();
 	if(m_Height<getCBMSlice(m_CurrentSlice)->getHeight())m_Height=getCBMSlice(m_CurrentSlice)->getHeight();
 	return bResult;
@@ -643,8 +649,3 @@ bool CrushedPrintJob::DeleteSupport(int iSlice, QPoint qCenter, int iRadius){
 	return false;
 }
 
-
-void CrushedPrintJob::DeleteAllSupports()
-{
-	mSupports.clear();
-}

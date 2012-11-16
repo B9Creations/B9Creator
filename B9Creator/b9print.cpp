@@ -123,11 +123,14 @@ void B9Print::on_signalAbortPrint()
     m_pTerminal->onScreenCountChanged(); // toggles off the screen if need for primary monitor setups
     QMessageBox::warning(0,"Printing Aborted!","PRINT ABORTED\n\n"+m_sAbortMessage);
     hide();
+    m_pTerminal->setUsePrimaryMonitor(false);
+    m_pTerminal->setPrintPreview(false);
+    m_pTerminal->onScreenCountChanged();
     m_pTerminal->setEnabled(true);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, int iTover, int iLastLayer, bool bPrintPreview)
+void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, int iTover, int iLastLayer, bool bPrintPreview, bool bUsePrimaryMonitor)
 {
     // Note if, iLastLayer < 1, print ALL layers.
     // if bPrintPreview, run without turning on the projector
@@ -135,6 +138,7 @@ void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, i
     m_iPrintState = PRINT_NO;
     m_pTerminal->setEnabled(false);
     m_pCPJ = pCPJ;
+    m_pTerminal->createNormalizedMask(m_pCPJ->getXYPixelmm());
     m_iTbase = iTbase; m_iTover = iTover;
     m_iXOff = iXOff; m_iYOff = iYOff;
     m_iCurLayerNumber = 0;
@@ -142,6 +146,10 @@ void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, i
     m_bAbort = false;
     m_iLastLayer = iLastLayer;
     if(m_iLastLayer<1)m_iLastLayer = m_pCPJ->getTotalLayers();
+
+    m_pTerminal->setUsePrimaryMonitor(bUsePrimaryMonitor);
+    m_pTerminal->setPrintPreview(bPrintPreview);
+    m_pTerminal->onScreenCountChanged();
 
     ui->progressBarPrintProgress->setMinimum(0);
     ui->progressBarPrintProgress->setMaximum(m_iLastLayer);
@@ -294,6 +302,9 @@ void B9Print::exposureFinished(){
         setProjMessage("Finished!");
         ui->lineEditLayerCount->setText("Finished!");
         m_pTerminal->setEnabled(true);
+        m_pTerminal->setUsePrimaryMonitor(false);
+        m_pTerminal->setPrintPreview(false);
+        m_pTerminal->onScreenCountChanged();
         hide();
     }
     else

@@ -133,6 +133,9 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     m_pDesktop = QApplication::desktop();
     pProjector = NULL;
     m_bPrimaryScreen = false;
+    m_bPrintPreview = false;
+    m_bUsePrimaryMonitor = false;
+
     connect(m_pDesktop, SIGNAL(screenCountChanged(int)),this, SLOT(onScreenCountChanged(int)));
 
     connect(pPrinterComm,SIGNAL(updateConnectionStatus(QString)), this, SLOT(onUpdateConnectionStatus(QString)));
@@ -963,17 +966,26 @@ void B9Terminal::onScreenCountChanged(int iCount){
     int i=0;
     int screenCount = m_pDesktop->screenCount();
     QRect screenGeometry;
-    for(i=screenCount-1;i>= 0;i--) {
-        screenGeometry = m_pDesktop->screenGeometry(i);
-        if(screenGeometry.width() == pPrinterComm->getNativeX() && screenGeometry.height() == pPrinterComm->getNativeY()) {
-            //Found the projector!
-            sVideo = "Connected to Monitor: " + QString::number(i+1);
-            m_bNeedsWarned = true;
-            break;
+
+    if(m_bUsePrimaryMonitor)
+    {
+        screenGeometry = m_pDesktop->screenGeometry(0);
+    }
+    else{
+        for(i=screenCount-1;i>= 0;i--) {
+            screenGeometry = m_pDesktop->screenGeometry(i);
+            if(screenGeometry.width() == pPrinterComm->getNativeX() && screenGeometry.height() == pPrinterComm->getNativeY()) {
+                //Found the projector!
+                sVideo = "Connected to Monitor: " + QString::number(i+1);
+                m_bNeedsWarned = true;
+                break;
+            }
         }
     }
+    if(i<=0||m_bUsePrimaryMonitor)m_bPrimaryScreen = true; else m_bPrimaryScreen = false;
+
     emit updateProjectorOutput(sVideo);
-    if(i<=0)m_bPrimaryScreen = true; else m_bPrimaryScreen = false;
+
     pProjector->setShowGrid(true);
     pProjector->setCPJ(NULL);
 
@@ -983,14 +995,21 @@ void B9Terminal::onScreenCountChanged(int iCount){
         pProjector->showFullScreen(); // Only show it if it is a secondary monitor
         activateWindow(); // if not using primary monitor, take focus back to here.
     }
-    else if(pPrinterComm->getProjectorStatus() != B9PrinterStatus::PS_OFF &&
+    else if(m_bPrintPreview||(pPrinterComm->getProjectorStatus() != B9PrinterStatus::PS_OFF &&
             pPrinterComm->getProjectorStatus() != B9PrinterStatus::PS_COOLING &&
-            pPrinterComm->getProjectorStatus() != B9PrinterStatus::PS_UNKNOWN) {
+            pPrinterComm->getProjectorStatus() != B9PrinterStatus::PS_UNKNOWN)) {
         // if the projector is not turned off, we better put up the blank screen now!
         pProjector->showFullScreen();
     }
     else warnSingleMonitor();
 }
+
+void B9Terminal::createNormalizedMask(double XYPS, double dZ, double dOhMM)
+{
+    //call when we show or resize
+    pProjector->createNormalizedMask(XYPS, dZ, dOhMM);
+}
+
 
 void B9Terminal::on_comboBoxXPPixelSize_currentIndexChanged(int index)
 {

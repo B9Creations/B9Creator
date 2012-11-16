@@ -58,7 +58,7 @@ public slots:
 	void setCPJ(CrushedPrintJob *pCPJ);				// Set the pointer to the CMB to be displayed, NULL if blank
     void setXoff(int xOff){m_xOffset = xOff;drawAll();} // x offset for layer image
     void setYoff(int yOff){m_yOffset = yOff;drawAll();} // y offset for layer image
-
+    void createNormalizedMask(double XYPS=0.1, double dZ = 257.0, double dOhMM = 91.088); //call when we show or resize
 
 signals:
     void eventHiding();             // signal to the parent that we are being hidden
@@ -80,11 +80,13 @@ private:
 	void drawGrid();		// draws a grid pattern using mGridColor
 	void drawStatusMsg();	// draws the current status msg on the projector screen
 	void drawCBM();			// draws the current CBM pointed to by mpCBM, returns if mpCBM is null
+
 	
     bool m_bIsPrintWindow;  // set to true if we lock the window to full screen when shown
     bool m_bGrid;			// if true, grid is to be drawn
 	CrushedPrintJob* mpCPJ;	// CPJ to inflate CBM from
 	QImage mImage;
+    QImage m_NormalizedMask;
 	QString mStatusMsg;
 	int m_xOffset, m_yOffset;
 };

@@ -62,7 +62,8 @@ void B9Projector::showProjector(int x, int y, int w, int h)
 	setWindowTitle("Preview");
     setGeometry(x,y,w,h);
     if(m_bIsPrintWindow) showFullScreen(); else show();
-	mImage = QImage(width(),height(),QImage::Format_RGB32);
+    mImage = QImage(width(),height(),QImage::Format_ARGB32_Premultiplied);
+    createNormalizedMask();
 	drawAll();
 }
 
@@ -90,8 +91,8 @@ void B9Projector::setCPJ(CrushedPrintJob * pCPJ)
 void B9Projector::drawAll()
 {
 	blankProjector();
-	drawGrid();
-	drawStatusMsg();
+    drawGrid();
+    drawStatusMsg();
 	drawCBM();
 	update();
 }
@@ -137,12 +138,54 @@ void B9Projector::drawStatusMsg()
  	painter.drawText(QPoint(leftOffset,bottomOffset),mStatusMsg);
 }
 
+
+void B9Projector::createNormalizedMask( double XYPS, double dZ, double dOhMM)
+{
+    if(mpCPJ!=NULL)
+        XYPS = mpCPJ->getXYPixelmm();
+    double xsqrmm, ysqrmm;
+    double zsqrmm = dZ*dZ;
+    double Oh = dOhMM;
+    double Ol = width()*XYPS*0.5;
+    double dDimRg = 255.0/sqrt(Ol*Ol + Oh*Oh + zsqrmm);
+
+    //Here we create a gray scale mask to normalize the projector's output
+    m_NormalizedMask = QImage(width(),height(),QImage::Format_ARGB32_Premultiplied);
+    m_NormalizedMask.fill(qRgba(0,0,0,0));
+    int igs;
+    for (quint32 y = 0; y < m_NormalizedMask.height(); ++y) {
+        QRgb *scanLine = (QRgb *)m_NormalizedMask.scanLine(y);
+        for (quint32 x = 0; x < m_NormalizedMask.width(); ++x){
+            xsqrmm = pow((-Ol + (double)x*0.1),2.0);
+            ysqrmm = pow(( Oh - (double)y*0.1),2.0);
+            igs = sqrt(xsqrmm+ysqrmm+zsqrmm)*dDimRg;
+            scanLine[x] = qRgba(igs,igs,igs,255);
+        }
+    }
+}
+
 void B9Projector::drawCBM()
 {
 	if(mpCPJ==NULL) return;
-	mpCPJ->inflateCurrentSlice(&mImage, m_xOffset, m_yOffset);
-}
+    // Here we inflate the slice
+    QImage tImage = QImage(width(),height(),QImage::Format_ARGB32_Premultiplied);
+    if(false) // Set to false to test full normalized screen.
+    {
+        tImage.fill(qRgba(0,0,0,0));
+        mpCPJ->inflateCurrentSlice(&tImage, m_xOffset, m_yOffset);
+    }
+    else tImage.fill(qRgba(255,255,255,255));
 
+    // Here we copy the gray scale over using the slice as a mask
+    QPainter mPainter(&tImage);
+    mPainter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    mPainter.drawImage(0,0,m_NormalizedMask);
+
+    // Here we copy the resulting normalized slice to the mImage
+    QPainter mPainter2(&mImage);
+    mPainter2.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    mPainter2.drawImage(0,0,tImage);
+}
 
 void B9Projector::paintEvent (QPaintEvent * pEvent)
 {
@@ -176,10 +219,11 @@ void B9Projector::mouseMoveEvent ( QMouseEvent * pEvent )
 
 void B9Projector::resizeEvent ( QResizeEvent * pEvent )
 {	
-	QImage newImage(width(),height(),QImage::Format_RGB32);
-	QPainter painter(&newImage);
+    QImage newImage(width(),height(),QImage::Format_ARGB32_Premultiplied);
+    QPainter painter(&newImage);
 	painter.drawImage(QPoint(0,0), mImage);
 	mImage = newImage;
+    createNormalizedMask();
 	drawAll();
 	QDesktopWidget dt;
 	emit newGeometry (dt.screenNumber(), geometry());
