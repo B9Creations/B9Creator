@@ -49,6 +49,12 @@ int main(int argc, char *argv[])
     for(int i=0;i<900000000;i++)i=i;
     splash.finish(&w);
 */
+    //handle Command Arguments Here TODO
+
+
+
+
+
     w.show();
     return a.exec();
 }

@@ -36,3 +36,15 @@ void B9NativeApp::set_smaller_text_osx(QWidget *w)
         }
     }
 }
+
+bool B9NativeApp::event(QEvent* event)
+{
+    if( event->type() == QEvent::FileOpen)
+    {
+        //TODO Use this for Macos File associations.
+        //pMain->openJob(static_cast<QFileOpenEvent*>(event)->file());
+        return true;
+    }
+    return QApplication::event(event);
+}
+

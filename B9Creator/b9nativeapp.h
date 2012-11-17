@@ -25,6 +25,12 @@ public:
     }
 private:
     void set_smaller_text_osx(QWidget *w);
+
+
+protected:
+   bool event(QEvent * event);//For Mac Os X file associations.
+
+
 };
 
 #endif // B9NATIVEAPP_H

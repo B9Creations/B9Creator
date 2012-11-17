@@ -32,6 +32,7 @@
 //
 *************************************************************************************/
 #include <QtGui>
+#include <QByteArray>
 #include "b9projector.h"
 
 B9Projector::B9Projector(bool bPrintWindow, QWidget *parent, Qt::WFlags flags)
@@ -138,9 +139,47 @@ void B9Projector::drawStatusMsg()
  	painter.drawText(QPoint(leftOffset,bottomOffset),mStatusMsg);
 }
 
+/*
+void B9Projector::timingTest()
+{
+    QByteArray timingMask;
+    timingMask.resize(1024*768);
+    QMessageBox msg;
+
+    m_NormalizedMask = QImage(1024,768,QImage::Format_ARGB32_Premultiplied);
+    m_NormalizedMask.fill(qRgba(0,0,0,0));
+
+    QImage tImage = QImage(1024,768,QImage::Format_ARGB32_Premultiplied);
+    tImage.fill(qRgba(0,0,0,0));
+
+    QTime t;
+    t.start();
+
+    int igs=222;
+    for (quint32 y = 0; y < (quint32)m_NormalizedMask.height(); ++y) {
+        QRgb *scanLine = (QRgb *)m_NormalizedMask.scanLine(y);
+        for (quint32 x = 0; x < (quint32)m_NormalizedMask.width(); ++x){
+            if((int)timingMask[x+y*1024]>233)
+                scanLine[x] = qRgba(igs,igs,igs,255);
+            else
+                scanLine[x] = qRgba(igs,igs,igs,255);
+        }
+    }
+
+    // Here we copy the resulting normalized slice to the mImage
+    QPainter mPainter2(&mImage);
+    mPainter2.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    mPainter2.drawImage(0,0,tImage);
+
+    msg.setText(QString::number(t.elapsed()));
+    msg.exec();
+
+}
+*/
 
 void B9Projector::createNormalizedMask( double XYPS, double dZ, double dOhMM)
 {
+//    dZ=20;
     if(mpCPJ!=NULL)
         XYPS = mpCPJ->getXYPixelmm();
     double xsqrmm, ysqrmm;
@@ -153,9 +192,9 @@ void B9Projector::createNormalizedMask( double XYPS, double dZ, double dOhMM)
     m_NormalizedMask = QImage(width(),height(),QImage::Format_ARGB32_Premultiplied);
     m_NormalizedMask.fill(qRgba(0,0,0,0));
     int igs;
-    for (quint32 y = 0; y < m_NormalizedMask.height(); ++y) {
+    for (quint32 y = 0; y < (quint32)m_NormalizedMask.height(); ++y) {
         QRgb *scanLine = (QRgb *)m_NormalizedMask.scanLine(y);
-        for (quint32 x = 0; x < m_NormalizedMask.width(); ++x){
+        for (quint32 x = 0; x < (quint32)m_NormalizedMask.width(); ++x){
             xsqrmm = pow((-Ol + (double)x*0.1),2.0);
             ysqrmm = pow(( Oh - (double)y*0.1),2.0);
             igs = sqrt(xsqrmm+ysqrmm+zsqrmm)*dDimRg;
@@ -169,7 +208,7 @@ void B9Projector::drawCBM()
 	if(mpCPJ==NULL) return;
     // Here we inflate the slice
     QImage tImage = QImage(width(),height(),QImage::Format_ARGB32_Premultiplied);
-    if(false) // Set to false to test full normalized screen.
+    if(true) // Set to false to test full normalized screen.
     {
         tImage.fill(qRgba(0,0,0,0));
         mpCPJ->inflateCurrentSlice(&tImage, m_xOffset, m_yOffset);

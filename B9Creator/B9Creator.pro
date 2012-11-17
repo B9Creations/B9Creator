@@ -38,15 +38,16 @@
 
 QT       += core gui
 QT       += svg
+QT       += opengl
 
 TARGET = B9Creator
 TEMPLATE = app
 
 INCLUDEPATH += b9slice \ b9edit \ b9create
+INCLUDEPATH += assimp--3.0.1270-sdk/include
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    b9plan.cpp \
     logfilemanager.cpp \
     loadingbar.cpp \
     crushbitmap.cpp \
@@ -58,17 +59,30 @@ SOURCES += main.cpp\
     b9edit/DrawingContext.cpp \
     b9edit/b9edit.cpp \
     b9edit/aboutbox.cpp \
-    b9create/b9creator.cpp \
-    b9slice/b9slice.cpp \
     helpsystem.cpp \
     b9nativeapp.cpp \
     dlgcyclesettings.cpp \
     dlgmaterialsmanager.cpp \
     b9matcat.cpp \
-    b9print.cpp
+    b9print.cpp \
+    b9layout/worldview.cpp \
+    b9layout/utilityfunctions.cpp \
+    b9layout/triangulate.cpp \
+    b9layout/triangle3d.cpp \
+    b9layout/sliceset.cpp \
+    b9layout/slicedebugger.cpp \
+    b9layout/slicecontext.cpp \
+    b9layout/slice.cpp \
+    b9layout/SlcExporter.cpp \
+    b9layout/segment.cpp \
+    b9layout/projectdata.cpp \
+    b9layout/modelinstance.cpp \
+    b9layout/modeldata.cpp \
+    b9layout/loop.cpp \
+    b9layout/b9layout.cpp \
+    b9slice/b9slice.cpp
 
 HEADERS  += mainwindow.h \
-    b9plan.h \
     logfilemanager.h \
     loadingbar.h \
     crushbitmap.h \
@@ -80,33 +94,46 @@ HEADERS  += mainwindow.h \
     b9edit/DrawingContext.h \
     b9edit/b9edit.h \
     b9edit/aboutbox.h \
-    b9create/b9creator.h \
-    b9slice/b9slice.h \
     helpsystem.h \
     b9nativeapp.h \
     dlgcyclesettings.h \
     dlgmaterialsmanager.h \
     b9matcat.h \
-    b9print.h
+    b9print.h \
+    b9layout/worldview.h \
+    b9layout/utlilityfunctions.h \
+    b9layout/triangulate.h \
+    b9layout/triangle3d.h \
+    b9layout/sliceset.h \
+    b9layout/slicedebugger.h \
+    b9layout/slicecontext.h \
+    b9layout/slice.h \
+    b9layout/SlcExporter.h \
+    b9layout/segment.h \
+    b9layout/projectdata.h \
+    b9layout/modelinstance.h \
+    b9layout/modeldata.h \
+    b9layout/loop.h \
+    OS_GL_Wrapper.h \
+    b9layout/b9layout.h \
+    b9slice/b9slice.h
 
 FORMS    += mainwindow.ui \
-    b9plan.ui \
     b9terminal.ui \
     b9edit/sliceeditview.ui \
     b9edit/b9edit.ui \
     b9edit/aboutbox.ui \
-    b9create/b9creator.ui \
     b9slice/b9slice.ui \
     dlgcyclesettings.ui \
     dlgmaterialsmanager.ui \
-    b9print.ui
+    b9print.ui \
+    b9layout/slicedebugwindow.ui \
+    b9layout/b93dmain.ui
 
 RESOURCES += \
     b9edit/sliceeditview.qrc \
     b9edit/b9edit.qrc \
-    b9edit/sliceeditview.qrc \
-    b9create/b9creator.qrc \
-    b9create/b9creator.qrc
+    b9edit/sliceeditview.qrc
 
  win32 {
     RC_FILE = b9edit/B9Edit.rc
@@ -137,4 +164,52 @@ OTHER_FILES += \
     documentation/images/filedialog.png \
     documentation/images/fadedfilemenu.png \
     documentation/images/browse.png
+
+
+
+#Windows Library Specifics-------------------------------------------------------------
+
+
+win32{
+
+#Windows Assimp Static Library Loading
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/assimp--3.0.1270-sdk/lib/assimp_release-noboost-st_Win32/ -lassimp
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/assimp--3.0.1270-sdk/lib/assimp_debug-noboost-st_Win32/ -lassimp
+
+INCLUDEPATH += $$PWD/assimp--3.0.1270-sdk/include
+DEPENDPATH += $$PWD/assimp--3.0.1270-sdk/include
+
+win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/assimp--3.0.1270-sdk/lib/assimp_release-noboost-st_Win32/assimp.lib
+else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/assimp--3.0.1270-sdk/lib/assimp_debug-noboost-st_Win32/assimp.lib
+
+
+}
+
+
+#Mac Library Specifics-------------------------------------------------------------
+
+macx{
+
+CONFIG -= x86_64
+
+#Mac Assimp Static Lbrary Loading
+macx: LIBS += -L$$PWD/assimp--3.0.1270-sdk/bin/assimp_Release_MacOSX/ -lassimp
+INCLUDEPATH += $$PWD/assimp--3.0.1270-sdk/bin/assimp_Release_MacOSX
+DEPENDPATH += $$PWD/assimp--3.0.1270-sdk/bin/assimp_Release_MacOSX
+macx: PRE_TARGETDEPS += $$PWD/assimp--3.0.1270-sdk/bin/assimp_Release_MacOSX/libassimp.a
+
+}
+
+
+#Linux Library Specifics-------------------------------------------------------------
+
+
+#Linux Assimp Static Library Loading
+unix:!macx:!symbian: LIBS += -L$$PWD/assimp--3.0.1270-sdk/lib/ -lassimp
+unix:!macx:!symbian: PRE_TARGETDEPS += $$PWD/assimp--3.0.1270-sdk/lib/libassimp.a
+
+unix:!macx:!symbian: LIBS += -lGLU
+unix:!macx:!symbian: LIBS += -lz
+
+
 

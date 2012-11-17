@@ -59,6 +59,7 @@ public slots:
     void setXoff(int xOff){m_xOffset = xOff;drawAll();} // x offset for layer image
     void setYoff(int yOff){m_yOffset = yOff;drawAll();} // y offset for layer image
     void createNormalizedMask(double XYPS=0.1, double dZ = 257.0, double dOhMM = 91.088); //call when we show or resize
+    //void timingTest();
 
 signals:
     void eventHiding();             // signal to the parent that we are being hidden

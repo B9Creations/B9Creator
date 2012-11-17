@@ -39,11 +39,10 @@
 #include <QCloseEvent>
 #include <QDesktopWidget>
 #include "logfilemanager.h"
-#include "b9plan.h"
+#include "b9layout/b9layout.h"
 #include "b9slice.h"
 #include "b9edit/b9edit.h"
 #include "b9print.h"
-#include "b9create/b9creator.h"
 #include "b9terminal.h"
 #include "helpsystem.h"
 
@@ -82,7 +81,7 @@ private:
     bool m_bOpenLogOnExit;
     HelpSystem m_HelpSystem;
 
-    B9Plan *pMW1;
+    B9Layout *pMW1;
     B9Slice *pMW2;
     B9Edit *pMW3;
     B9Print *pMW4;

@@ -58,9 +58,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->statusBar->showMessage(MSG_SEARCHING);
 
-    pMW1 = new B9Plan(0);
+    pMW1 = new B9Layout(0);
     pMW1->setWindowTitle("Layout");
-    pMW2 = new B9Slice(0);
+    pMW2 = new B9Slice(0,pMW1);
     pMW3 = new B9Edit(0);
     pMW4 = new B9Print(pTerminal, 0);
 
@@ -182,8 +182,8 @@ void MainWindow::on_commandPrint_clicked(bool checked)
         m_pCPJ->showSupports(true);
 
 
-//        pMW4->print3D(m_pCPJ, 0, 0, 5000, 2000, 20, true, true);
-        pMW4->print3D(m_pCPJ, 0, 0, 5000, 2000, 20, false, false);
+        pMW4->print3D(m_pCPJ, 0, 0, 5000, 2000, 20, true, true);
+//        pMW4->print3D(m_pCPJ, 0, 0, 5000, 2000, 20, false, false);
 
         /////////////////////////////////////
      }
