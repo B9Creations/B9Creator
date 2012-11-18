@@ -23,6 +23,7 @@ WorldView::WorldView(QWidget *parent, B9Layout* main) : QGLWidget(parent)
 	//tools/keys
 	currtool = "pointer";
 	shiftdown = false;
+    controldown = false;
 	dragdown = false;
 	pandown = 0;
 	selectedinst = NULL;
@@ -33,7 +34,7 @@ WorldView::WorldView(QWidget *parent, B9Layout* main) : QGLWidget(parent)
 
 	pDrawTimer = new QTimer();
 	connect(pDrawTimer, SIGNAL(timeout()), this, SLOT(UpdateTick()));
-    pDrawTimer->start(0);
+    pDrawTimer->start(16.66);
 
 	setFocusPolicy(Qt::ClickFocus);
 }
@@ -114,7 +115,7 @@ void WorldView::initializeGL()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_NORMALIZE);
-    glLineWidth(1.2);
+    glLineWidth(0.5);
     glEnable(GL_LINE_SMOOTH);
     glColorMaterial ( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
     glEnable ( GL_COLOR_MATERIAL );
@@ -240,15 +241,15 @@ void WorldView::DrawBuildArea()
 		
         glColor3f(1.0f,0.0f,0.0f);
 		glBegin(GL_LINES); 
-				glVertex3d( 0, 0, 0);
+                glVertex3d( 0, 0, buildsizez);
 				glVertex3d( 0, 0, buildsizez + 10); 
 		glEnd();
 		glBegin(GL_LINES); 
-				glVertex3d( 0, 0, 0);
+                glVertex3d( buildsizex, 0, 0);
 				glVertex3d( buildsizex + 10, 0, 0); 
 		glEnd();
 		glBegin(GL_LINES); 
-				glVertex3d( 0, 0, 0);
+                glVertex3d( 0, buildsizey, 0);
 				glVertex3d( 0, buildsizey + 10, 0); 
 		glEnd();
         glColor3f(1.0f,1.0f,1.0f);
@@ -322,10 +323,6 @@ void WorldView::DrawBuildArea()
 	qDebug() << pixel[0] << pixel[1] << pixel[2];
 	//now that we have the color, compare it against every instance
 	
-	if(singleselect)
-		pMain->DeSelectAll();//if shift is off deselect all.
-	
-	
 	for(m=0;m<pMain->ModelDataList.size();m++)
 	{
 		for(i=0;i<pMain->ModelDataList[m]->instList.size();i++)
@@ -361,6 +358,9 @@ void WorldView::DrawBuildArea()
 void WorldView::mousePressEvent(QMouseEvent *event)
 {
      lastPos = event->pos();
+     mousedownPos = event->pos();
+     initialsnap = true;
+     std::vector<ModelInstance*> currentselection = pMain->GetSelectedInstances();
 	 if(event->button() == Qt::MiddleButton)
 	 {
 		pandown = true;
@@ -368,17 +368,11 @@ void WorldView::mousePressEvent(QMouseEvent *event)
 	 if(event->button() == Qt::LeftButton)
 	 {
 		 dragdown = true;
-		 if(currtool == "pointer")
-		 {
-			SelectByScreen(event->pos(),!shiftdown); // start the proccess of picking objects in the screen;
-		 }
-		 else//if we are on some other tool, only be able to select it if nothing else is selected
-		 {
-			 if(!pMain->GetSelectedInstances().size())
-			 {
-				 SelectByScreen(event->pos(),!shiftdown);
-			 }
-		 }
+
+         if(!controldown)
+         pMain->DeSelectAll();
+
+         SelectByScreen(event->pos(),!shiftdown);
 	 }
 }
 
@@ -391,7 +385,7 @@ void WorldView::mouseReleaseEvent(QMouseEvent *event)
 	if(event->button() == Qt::LeftButton)
 	{
 		dragdown = false;
-		if(currtool == "rotate")
+        if(currtool == "rotate" || currtool == "scale")
 		{
 			UpdateSelectedBounds();
 		}
@@ -402,16 +396,30 @@ void WorldView::mouseMoveEvent(QMouseEvent *event)
  {
     int dx = event->x() - lastPos.x();
     int dy = event->y() - lastPos.y();
+    int dstartx = event->x() - mousedownPos.x();
+    int dstarty = event->y() - mousedownPos.y();
 	double x;
 	double y;
+
+    //make it so the mouse has to move slightly more to start the action
+    if(powf((dstartx*dstartx + dstarty*dstarty),0.5) < 5.0 && initialsnap)
+    {
+        dx = 0; dy = 0;
+    }
+    else
+    {
+        initialsnap = true;
+
+    }
+
 
 
 	if (event->buttons() & Qt::RightButton) {
 		setXRotation(xRot + 0.5 * dy);
 		setZRotation(zRot + 0.5 * dx);
 	}
-	lastPos = event->pos();
 
+    lastPos = event->pos();
 	
 	if(pandown)
 	{
@@ -428,8 +436,7 @@ void WorldView::mouseMoveEvent(QMouseEvent *event)
 				y = qCos(zRot*0.017453)*-dy + qCos((zRot+90)*0.017453)*dx;
 
 				if(shiftdown)
-				{
-					
+				{		
 					pMain->GetSelectedInstances()[i]->Move(QVector3D(0,0,-dy*0.1));
 				}
 				else
@@ -437,32 +444,44 @@ void WorldView::mouseMoveEvent(QMouseEvent *event)
 					pMain->GetSelectedInstances()[i]->Move(QVector3D(x*0.2,y*0.1,0));
 				}
 			}
-		}
-		//show the results of the movement in real time
-		pMain->UpdateTranslationInterface();
+        }
 	}
-	if(currtool == "rotate")
-	{
-		if(dragdown)
-		{
-			if(pMain->GetSelectedInstances().size() == 1)
-			{
+    if(currtool == "rotate")
+    {
+        if(dragdown)
+        {
+            //if(pMain->GetSelectedInstances().size() == 1)
+            {
                 for(unsigned int i = 0; i<pMain->GetSelectedInstances().size(); i++)
-				{
-					if(shiftdown)
-					{
-						pMain->GetSelectedInstances()[i]->Rotate(QVector3D(0,0,-dx*0.2));
-					}
-					else
-					{
-						pMain->GetSelectedInstances()[i]->Rotate(QVector3D(dy*0.2,dx*0.2,0));
-					}	
-				}
-			}
-		}
-		//show the results of the movement in real time
-		pMain->UpdateTranslationInterface();
-	}
+                {
+                    if(shiftdown)
+                    {
+                        pMain->GetSelectedInstances()[i]->Rotate(QVector3D(dy*0.2,dx*0.2,0));
+                    }
+                    else
+                    {
+                        pMain->GetSelectedInstances()[i]->Rotate(QVector3D(0,0,-dx*0.2));
+                    }
+                }
+            }
+        }
+    }
+    if(currtool == "scale")
+    {
+        if(dragdown)
+        {
+
+             for(unsigned int i = 0; i<pMain->GetSelectedInstances().size(); i++)
+             {
+                  pMain->GetSelectedInstances()[i]->Scale(QVector3D(dx*0.01,dx*0.01,dx*0.01));
+
+             }
+
+        }
+
+    }
+    //show the results of the movement in real time
+    pMain->UpdateTranslationInterface();
  }
 
 void WorldView::wheelEvent(QWheelEvent *event)
@@ -478,25 +497,31 @@ void WorldView::wheelEvent(QWheelEvent *event)
 void WorldView::keyPressEvent( QKeyEvent * event )
 {
 	QWidget::keyPressEvent(event);
-	if(event->key() == Qt::Key_Shift)
-	{
-		shiftdown = true;
-	}
+    if(event->key() == Qt::Key_Shift)
+    {
+        shiftdown = true;
+    }
+    if(event->key() == Qt::Key_Control)
+    {
+        controldown = true;
+    }
 	if(event->key() == Qt::Key_J)
 	{
         for(unsigned int i = 0; i<pMain->GetSelectedInstances().size(); i++)
 		{
 			pMain->GetSelectedInstances()[i]->UpdateBounds();
-
-
 		}
 	}
 
 }
 void WorldView::keyReleaseEvent( QKeyEvent * event )
 {
-	if(event->key() == Qt::Key_Shift)
-	{
-		shiftdown = false;
-	}
+    if(event->key() == Qt::Key_Shift)
+    {
+        shiftdown = false;
+    }
+    if(event->key() == Qt::Key_Control)
+    {
+        controldown = false;
+    }
 }

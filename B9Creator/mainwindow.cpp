@@ -182,8 +182,8 @@ void MainWindow::on_commandPrint_clicked(bool checked)
         m_pCPJ->showSupports(true);
 
 
-        pMW4->print3D(m_pCPJ, 0, 0, 5000, 2000, 20, true, true);
-//        pMW4->print3D(m_pCPJ, 0, 0, 5000, 2000, 20, false, false);
+//        pMW4->print3D(m_pCPJ, 0, 0, 4000, 3000, 20, true, true);
+        pMW4->print3D(m_pCPJ, 0, 0, 2000, 4000, 20, false, false);
 
         /////////////////////////////////////
      }

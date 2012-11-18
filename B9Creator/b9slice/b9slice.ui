@@ -6,9 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>658</width>
-    <height>444</height>
+    <width>386</width>
+    <height>322</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>386</width>
+    <height>322</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
@@ -25,10 +37,23 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit"/>
+       <widget class="QLineEdit" name="CurrentLayout">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="toolTip">
+         <string>Directory of the current layout</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="LayoutBrowse">
+        <property name="toolTip">
+         <string>Layout file to slice</string>
+        </property>
         <property name="text">
          <string>Browse</string>
         </property>
@@ -39,29 +64,223 @@
     <item>
      <widget class="QGroupBox" name="groupBox">
       <property name="title">
-       <string>GroupBox</string>
+       <string>Job Properties</string>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>289</height>
-          </size>
-         </property>
-        </spacer>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Job Name:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="jobname">
+           <property name="toolTip">
+            <string>Enter the job name here</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Job Description:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="jobdesc">
+           <property name="toolTip">
+            <string>Enter the job description here</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Image Resolution:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="imgsize">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="toolTip">
+            <string>The pixel dimentions the layout was set up for</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Pixel Size (µm):</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="xypixelsize">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="toolTip">
+            <string>how large each pixel will be in microns</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Layer Thickness (µm):</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="thicknesscombo">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="toolTip">
+            <string>How thick each slice is in microns</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>101.6</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>95.25</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>88.9</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>82.55</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>76.2</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>69.85</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>63.5</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>57.15</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>50.8</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>44.45</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>38.1</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>31.75</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>25.4</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>19.05</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>12.7</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>6.35</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
     </item>
     <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Expanding</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
      <widget class="QPushButton" name="SliceButton">
+      <property name="toolTip">
+       <string>Begin slicing</string>
+      </property>
       <property name="text">
-       <string>Slice To File</string>
+       <string>Slice</string>
       </property>
      </widget>
     </item>
@@ -72,7 +291,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>658</width>
+     <width>386</width>
      <height>21</height>
     </rect>
    </property>
@@ -88,17 +307,37 @@
    <slot>LoadLayout()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>618</x>
-     <y>43</y>
+     <x>366</x>
+     <y>53</y>
     </hint>
     <hint type="destinationlabel">
-     <x>557</x>
+     <x>385</x>
      <y>59</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>SliceButton</sender>
+   <signal>clicked()</signal>
+   <receiver>B9Slice</receiver>
+   <slot>Slice()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>289</x>
+     <y>270</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>366</x>
+     <y>292</y>
     </hint>
    </hints>
   </connection>
  </connections>
  <slots>
   <slot>LoadLayout()</slot>
+  <slot>Slice()</slot>
+  <slot>SetJobName(QString)</slot>
+  <slot>SetJobDescription(QString)</slot>
+  <slot>SetJobThickness(QString)</slot>
  </slots>
 </ui>

@@ -21,7 +21,7 @@
 	void ProjectData::New()//Clears out internal project data, creates a new one with defualts
 	{
 		SetDefaults();
-		SetDirtied(false);
+        SetDirtied(false);
 	}
 	bool ProjectData::Open(QString filepath) //returns success
 	{
@@ -38,7 +38,7 @@
 			return false;
 		}
 		QTextStream in(&file);//begin text streaming.
-		filename = in.readLine();//get project name
+        mfilename = in.readLine();//get project name
 		
 		buff = in.readLine();//eat startmodellist
 		while(!jumpout)
@@ -66,6 +66,7 @@
 				inst->SetPos(QVector3D(xp,yp,zp));
 				inst->SetRot(QVector3D(xr,yr,zr));
 				inst->SetScale(QVector3D(xs,ys,zs));
+                inst->UpdateBounds();//in order that zhieght is good and all.
 			}
 			else
 			{
@@ -75,14 +76,13 @@
 
 		in >> buff >> resx >> resy;
 		in >> buff >> xypixel;
-		in >> buff >> zthick;
 
 
 		SetResolution(QVector2D(resx,resy));
 		CalculateBuildArea();
 
-
 		SetDirtied(false);
+        mfilename = filepath;
 		emit ProjectLoaded();
 		return true;
 	}
@@ -113,9 +113,10 @@
 
 		out << "resolution " << GetResolution().x() << " " << GetResolution().y() << '\n';
 		out << "XYpixelsize " << GetPixelSize() << '\n';
-        out << "Zlayer " << GetPixelThickness() << '\n';
+
 
 		SetDirtied(false);
+        mfilename = filepath;
 		return true;
 	}
 
@@ -127,7 +128,7 @@
 	}
 	QString ProjectData::GetFileName()//untitled if not saved yet
 	{
-		return filename;
+        return mfilename;
 	}
 	QStringList ProjectData::GetModelFileList()
 	{
@@ -149,22 +150,23 @@
 	{
 		return resolution;
 	}
+    QString ProjectData::GetJobName()
+    {
+        return jobExportName;
+    }
+    QString ProjectData::GetJobDescription()
+    {
+        return jobExportDesc;
+    }
+
+
 
 	//Sets
 	void ProjectData::SetDirtied(bool dirt)
 	{
-		emit DirtChanged(dirt);
-		if(dirt != dirtied)
-		{
-			
-		}
-		dirtied = dirt;
+        dirtied = dirt;
 	}
-	void ProjectData::SetFileName(QString name)
-	{
-		filename = name;
-		SetDirtied(true);
-	}
+
 	
 	void ProjectData::SetBuildSpaceSize(QVector3D size)
 	{
@@ -186,6 +188,18 @@
 		resolution = dim;
 		SetDirtied(true);
 	}
+
+    void ProjectData::SetJobName(QString name)
+    {
+        jobExportName = name;
+    }
+
+    void ProjectData::SetJobDescription(QString desc)
+    {
+        jobExportDesc = desc;
+    }
+
+
 
 
 	void ProjectData::CalculateBuildArea()
@@ -218,7 +232,7 @@
 
 	void ProjectData::SetDefaults()
 	{
-		SetFileName("untitled");
+        mfilename = "untitled";
 		SetPixelSize(100);
 		SetPixelThickness(100);
 		SetResolution(QVector2D(1024,768));

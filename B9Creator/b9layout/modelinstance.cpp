@@ -3,7 +3,7 @@
 #include <QtOpenGL>
 
 unsigned char ModelInstance::gColorID[3] = {0,0,0};
-QColor ModelInstance::selectedcolor = QColor(0,255,255);
+QColor ModelInstance::selectedcolor = QColor(0,200,200);
 
 
 ///////////////////////////////////
@@ -29,7 +29,7 @@ ModelInstance::ModelInstance(ModelData* parent)
 	isselected = false;
 
 	//color
-	normalcolor = QColor(255,50,50);
+    normalcolor = QColor(125,125,150);
 	currcolor = normalcolor;
 	
 	
@@ -101,7 +101,7 @@ void ModelInstance::SetY(double y)
 }
 void ModelInstance::SetZ(double z)
 {
-	SetPos(QVector3D(pos.y(),pos.y(),z));
+    SetPos(QVector3D(pos.x(),pos.y(),z));
 }
 
 void ModelInstance::SetScale(QVector3D scale)
@@ -337,7 +337,7 @@ void ModelInstance::CorrectRot()
 }
 void ModelInstance::CorrectScale()
 {
-	/*
+
 	if(scale.x() <= 0)
 		scale.setX(0);
 
@@ -347,5 +347,5 @@ void ModelInstance::CorrectScale()
 	if(scale.z() <= 0)
 		scale.setZ(0);
 
-		*/
+
 }

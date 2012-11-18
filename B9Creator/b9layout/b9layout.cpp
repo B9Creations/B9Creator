@@ -30,7 +30,8 @@ B9Layout::B9Layout(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flag
 
     ui.WorldViewContext->addWidget(pWorldView);
     pWorldView->show();
-    pWorldView->pDrawTimer->stop();
+    SetToolPointer();//start off with pointer tool
+
 	
     pslicedebugger = new SliceDebugger(this,this,Qt::Window);
 
@@ -48,12 +49,16 @@ B9Layout::B9Layout(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flag
 	ui.mainToolBar->addAction(ui.actionSelection);
 	ui.mainToolBar->addAction(ui.actionMove);
 	ui.mainToolBar->addAction(ui.actionRotate);
+    ui.mainToolBar->addAction(ui.actionScale);
+    ui.mainToolBar->addSeparator();
+    ui.mainToolBar->addAction(ui.actionDrop_To_Floor);
 
 	//connections:
     QObject::connect(project,SIGNAL(DirtChanged(bool)),this,SLOT(UpdateInterface()));
     QObject::connect(ui.actionCenter_View,SIGNAL(activated()),pWorldView,SLOT(CenterView()));
     QObject::connect(ui.ModelList,SIGNAL(itemSelectionChanged()),this,SLOT(RefreshSelectionsFromList()));
 	
+    New();
 
     UpdateTranslationInterface();
 }
@@ -85,13 +90,45 @@ void B9Layout::OpenDebugWindow()
 //file
 void B9Layout::New()
 {
+    RemoveAllInstances(); //remove instances.
 	project->New();
+    UpdateBuildSpaceUI();
+    project->SetDirtied(false);//because UpdatingBuildSpaceUI dirties things in a round about way.
 }
 QString B9Layout::Open()
 {
 	bool success;
 
     QSettings settings;
+
+
+    //first check if the user needs to save what hes working on first.
+    if(project->IsDirtied())
+    {
+        QMessageBox msgBox;
+        msgBox.setText("The current layout has been modified.");
+         msgBox.setInformativeText("Do you want to save your changes before opening?");
+         msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+         msgBox.setDefaultButton(QMessageBox::Save);
+        int ret = msgBox.exec();
+
+
+        switch (ret)
+        {
+          case QMessageBox::Save:
+                SaveAs();
+              break;
+          case QMessageBox::Discard:
+                //do nothing
+              break;
+          case QMessageBox::Cancel:
+            return "";
+              break;
+          default:
+              break;
+        }
+    }
+
 
 
 	QString filename = QFileDialog::getOpenFileName(this,
@@ -101,12 +138,21 @@ QString B9Layout::Open()
     {return "";}
 
 
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+
     RemoveAllInstances(); //remove instances.
 	success = project->Open(filename);
 
+    //lets update some of the UI stuff to match what we just loaded.
+    UpdateBuildSpaceUI();
+
+
+    QApplication::setOverrideCursor(Qt::ArrowCursor);
 	if(!success)
 	{
         QMessageBox::warning(this, tr("B9Layout"), tr("Unable To Open Layout"),QMessageBox::Ok);
+
         return "";
 	}
 
@@ -120,7 +166,7 @@ QString B9Layout::Open()
 }
 void B9Layout::Save()
 {
-	if(project->IsDirtied() || project->GetFileName() == "untitled")
+    if(project->GetFileName() == "untitled")
 	{
 		SaveAs();
 	}
@@ -154,7 +200,7 @@ void B9Layout::SaveAs()
 }
 
 //interface
-void B9Layout::SetXYPixelSize(QString size)
+void B9Layout::SetXYPixelSizePreset(QString size)
 {
 	project->SetPixelSize(size.toDouble());
 	project->CalculateBuildArea();
@@ -174,15 +220,97 @@ void B9Layout::SetProjectorY(QString y)
 	project->SetResolution(QVector2D(project->GetResolution().x(),y.toInt()));
 	project->CalculateBuildArea();
 }
+void B9Layout::SetProjectorPreset(int index)
+{
+    switch(index)
+    {
+        case 0:
+            SetProjectorX(QString().number(1024));
+            SetProjectorY(QString().number(768));
+
+            break;
+        case 1:
+            SetProjectorX(QString().number(1280));
+            SetProjectorY(QString().number(768));
+
+            break;
+        case 2:
+            SetProjectorX(QString().number(1920));
+            SetProjectorY(QString().number(1080));
+            break;
+        case 3:
+            SetProjectorX(QString().number(1920));
+            SetProjectorY(QString().number(1200));
+
+            break;
+        default:
+
+
+            break;
+
+    }
+
+}
+
 void B9Layout::SetZHeight(QString z)
 {
 	project->SetBuildSpaceSize(QVector3D(project->GetBuildSpace().x(),project->GetBuildSpace().x(), z.toDouble()));
 
 }
 
+void B9Layout::UpdateBuildSpaceUI()
+{
+    int pixi;
+    int proi;
+
+    //pixel sizes
+    if(project->GetPixelSize() == 50)
+        pixi=0;
+    else if(project->GetPixelSize() == 75)
+        pixi=1;
+    else if(project->GetPixelSize() == 100)
+        pixi=2;
+
+    //projector resolutions
+    if(project->GetResolution() == QVector2D(1024,768))
+        proi=0;
+    else if(project->GetResolution() == QVector2D(1280,768))
+        proi=1;
+    else if(project->GetResolution() == QVector2D(1920,1080))
+        proi=2;
+    else if(project->GetResolution() == QVector2D(1920,1200))
+        proi=3;
+
+
+
+    ui.pixelsizecombo->setCurrentIndex(pixi);
+    ui.projectorcombo->setCurrentIndex(proi);
+
+
+
+
+}
+
+
+
 //modeltranslation interface;
 void B9Layout::UpdateTranslationInterface()
 {
+    if(ui.ModelList->selectedItems().size() <= 0 )//no items selected.
+    {
+        ui.actionDelete->setEnabled(false);
+        ui.actionDrop_To_Floor->setEnabled(false);
+        ui.actionDuplicate->setEnabled(false);
+        ui.duplicateButton->setEnabled(false);
+    }
+    else
+    {
+        ui.actionDelete->setEnabled(true);
+        ui.actionDrop_To_Floor->setEnabled(true);
+        ui.actionDuplicate->setEnabled(true);
+        ui.duplicateButton->setEnabled(true);
+    }
+
 
 	if(ui.ModelList->selectedItems().size() <= 0 || ui.ModelList->selectedItems().size() > 1)//no items selected.
 	{
@@ -219,6 +347,8 @@ void B9Layout::UpdateTranslationInterface()
 		ui.modelsizex->setText(QString().number(inst->GetMaxBound().x() - inst->GetMinBound().x()));
 		ui.modelsizey->setText(QString().number(inst->GetMaxBound().y() - inst->GetMinBound().y()));
 		ui.modelsizez->setText(QString().number(inst->GetMaxBound().z() - inst->GetMinBound().z()));
+
+
 	}
 }
 void B9Layout::PushTranslations()
@@ -274,20 +404,34 @@ void B9Layout::LockScale(bool lock)
 void B9Layout::SetToolPointer()
 {
 	pWorldView->SetTool("pointer");
+    ui.actionSelection->setChecked(true);
 	ui.actionMove->setChecked(false);
 	ui.actionRotate->setChecked(false);
+    ui.actionScale->setChecked(false);
 }
 void B9Layout::SetToolMove()
 {
 	pWorldView->SetTool("move");
+    ui.actionMove->setChecked(true);
 	ui.actionSelection->setChecked(false);
 	ui.actionRotate->setChecked(false);
+    ui.actionScale->setChecked(false);
 }
 void B9Layout::SetToolRotate()
 {
 	pWorldView->SetTool("rotate");
+    ui.actionRotate->setChecked(true);
 	ui.actionMove->setChecked(false);
 	ui.actionSelection->setChecked(false);
+    ui.actionScale->setChecked(false);
+}
+void B9Layout::SetToolScale()
+{
+    pWorldView->SetTool("scale");
+    ui.actionScale->setChecked(true);
+    ui.actionMove->setChecked(false);
+    ui.actionSelection->setChecked(false);
+    ui.actionRotate->setChecked(false);
 }
 
 
@@ -334,19 +478,25 @@ ModelInstance* B9Layout::AddModel(QString filepath)
 	project->UpdateZSpace();
 	return pNewInst;
 }
-void B9Layout::RemoveAllInstances() //does not call cleanmodeldata!
+void B9Layout::RemoveAllInstances()
 {
     unsigned int m;
     unsigned int i;
 
+    std::vector<ModelInstance*> allinstlist;
 	for(m=0;m<this->ModelDataList.size();m++)
 	{
 		ModelDataList[m]->loadedcount = 0;//also reset the index counter for instances!
 		for(i=0;i<ModelDataList[m]->instList.size();i++)
 		{
-			delete ModelDataList[m]->instList[i];
+            allinstlist.push_back(ModelDataList[m]->instList[i]);
 		}
 	}
+    for(i=0;i<allinstlist.size();i++)
+    {
+        delete allinstlist[i];
+    }
+
 	CleanModelData();
 }
 void B9Layout::CleanModelData()
@@ -612,17 +762,19 @@ void B9Layout::DeleteSelectedInstances()
 
 void B9Layout::SliceWorld()
 {
-	QString filename = QFileDialog::getSaveFileName(this, tr("Export Slices"), "/home/jana/untitled.b9j", tr("B9 Job (*.b9j);;SLC (*.slc)"));
-	if(filename.isEmpty())
+    QSettings settings;
+
+    QString filename = QFileDialog::getSaveFileName(this, tr("Export Slices"), settings.value("JobDir").toString()+ "/" + project->GetJobName(), tr("B9 Job (*.b9j);;SLC (*.slc)"));
+    if(filename.isEmpty())
 	{
 		return;
 	}
 	QString Format = QFileInfo(filename).completeSuffix();
-	if(Format == "b9j")
+    if(Format.toLower() == "b9j")
 	{
 		SliceWorldToJob(filename);
 	}
-	else if(Format == "slc")
+    else if(Format.toLower() == "slc")
 	{
 		SliceWorldToSlc(filename);
 	}
@@ -631,12 +783,15 @@ void B9Layout::SliceWorld()
 		return;
 	}
 
+    settings.setValue("JobDir",QFileInfo(filename).absolutePath());
+
 
 }
 
 //slicing to a job file!
 void B9Layout::SliceWorldToJob(QString filename)
 {
+
     unsigned int m;
     unsigned int i;
     unsigned int l;
@@ -646,6 +801,8 @@ void B9Layout::SliceWorldToJob(QString filename)
 	double thickness = project->GetPixelThickness()*0.001;
 	int xsize = project->GetResolution().x();
 	int ysize = project->GetResolution().y();
+    QString jobname = project->GetJobName();
+    QString jobdesc = project->GetJobDescription();
 	int x;
 	int y;
 	QRgb pickedcolor;
@@ -667,8 +824,6 @@ void B9Layout::SliceWorldToJob(QString filename)
 			nummodels++;
 		}
 	}
-
-
 	//make a loading bar
 	LoadingBar progressbar(0, numlayers, this);
 	QObject::connect(&progressbar,SIGNAL(rejected()),this,SLOT(CancelSlicing()));
@@ -682,26 +837,16 @@ void B9Layout::SliceWorldToJob(QString filename)
 
 	//make a master job file for use later
 	pMasterJob = new CrushedPrintJob();
-	pMasterJob->setName(QFileInfo(filename).baseName());
-	pMasterJob->setDescription("Exported by B93D");
+    pMasterJob->setName(jobname);
+    pMasterJob->setDescription(jobdesc);
 	pMasterJob->setXYPixel(QString().number(project->GetPixelSize()/1000));
 	pMasterJob->setZLayer(QString().number(project->GetPixelThickness()/1000));
 	
-	img.fill(Qt::black);
-	for(l=0;l<numlayers;l++)
-	{
-		pMasterJob->addImage(&img);
-		progressbar.setValue(l);
-		QApplication::processEvents();
-		if(cancelslicing)
-		{
-			delete pMasterJob;
-			pWorldView->makeCurrent();
-			cancelslicing = false;
-			return;
-		}
-	}
-	
+
+
+    pMasterJob->clearAll(numlayers);//fills the master job with the needed layers
+
+
 	progressbar.setDescription("Slicing World..");
 	progressbar.setMax(numlayers*nummodels);
 	progressbar.setValue(0);
@@ -747,11 +892,14 @@ void B9Layout::SliceWorldToJob(QString filename)
 					
 					
 					QApplication::processEvents();
-
-
+                    imgfrommaster.fill(Qt::black);
 					pMasterJob->setCurrentSlice(l);
-					imgfrommaster.fill(Qt::black);
 					pMasterJob->inflateCurrentSlice(&imgfrommaster);
+                    if(imgfrommaster.size() == QSize(0,0))
+                    {
+                        imgfrommaster = QImage(xsize,ysize,QImage::Format_ARGB32);
+                        imgfrommaster.fill(Qt::black);
+                    }
 					for(x = 0; x < xsize; x++)
 					{
 						for(y = 0; y < ysize; y++)
@@ -901,15 +1049,20 @@ void B9Layout::CancelSlicing()
 ///////////////////////////////////////////////////
 void B9Layout::keyPressEvent(QKeyEvent * event )
 {
+
 }
 void B9Layout::keyReleaseEvent(QKeyEvent * event )
 {
+
 }
 void B9Layout::hideEvent(QHideEvent *event)
 {
     emit eventHiding();
 
     pWorldView->pDrawTimer->stop();
+
+
+
 
     event->accept();
 }
@@ -918,5 +1071,54 @@ void B9Layout::showEvent(QShowEvent *event)
 
     pWorldView->pDrawTimer->start();
 
+    event->accept();}
+
+void B9Layout::closeEvent ( QCloseEvent * event )
+{
+
+    //if the layout is dirty - ask the user if they want to save.
+    if(project->IsDirtied())
+    {
+        QMessageBox msgBox;
+        msgBox.setText("The layout has been modified.");
+         msgBox.setInformativeText("Do you want to save your changes?");
+         msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+         msgBox.setDefaultButton(QMessageBox::Save);
+        int ret = msgBox.exec();
+
+
+        switch (ret)
+        {
+          case QMessageBox::Save:
+                SaveAs();
+              break;
+          case QMessageBox::Discard:
+                //nothing
+              break;
+          case QMessageBox::Cancel:
+                event->ignore();
+                return;
+              break;
+          default:
+              break;
+        }
+    }
+
+    New();
     event->accept();
+
+}
+void B9Layout::contextMenuEvent(QContextMenuEvent *event)
+{
+    /*
+    QMenu menu(this);
+    menu.addAction(ui.actionDelete);
+    menu.addAction(ui.actionDrop_To_Floor);
+    menu.addSeparator();
+    menu.addAction(ui.actionMove);
+    menu.addAction(ui.actionRotate);
+    menu.addAction(ui.actionScale);
+
+    menu.exec(event->globalPos());
+    */
 }

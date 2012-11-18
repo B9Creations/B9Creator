@@ -515,7 +515,7 @@ uint CrushedPrintJob::getTotalWhitePixels(int iFirst, int iLast)
 	return iTotal;
 }
 
-void CrushedPrintJob::clearAll() {
+void CrushedPrintJob::clearAll(int iLayers) {
     mTotalWhitePixels=0;
 	mBase=0; 
 	mFilled=0; 
@@ -525,6 +525,14 @@ void CrushedPrintJob::clearAll() {
 	mJobExtents.setTopLeft(QPoint(65535,65535));
     DeleteAllSupports();
 	mSlices.clear();
+
+    if(iLayers == 0) return;
+
+    CrushedBitMap *pCBM;
+    for(int i=0; i<iLayers; i++){
+        pCBM = new CrushedBitMap();
+        mSlices.append(*pCBM);
+    }
 }
 
 void CrushedPrintJob::inflateCurrentSlice(QImage* pImage, int xOffset, int yOffset, bool bUseNaturalSize) {

@@ -105,6 +105,8 @@ public slots:
 
     void rcProjectorPwr(bool bPwrOn);
     void rcSetCPJ(CrushedPrintJob *pCPJ); // Set the pointer to the CMB to be displayed, NULL if blank
+    void rcCreateToverMap(int iRadius){pProjector->createToverMap(iRadius);}
+    bool rcClearTimedPixels(int iLevel){return pProjector->clearTimedPixels(iLevel);}
     void rcSetProjMessage(QString sMsg);
 
     void showIt(){show();setEnabledWarned();}

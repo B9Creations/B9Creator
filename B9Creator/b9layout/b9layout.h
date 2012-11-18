@@ -44,12 +44,15 @@ public slots:
 	void Save();
 	void SaveAs();
 
+
 	//interface
-	void SetXYPixelSize(QString size);
+    void SetXYPixelSizePreset(QString size);
 	void SetZLayerThickness(QString thick);
 	void SetProjectorX(QString);
 	void SetProjectorY(QString);
-	void SetZHeight(QString z);
+    void SetProjectorPreset(int index);
+    void SetZHeight(QString z);
+    void UpdateBuildSpaceUI();
 
 
 	//modeltranslation interface;
@@ -61,7 +64,7 @@ public slots:
 	void SetToolPointer();
 	void SetToolMove();
 	void SetToolRotate();
-
+    void SetToolScale();
 	
 	//model
 	ModelInstance* AddModel(QString filepath = "");
@@ -107,7 +110,8 @@ private:
 
     void hideEvent(QHideEvent *event);
     void showEvent(QShowEvent *event);
-
+    void closeEvent(QCloseEvent * event );
+    void contextMenuEvent(QContextMenuEvent *event);
 };
 
 #endif // B93D_H

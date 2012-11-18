@@ -29,16 +29,18 @@ public:
 	double GetPixelSize();
     double GetPixelThickness();
 	QVector2D GetResolution();
+    QString GetJobName();
+    QString GetJobDescription();
 
 	//Sets
 	void SetDirtied(bool dirt);
-	void SetFileName(QString name);
-	
+
 	void SetBuildSpaceSize(QVector3D size);
 	void SetPixelSize(double size);
     void SetPixelThickness(double thick);
 	void SetResolution(QVector2D dim);
-
+    void SetJobName(QString);
+    void SetJobDescription(QString);
 
 	void CalculateBuildArea();
 	void UpdateZSpace();//calculates the size of the z box based on instance bounds
@@ -52,13 +54,14 @@ private:
 	
 
 	bool dirtied;
-	QString filename;
+    QString mfilename;
 	QStringList modelfilelist;
 	QVector3D dimentions;
 	QVector2D resolution;
 	double xypixel;
 	double zthick;
-	QString jobfile;
+    QString jobExportName;//used when slicing to a job file.
+    QString jobExportDesc;
 
 	void SetDefaults();
 

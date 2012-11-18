@@ -38,6 +38,7 @@
 #include <QHideEvent>
 #include <QImage>
 #include <QColor>
+#include <QByteArray>
 #include "crushbitmap.h"
 
 class B9Projector : public QWidget
@@ -56,10 +57,11 @@ public slots:
 	void setShowGrid(bool bShow);					// Set bShow to true if Grid is to be drawn
 	void setStatusMsg(QString status);				// Set status to the message to be displayed
 	void setCPJ(CrushedPrintJob *pCPJ);				// Set the pointer to the CMB to be displayed, NULL if blank
+    bool clearTimedPixels(int iLevel);              // based on the level (0-255) we clear all pixels with Tover array values < iLevel
+    void createToverMap(int iRadius);
     void setXoff(int xOff){m_xOffset = xOff;drawAll();} // x offset for layer image
     void setYoff(int yOff){m_yOffset = yOff;drawAll();} // y offset for layer image
     void createNormalizedMask(double XYPS=0.1, double dZ = 257.0, double dOhMM = 91.088); //call when we show or resize
-    //void timingTest();
 
 signals:
     void eventHiding();             // signal to the parent that we are being hidden
@@ -82,14 +84,22 @@ private:
 	void drawStatusMsg();	// draws the current status msg on the projector screen
 	void drawCBM();			// draws the current CBM pointed to by mpCBM, returns if mpCBM is null
 
+    void createToverMap0();
+    void createToverMap1();
+    void createToverMap2();
+    void createToverMap3();
 	
     bool m_bIsPrintWindow;  // set to true if we lock the window to full screen when shown
     bool m_bGrid;			// if true, grid is to be drawn
 	CrushedPrintJob* mpCPJ;	// CPJ to inflate CBM from
-	QImage mImage;
+    QImage mImage;
+    QImage mCurSliceImage;  // Current Normalized slice, possible that has some or all pixels cleared
+    int m_iLevel;
     QImage m_NormalizedMask;
 	QString mStatusMsg;
 	int m_xOffset, m_yOffset;
+    QByteArray m_vToverMap;
+
 };
 
 #endif // B9PROJECTOR_H

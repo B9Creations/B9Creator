@@ -84,7 +84,7 @@ typically grouped together.
 class CrushedPrintJob;
 class CrushedBitMap {
 public:
-	CrushedBitMap() {mIndex = 0; uiWhitePixels=0;m_bIsBaseLayer=false; m_iWidth=0; m_iHeight=0;}
+    CrushedBitMap() {mIndex = 0; uiWhitePixels=0;m_bIsBaseLayer=false; m_iWidth=0; m_iHeight=0;}
 	CrushedBitMap(QImage* pImage);
 	CrushedBitMap(QPixmap* pPixmap);
     ~CrushedBitMap(){}
@@ -128,7 +128,8 @@ public:
 	CrushedPrintJob();
 	~CrushedPrintJob() {}
 
-    void clearAll();    // removes all slices and resets all variables
+    void clearAll(int iLayers = 0);    // removes all slices and resets all variables
+
 
     int getTotalLayers() {return mSlices.size() + mBase;}  // total layers including the base standoff offset layers
     uint getTotalWhitePixels() {return mTotalWhitePixels;} // returns all white pixels (fast)

@@ -31,13 +31,13 @@ bool SliceSet::GenerateSlice(double realAltitude)
 	//destroy the old slice if there is one:
 	if(pSliceData != NULL)
 	{
-		qDebug() << "old slice data deleted";
+        //qDebug() << "old slice data deleted";
 		delete pSliceData;
 		pSliceData = NULL;
 	}
 
 	//make a new one:
-	qDebug() << "SliceSet::GenerateSlice: Creating New Slice At Altitude: " << realAltitude;
+    //qDebug() << "SliceSet::GenerateSlice: Creating New Slice At Altitude: " << realAltitude;
 	
 	pSliceData = new Slice(realAltitude);
 
@@ -47,8 +47,8 @@ bool SliceSet::GenerateSlice(double realAltitude)
 
 	loops = pSliceData->GenerateLoops();//generate loop structures
 
-	qDebug() << "SliceSet::GenerateSlice: Segments: " << segments;
-	qDebug() << "SliceSet::GenerateSlice: Loops: " << loops;
+    //qDebug() << "SliceSet::GenerateSlice: Segments: " << segments;
+    //qDebug() << "SliceSet::GenerateSlice: Loops: " << loops;
 
 	return true;
 }

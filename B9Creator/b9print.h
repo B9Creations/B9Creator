@@ -2,7 +2,9 @@
 #define B9PRINT_H
 
 #include <QDialog>
+#include <QDateTime>
 #include <QHideEvent>
+#include <QSettings>
 #include "helpsystem.h"
 #include "b9terminal.h"
 
@@ -35,15 +37,17 @@ private slots:
     void on_updateProjector(B9PrinterStatus::ProjectorStatus eStatus);
     void on_signalAbortPrint();
 
-    void exposeLayer();
-    void exposureFinished();
+    void exposeTBaseLayer();
+    void startExposeTOverLayers();
+    void exposureOfCurTintLayerFinished();
+    void exposureOfTOverLayersFinished();
 
     void on_pushButtonPauseResume_clicked();
 
     void on_pushButtonAbort_clicked(QString sAbortText="User Directed Abort.");
 
 private:
-    enum {PRINT_NO, PRINT_RELEASING, PRINT_EXPOSING, PRINT_ABORT};
+    enum {PRINT_NO, PRINT_RELEASING, PRINT_EXPOSING, PRINT_ABORT, PRINT_DONE};
     enum {PAUSE_NO, PAUSE_WAIT, PAUSE_YES};
 
     void keyPressEvent(QKeyEvent * pEvent);		// Handle key press events
@@ -67,6 +71,11 @@ private:
     int m_iPaused;
     bool m_bAbort;
     QString m_sAbortMessage;
+    double m_dTintMS;
+    int m_iTintNum, m_iCurTintIndex, m_iMinimumTintMS,m_iMinimumTintMSWorstCase;
+    QTime m_vClock;
+    QSettings m_vSettings;
+
 };
 
 #endif // B9PRINT_H

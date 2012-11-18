@@ -14,6 +14,9 @@ class WorldView : public QGLWidget
      WorldView(QWidget *parent, B9Layout* main);
      ~WorldView();
      QTimer* pDrawTimer; //refreshed the 3d scene
+
+     bool shiftdown; //public so that the mainwindow can alter these values easy.
+     bool controldown;
  public slots:
     void setXRotation(int angle);
     void setYRotation(int angle);
@@ -46,6 +49,7 @@ class WorldView : public QGLWidget
 	void keyPressEvent(QKeyEvent * event );
 	void keyReleaseEvent(QKeyEvent * event );
 
+
  private:
     float xRot;
     float yRot;
@@ -56,7 +60,7 @@ class WorldView : public QGLWidget
 	float camdist;
 	//tools/keys
 	QString currtool;
-	bool shiftdown;
+
 	bool pandown;
 	bool dragdown;
 	ModelInstance* selectedinst;
@@ -66,8 +70,9 @@ class WorldView : public QGLWidget
 	float buildsizey;
 	float buildsizez;
 
+    QPoint mousedownPos;
+    bool initialsnap;
 	QPoint lastPos;
-
 
     B9Layout* pMain;
  };

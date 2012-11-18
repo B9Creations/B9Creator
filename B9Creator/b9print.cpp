@@ -1,6 +1,5 @@
 #include <QMessageBox>
 #include <QTimer>
-#include <QDateTime>
 #include "b9print.h"
 #include "ui_b9print.h"
 
@@ -31,7 +30,7 @@ B9Print::B9Print(B9Terminal *pTerm, QWidget *parent) :
     connect(m_pTerminal, SIGNAL(updateProjectorStatus(QString)), this, SLOT(on_updateProjectorStatus(QString)));
     connect(m_pTerminal, SIGNAL(updateProjector(B9PrinterStatus::ProjectorStatus)), this, SLOT(on_updateProjector(B9PrinterStatus::ProjectorStatus)));
     connect(m_pTerminal, SIGNAL(signalAbortPrint(QString)), this, SLOT(on_pushButtonAbort_clicked(QString)));
-    connect(m_pTerminal, SIGNAL(PrintReleaseCycleFinished()), this, SLOT(exposeLayer()));
+    connect(m_pTerminal, SIGNAL(PrintReleaseCycleFinished()), this, SLOT(exposeTBaseLayer()));
     connect(m_pTerminal, SIGNAL(pausePrint()), this, SLOT(on_pushButtonPauseResume_clicked()));
     connect(m_pTerminal, SIGNAL(sendStatusMsg(QString)),this, SLOT(setProjMessage(QString)));
 
@@ -120,13 +119,14 @@ void B9Print::on_signalAbortPrint()
         m_pTerminal->rcProjectorPwr(false); // Don't try to release if possibly jammed!
     else
         m_pTerminal->rcFinishPrint(5); //Finish at current z position + 5 mm, turn Projector Off
+
     m_pTerminal->onScreenCountChanged(); // toggles off the screen if need for primary monitor setups
-    QMessageBox::warning(0,"Printing Aborted!","PRINT ABORTED\n\n"+m_sAbortMessage);
     hide();
     m_pTerminal->setUsePrimaryMonitor(false);
     m_pTerminal->setPrintPreview(false);
     m_pTerminal->onScreenCountChanged();
     m_pTerminal->setEnabled(true);
+    QMessageBox::information(0,"Printing Aborted!","PRINT ABORTED\n\n"+m_sAbortMessage);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -134,6 +134,13 @@ void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, i
 {
     // Note if, iLastLayer < 1, print ALL layers.
     // if bPrintPreview, run without turning on the projector
+
+    m_iMinimumTintMS = m_vSettings.value("m_iMinimumTintMS",50).toInt(); // Grab the old value
+    if(m_iMinimumTintMS>500)
+        m_iMinimumTintMS=555; // Should never get this big, fix it.
+    else if (m_iMinimumTintMS<50)
+        m_iMinimumTintMS=56;  // Or this little
+    m_vSettings.setValue("m_iMinimumTintMS",(int)((double)m_iMinimumTintMS*.9)); //Set it back to 90% of it last value, just to keep it close to the edge
 
     m_iPrintState = PRINT_NO;
     m_pTerminal->setEnabled(false);
@@ -197,7 +204,7 @@ void B9Print::on_pushButtonPauseResume_clicked()
         m_iPaused = PAUSE_NO;
         ui->pushButtonPauseResume->setText("Pause");
         ui->pushButtonAbort->setEnabled(true);
-        exposureFinished();
+        exposureOfTOverLayersFinished();
     }
     else if(m_iPaused==PAUSE_NO){
         // Time to Pause....
@@ -241,9 +248,9 @@ void B9Print::setSlice(int iSlice)
     }
 }
 
-void B9Print::exposeLayer(){
+void B9Print::exposeTBaseLayer(){
     //Release & reposition cycle completed, time to expose the new layer
-    if(m_iPrintState==PRINT_NO)return;
+    if(m_iPrintState==PRINT_NO || m_iPrintState == PRINT_DONE || m_iPrintState == PRINT_ABORT)return;
     if(m_bAbort){
         // We're done, release and raise
         m_pTerminal->rcSetCPJ(NULL); //blank
@@ -253,10 +260,11 @@ void B9Print::exposeLayer(){
         return;
     }
 
-    //Start Print exposure
+    //Start Tbase Print exposure
     ui->progressBarPrintProgress->setValue(m_iCurLayerNumber+1);
     ui->lineEditLayerCount->setText("Creating Layer "+QString::number(m_iCurLayerNumber+1)+" of "+QString::number(m_iLastLayer)+",  "+QString::number(100.0*(double)(m_iCurLayerNumber+1)/(double)m_iLastLayer,'f',1)+"% Complete");
     setSlice(m_iCurLayerNumber);
+    m_vClock.start(); // image is out there, start the clock running!
     QString sTimeUpdate = updateTimes();
     if(m_iPaused==PAUSE_WAIT){
         ui->lineEditLayerCount->setText("Pausing...");
@@ -266,15 +274,65 @@ void B9Print::exposeLayer(){
         setProjMessage("(Press'p' to pause, 'A' to ABORT)  " + sTimeUpdate+"  Creating Layer "+QString::number(m_iCurLayerNumber+1)+" of "+QString::number(m_iLastLayer));
     }
     m_iPrintState = PRINT_EXPOSING;
-    // set timer TODO Change exposure method here!
-    int iAdjExposure = m_pTerminal->getLampAdjustedExposureTime(m_iTbase + m_iTover);
-    QTimer::singleShot(iAdjExposure, this, SLOT(exposureFinished()));
+    // set timer
+    int iAdjExposure = m_pTerminal->getLampAdjustedExposureTime(m_iTbase);
+    if(iAdjExposure>0){
+        QTimer::singleShot(iAdjExposure-m_vClock.elapsed(), this, SLOT(startExposeTOverLayers()));
+        return;
+    }
+    else
+    {
+        startExposeTOverLayers(); // If this is getting called, we're taking too long!
+        qDebug() << "EXPOSURE TIMING ERROR:  Tbase exposed for too long!, Tbase is set too small or computer too slow?" << iAdjExposure;
+        return;
+    }
 }
 
-void B9Print::exposureFinished(){
+void B9Print::startExposeTOverLayers(){
+    m_vClock.start();  //restart for Tover interval pace
+
+    m_iMinimumTintMS = m_vSettings.value("m_iMinimumTintMS",50).toInt(); // We default to 50ms but adjust it upwards when it gets hit.
+    m_iMinimumTintMSWorstCase=m_iMinimumTintMS;
+
+    qDebug() << " MinTintMS " << m_iMinimumTintMS;
+
+    int iAdjTover = m_pTerminal->getLampAdjustedExposureTime(m_iTover);
+    m_iTintNum = (int)((double)iAdjTover/(double)m_iMinimumTintMS);
+    if(m_iTintNum > 255) m_iTintNum = 255; // maximum number of time intervals we chop Tover into is 256
+
+    m_dTintMS = (double)iAdjTover/(double)m_iTintNum; // The time of each interval in fractional ms, will always be >= m_iMinimumTintMS
+    m_iCurTintIndex = 0;
+    exposureOfCurTintLayerFinished();
+}
+
+void B9Print::exposureOfCurTintLayerFinished(){
+    // Turn off the pixels at the curent point
+    qDebug() <<"INTERVAL COUNT " << m_iCurTintIndex;
+    if(m_pTerminal->rcClearTimedPixels((double)m_iCurTintIndex*255.0/(double)m_iTintNum) || m_iCurTintIndex>=m_iTintNum)
+    {
+        exposureOfTOverLayersFinished();  // We're done with Tover
+        m_vSettings.setValue("m_iMinimumTintMS",m_iMinimumTintMSWorstCase);
+        return;
+    }
+
+    m_iCurTintIndex ++;
+    int iAdjustedInt = (int)(m_dTintMS * (double)m_iCurTintIndex)-m_vClock.elapsed();
+    if(iAdjustedInt>0){
+        QTimer::singleShot(iAdjustedInt, this, SLOT(exposureOfCurTintLayerFinished()));
+        return;
+    }
+    else
+    {
+        if(m_iCurTintIndex==1)m_iMinimumTintMSWorstCase=m_iMinimumTintMS-iAdjustedInt;
+        qDebug()<<"Adjusting Minimum Tover interval size " << m_iMinimumTintMSWorstCase << "ms";
+        exposureOfCurTintLayerFinished(); // If this is getting called, we're taking too long!
+        return;
+    }
+}
+
+void B9Print::exposureOfTOverLayersFinished(){
     if(m_iPrintState==PRINT_NO)return;
     m_pTerminal->rcSetCPJ(NULL); //blank
-
     //Cycle to next layer or finish
     if(m_iPaused==PAUSE_WAIT){
         m_iPaused=PAUSE_YES;
@@ -297,7 +355,7 @@ void B9Print::exposureFinished(){
     }
     else if(m_iCurLayerNumber==m_iLastLayer-1){
         // We're done, release and raise
-        m_iPrintState=PRINT_NO;
+        m_iPrintState=PRINT_DONE;
         m_pTerminal->rcFinishPrint(25.4); //Finish at current z position + 25.4 mm, turn Projector Off
         setProjMessage("Finished!");
         ui->lineEditLayerCount->setText("Finished!");

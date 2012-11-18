@@ -24,13 +24,16 @@ signals:
 
 public slots:
     void LoadLayout();
-
+    void Slice();
 
 
 private:
     void hideEvent(QHideEvent *event);
+    void showEvent(QHideEvent *event);
     Ui::B9Slice *ui;
     B9Layout* pMain;
+
+    QString currentLayout;
 };
 
 #endif // B9SLICE_H
