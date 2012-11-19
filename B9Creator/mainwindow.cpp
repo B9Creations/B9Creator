@@ -55,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
     pTerminal->setEnabled(true);
 
     connect(pTerminal, SIGNAL(updateConnectionStatus(QString)), ui->statusBar, SLOT(showMessage(QString)));
+    connect(pTerminal, SIGNAL(updateConnectionStatus(QString)), this, SLOT(checkConnected(QString)));
 
     ui->statusBar->showMessage(MSG_SEARCHING);
 
@@ -70,6 +71,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(pMW2, SIGNAL(eventHiding()),this, SLOT(handleW2Hide()));
     connect(pMW3, SIGNAL(eventHiding()),this, SLOT(handleW3Hide()));
     connect(pMW4, SIGNAL(eventHiding()),this, SLOT(handleW4Hide()));
+
+    ui->commandPrint->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -81,6 +84,23 @@ MainWindow::~MainWindow()
         pLogManager->openLogFileInFolder(); // Show log file location
     delete pLogManager; // delete last so all messages are logged
     delete ui;
+}
+
+void MainWindow::showSplash()
+{
+    if(m_pSplash!=NULL){
+        m_pSplash->show();
+        //m_pSplash->showMessage("Version 1.0");
+        QTimer::singleShot(3000,this,SLOT(hideSplash()));
+    }
+}
+
+void MainWindow::showAbout()
+{
+    if(m_pSplash!=NULL){
+        m_pSplash->show();
+        //m_pSplash->showMessage("Version 1.0");
+    }
 }
 
 void MainWindow::showLogAndExit()
@@ -159,9 +179,15 @@ void MainWindow::on_commandEdit_clicked(bool checked)
     }
     else pMW3->hide();
 }
+
+void MainWindow::checkConnected(QString sMsg)
+{
+    ui->commandPrint->setEnabled(pTerminal->isConnected());
+}
+
 void MainWindow::on_commandPrint_clicked(bool checked)
 {
-    if(checked && pTerminal->isConnected()) {
+    if(pTerminal->isConnected()) {
 
         /////////////////////////////////////////////////
         //  Stubbing in wizard's job for now
@@ -177,15 +203,48 @@ void MainWindow::on_commandPrint_clicked(bool checked)
             QMessageBox msgBox;
             msgBox.setText("Error Loading File.  Unknown Version?");
             msgBox.exec();
+
+            pMW4->hide();
             return;
+
         }
         m_pCPJ->showSupports(true);
 
 
-//        pMW4->print3D(m_pCPJ, 0, 0, 4000, 3000, 20, true, true);
-        pMW4->print3D(m_pCPJ, 0, 0, 2000, 4000, 20, false, false);
+        QSettings settings;
+
+        bool ok;
+        double dTbase = QInputDialog::getDouble(this, tr("TbaseTime"),
+                                           tr("Exposure Base Time:"), settings.value("TbaseTime",10).toInt(), 1, 20, 2, &ok);
+        if (!ok){pMW4->hide();return; }
+
+        double dTover = QInputDialog::getDouble(this, tr("ToverTime"),
+                                           tr("Exposure Edge Cure Time:"), settings.value("ToverTime",15).toInt(), 1, 20, 2, &ok);
+        if (!ok){pMW4->hide();return; }
+
+        double dTattach = QInputDialog::getDouble(this, tr("Attach Layer Cure Time"),
+                                                  tr("Attach (first)Layer Cure Time:"),settings.value("AttachLayerCureTime",30).toInt(), 1, 40, 2, &ok);
+        if (!ok){pMW4->hide();return; }
+
+        int iLayerCount = QInputDialog::getInt(this, tr("How many layers to print?"),
+                                     tr("Enter the number of layers to print (0 for all layers):"), 0, 0, 10000, 1, &ok);
+        if (!ok){pMW4->hide();return; }
+
+        settings.setValue("TbaseTime",(double)dTbase);
+        settings.setValue("ToverTime",(double)dTover);
+        settings.setValue("AttachLayerCureTime",(double)dTattach);
+
+        QMessageBox msgBox;
+        msgBox.setText("Ready to print");
+        msgBox.setInformativeText("Click Yes if you wish this to just be a 'Print Preview', or No to print normally.");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::No);
+        int ret = msgBox.exec();
+        if(ret==QMessageBox::Cancel)return;
+        bool bPrintPreview = false;
+        if(ret==QMessageBox::Yes)bPrintPreview=true;
+        pMW4->print3D(m_pCPJ, 0, 0, dTbase*1000, dTover*1000, dTattach*1000, iLayerCount, bPrintPreview, bPrintPreview);
 
         /////////////////////////////////////
-     }
-    else pMW4->hide();
+    }
 }

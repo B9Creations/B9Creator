@@ -114,6 +114,7 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     m_bWaiverAccepted = false;
     m_bWavierActive = false;
     m_bNeedsWarned = true;
+    m_bSecondTimeoutAttempt = false;
 
     ui->setupUi(this);
     ui->commStatus->setText("Searching for B9Creator...");
@@ -532,7 +533,7 @@ void B9Terminal::on_lineEditTgtZInches_editingFinished()
 
 void B9Terminal::setTgtAltitudePU(int iTgtPU)
 {
-    qDebug()<<"TgtPU"<<iTgtPU;
+//    qDebug()<<"TgtPU"<<iTgtPU;
     double dTgtMM = (iTgtPU * pPrinterComm->getPU())/100000.0;
     ui->lineEditTgtZPU->setText(QString::number(iTgtPU));
     ui->lineEditTgtZMM->setText(QString::number(dTgtMM,'g',8));
@@ -654,6 +655,7 @@ void B9Terminal::onBC_CurrentVatPercentOpen(int iPO){
 
 void B9Terminal::onBC_PrintReleaseCycleFinished()
 {
+    m_bSecondTimeoutAttempt = false;
     m_pPReleaseCycleTimer->stop();
     ui->lineEditCycleStatus->setText("Cycle Complete.");
     ui->pushButtonPrintBase->setEnabled(true);
@@ -664,8 +666,21 @@ void B9Terminal::onBC_PrintReleaseCycleFinished()
 
 void B9Terminal::onReleaseCycleTimeout()
 {
-    on_pushButtonStop_clicked(); // STOP!
     m_pPReleaseCycleTimer->stop();
+    QSettings settings;
+    double dTimeoutFactor = settings.value("ReleaseCycle_BaseTimeOutFactor",1.5).toInt();
+    if(!m_bSecondTimeoutAttempt && dTimeoutFactor < 2.0){
+        qDebug()<<"Release Cycle 1st Timeout.";
+        // We'll keep waiting
+        m_bSecondTimeoutAttempt = true;
+        settings.setValue("ReleaseCycle_BaseTimeOutFactor",dTimeoutFactor + 0.1);
+        int iTimeout = getEstNextCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
+        m_pPReleaseCycleTimer->start(iTimeout * settings.value("ReleaseCycle_BaseTimeOutFactor",1.5).toInt());
+        return;
+    }
+    qDebug()<<"Release Cycle 2nd Timeout.";
+return;  //TODO FIX THIS!
+    on_pushButtonStop_clicked(); // STOP!
     ui->lineEditCycleStatus->setText("ERROR: TimeOut");
     ui->pushButtonPrintBase->setEnabled(true);
     ui->pushButtonPrintNext->setEnabled(true);
@@ -693,10 +708,11 @@ void B9Terminal::on_pushButtonPrintNext_clicked()
     ui->pushButtonPrintNext->setEnabled(false);
     ui->pushButtonPrintFinal->setEnabled(false);
 
+    QSettings settings;
     SetCycleParameters();
     int iTimeout = getEstNextCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("N"+ui->lineEditTgtZPU->text());
-    m_pPReleaseCycleTimer->start(iTimeout * 1.5); // Timeout after 150% of estimated time required
+    m_pPReleaseCycleTimer->start(iTimeout * settings.value("ReleaseCycle_BaseTimeOutFactor",1.5).toInt()); // Timeout after 150% of estimated time required
 }
 
 void B9Terminal::on_pushButtonPrintFinal_clicked()
@@ -876,7 +892,8 @@ int B9Terminal::getZMoveTime(int iDelta, int iSpd){
 
 int B9Terminal::getVatMoveTime(int iSpeed){
     double dPercent = (double)iSpeed/100.0;
-    return 999 - dPercent*229.0; // based on speed tests of B9C1 on 11/14/2012
+//    return 999 - dPercent*229.0; // based on speed tests of B9C1 on 11/14/2012
+    return 1500 - dPercent*229.0; // updated based on timeouts on pre-production model tests 11/18/2012
 }
 
 int B9Terminal::getEstBaseCycleTime(int iCur, int iTgt){

@@ -39,7 +39,6 @@
 #include <QPainter>
 
 
-
 ////////////////////////////////////////////////////////////
 //
 // SimpleSupport functions
@@ -545,6 +544,7 @@ void CrushedPrintJob::inflateCurrentSlice(QImage* pImage, int xOffset, int yOffs
 	SimpleSupport sSimple;
 
     if(m_CurrentSlice < 0 || m_CurrentSlice >= getTotalLayers()) return;
+
 	getCBMSlice(m_CurrentSlice)->inflateSlice(pImage, xOffset, yOffset, bUseNaturalSize);
 
 	//Todo Render filled Extent && Supports
@@ -606,7 +606,7 @@ bool CrushedPrintJob::crushCurrentSlice(QImage* pImage){
     bool bResult=getCBMSlice(m_CurrentSlice)->crushSlice(pImage);
 	if(m_Width<getCBMSlice(m_CurrentSlice)->getWidth())m_Width=getCBMSlice(m_CurrentSlice)->getWidth();
 	if(m_Height<getCBMSlice(m_CurrentSlice)->getHeight())m_Height=getCBMSlice(m_CurrentSlice)->getHeight();
-	return bResult;
+    return bResult;
 }
 
 bool CrushedPrintJob::isWhitePixel(QPoint qPoint, int iSlice){

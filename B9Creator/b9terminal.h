@@ -236,6 +236,7 @@ private:
     bool m_bWaiverAccepted;
     bool m_bWavierActive;
     bool m_bNeedsWarned;
+    bool m_bSecondTimeoutAttempt;
 };
 
 #endif // B9TERMINAL_H

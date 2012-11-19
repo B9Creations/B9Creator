@@ -154,7 +154,7 @@
         <string>Print</string>
        </property>
        <property name="checkable">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -412,6 +412,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionAbout_B9Creator</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showAbout()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>101</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>myOpen()</slot>
@@ -421,5 +437,6 @@
   <slot>showHelp()</slot>
   <slot>showCatalog()</slot>
   <slot>showPrintWiz()</slot>
+  <slot>showAbout()</slot>
  </slots>
 </ui>

@@ -808,8 +808,8 @@ void B9Layout::SliceWorldToJob(QString filename)
 	QRgb pickedcolor;
 	QRgb mastercolor;
 	QPixmap pix;
-	QImage img(xsize,ysize, QImage::Format_ARGB32);
-	QImage imgfrommaster(xsize,ysize, QImage::Format_ARGB32);
+    QImage img(xsize,ysize, QImage::Format_ARGB32_Premultiplied);
+    QImage imgfrommaster(xsize,ysize, QImage::Format_ARGB32_Premultiplied);
 	CrushedPrintJob* pMasterJob = NULL;
 
 
@@ -861,9 +861,9 @@ void B9Layout::SliceWorldToJob(QString filename)
 			//slice all layers and add to instance's job file
 			for(l = 0; l < numlayers; l++)
 			{
-				//make sure we are in the model's z - bounds
-				if(l*thickness <= inst->GetMaxBound().z() && l*thickness >= inst->GetMinBound().z())
-				{	
+                //make sure we are in the model's z - bounds
+                if((double)l*thickness <= inst->GetMaxBound().z() && (double)l*thickness >= inst->GetMinBound().z()-0.5*thickness)
+                {
 					//ACTUALLY Generate the Slice.
 					inst->pSliceSet->GenerateSlice(l*thickness + thickness*0.5);
 					paintwidget.SetSlice(inst->pSliceSet->pSliceData);
@@ -885,7 +885,7 @@ void B9Layout::SliceWorldToJob(QString filename)
 								{
 									result = 255;
 								}
-								img.setPixel(x,y,QColor(result,0,0).rgb());
+                                img.setPixel(x,y,QColor(result,0,0,result).rgba());
 							}
 						}
 					}
@@ -897,7 +897,7 @@ void B9Layout::SliceWorldToJob(QString filename)
 					pMasterJob->inflateCurrentSlice(&imgfrommaster);
                     if(imgfrommaster.size() == QSize(0,0))
                     {
-                        imgfrommaster = QImage(xsize,ysize,QImage::Format_ARGB32);
+                        imgfrommaster = QImage(xsize,ysize,QImage::Format_ARGB32_Premultiplied);
                         imgfrommaster.fill(Qt::black);
                     }
 					for(x = 0; x < xsize; x++)
@@ -908,11 +908,11 @@ void B9Layout::SliceWorldToJob(QString filename)
 							mastercolor = imgfrommaster.pixel(x,y); 
 							if(qRed(pickedcolor) || qRed(mastercolor))
 							{
-								imgfrommaster.setPixel(x,y,QColor(255,255,255).rgb());
+                                imgfrommaster.setPixel(x,y,QColor(255,255,255).rgb());
 							}
 						}
-					}
-					pMasterJob->crushCurrentSlice(&imgfrommaster);
+                    }
+                    pMasterJob->crushCurrentSlice(&imgfrommaster);
 					QApplication::processEvents();
 
 					//update progress bar

@@ -130,7 +130,7 @@ void B9Print::on_signalAbortPrint()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, int iTover, int iLastLayer, bool bPrintPreview, bool bUsePrimaryMonitor)
+void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, int iTover, int iTattach, int iLastLayer, bool bPrintPreview, bool bUsePrimaryMonitor)
 {
     // Note if, iLastLayer < 1, print ALL layers.
     // if bPrintPreview, run without turning on the projector
@@ -146,7 +146,7 @@ void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, i
     m_pTerminal->setEnabled(false);
     m_pCPJ = pCPJ;
     m_pTerminal->createNormalizedMask(m_pCPJ->getXYPixelmm());
-    m_iTbase = iTbase; m_iTover = iTover;
+    m_iTbase = iTbase; m_iTover = iTover; m_iTattach = iTattach;
     m_iXOff = iXOff; m_iYOff = iYOff;
     m_iCurLayerNumber = 0;
     m_iPaused = PAUSE_NO;
@@ -276,6 +276,7 @@ void B9Print::exposeTBaseLayer(){
     m_iPrintState = PRINT_EXPOSING;
     // set timer
     int iAdjExposure = m_pTerminal->getLampAdjustedExposureTime(m_iTbase);
+    if(m_iCurLayerNumber==0) iAdjExposure = m_pTerminal->getLampAdjustedExposureTime(m_iTattach);  //Layer 0 has different exposure timing
     if(iAdjExposure>0){
         QTimer::singleShot(iAdjExposure-m_vClock.elapsed(), this, SLOT(startExposeTOverLayers()));
         return;
@@ -289,12 +290,14 @@ void B9Print::exposeTBaseLayer(){
 }
 
 void B9Print::startExposeTOverLayers(){
+    if(m_iCurLayerNumber==0){exposureOfTOverLayersFinished(); return;} //Skip this on first layer (0)
+
     m_vClock.start();  //restart for Tover interval pace
 
     m_iMinimumTintMS = m_vSettings.value("m_iMinimumTintMS",50).toInt(); // We default to 50ms but adjust it upwards when it gets hit.
     m_iMinimumTintMSWorstCase=m_iMinimumTintMS;
 
-    qDebug() << " MinTintMS " << m_iMinimumTintMS;
+//    qDebug() << " MinTintMS " << m_iMinimumTintMS;
 
     int iAdjTover = m_pTerminal->getLampAdjustedExposureTime(m_iTover);
     m_iTintNum = (int)((double)iAdjTover/(double)m_iMinimumTintMS);
@@ -307,7 +310,7 @@ void B9Print::startExposeTOverLayers(){
 
 void B9Print::exposureOfCurTintLayerFinished(){
     // Turn off the pixels at the curent point
-    qDebug() <<"INTERVAL COUNT " << m_iCurTintIndex;
+//    qDebug() <<"INTERVAL COUNT " << m_iCurTintIndex;
     if(m_pTerminal->rcClearTimedPixels((double)m_iCurTintIndex*255.0/(double)m_iTintNum) || m_iCurTintIndex>=m_iTintNum)
     {
         exposureOfTOverLayersFinished();  // We're done with Tover
@@ -324,7 +327,7 @@ void B9Print::exposureOfCurTintLayerFinished(){
     else
     {
         if(m_iCurTintIndex==1)m_iMinimumTintMSWorstCase=m_iMinimumTintMS-iAdjustedInt;
-        qDebug()<<"Adjusting Minimum Tover interval size " << m_iMinimumTintMSWorstCase << "ms";
+//        qDebug()<<"Adjusting Minimum Tover interval size " << m_iMinimumTintMSWorstCase << "ms";
         exposureOfCurTintLayerFinished(); // If this is getting called, we're taking too long!
         return;
     }

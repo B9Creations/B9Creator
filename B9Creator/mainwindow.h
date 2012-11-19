@@ -38,6 +38,7 @@
 #include <QMainWindow>
 #include <QCloseEvent>
 #include <QDesktopWidget>
+#include <QSplashScreen>
 #include "logfilemanager.h"
 #include "b9layout/b9layout.h"
 #include "b9slice.h"
@@ -67,6 +68,12 @@ public slots:
     void showLogAndExit();
     void showTerminal();
     void showCatalog();
+    void checkConnected(QString sMsg);
+
+    void showAbout();
+    void setSplash(QSplashScreen * splash){m_pSplash = splash;}
+    void showSplash();
+    void hideSplash(){if(m_pSplash!=NULL)m_pSplash->hide();}
 
 private slots:
     void on_commandLayout_clicked(bool checked);
@@ -81,6 +88,7 @@ private:
     bool m_bOpenLogOnExit;
     HelpSystem m_HelpSystem;
 
+    QSplashScreen * m_pSplash;
     B9Layout *pMW1;
     B9Slice *pMW2;
     B9Edit *pMW3;

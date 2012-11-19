@@ -96,7 +96,7 @@ bool B9Projector::clearTimedPixels(int iLevel)
     int height = mCurSliceImage.height();
     QRgb *pixels = (QRgb *)mCurSliceImage.scanLine(0);
     bool bAllClear = true;
-    qDebug() <<"iLevel " <<iLevel;
+//    qDebug() <<"iLevel " <<iLevel;
     m_iLevel = iLevel;
 
     // clear the mCurSliceImage image as required

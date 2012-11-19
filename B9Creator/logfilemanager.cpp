@@ -44,31 +44,32 @@
 QString sLogFileName;
 void messageHandler(QtMsgType type, const char *msg)
 {
+//#ifndef QT_NO_DEBUG
+    QFile outFile(sLogFileName);
+    QTextStream ts;
     QString txt;
     txt = QDateTime::currentDateTime().toString("yy.MM.dd hh:mm:ss.zzz");
+//#endif
     switch (type) {
     case QtDebugMsg:
+//#ifndef QT_NO_DEBUG
         fprintf(stderr, "Debug: %s\n", msg);
         txt += QString("  : %1").arg(msg);
+        outFile.open(QIODevice::WriteOnly | QIODevice::Append);
+        ts.setDevice(&outFile);
+        ts << txt << "\r" << endl;
+        outFile.close();
+//#endif
         break;
     case QtWarningMsg:
         fprintf(stderr, "Warning: %s\n", msg);
-        txt += QString("  Warning: %1").arg(msg);
     break;
     case QtCriticalMsg:
         fprintf(stderr, "Critical: %s\n", msg);
-        txt += QString(" Critical: %1").arg(msg);
     break;
     case QtFatalMsg:
         fprintf(stderr, "Fatal: %s\n", msg);
-        txt += QString("    Fatal: %1").arg(msg);
     }
-
-    QFile outFile(sLogFileName);
-    outFile.open(QIODevice::WriteOnly | QIODevice::Append);
-    QTextStream ts(&outFile);
-    ts << txt << "\r" << endl;
-
     if(type== QtFatalMsg)
         abort();
 }

@@ -83,10 +83,10 @@ void DrawingContext::GenerateLogicImage()
 
 	int x;
 	int y;
-	int white = QColor(255,255,255).rgb();
-	int grey = QColor(190,190,190).rgb();
-	int black = QColor(0,0,0).rgb();
-	int red = QColor(255,0,0).rgb();
+    int white = QColor(255,255,255).rgb();
+    int grey = QColor(190,190,190).rgb();
+    int black = QColor(0,0,0).rgb();
+    int red = QColor(255,0,0).rgb();
 	int width = pActiveImage->width();
 	int height = pActiveImage->height();
 	
@@ -116,9 +116,9 @@ void DrawingContext::GenerateGreenImage()
 		return;
 	int x;
 	int y;
-	int white = QColor(255,255,255).rgb();
-	int black = QColor(0,0,0).rgb();
-	int green = QColor(0,100,0).rgb();
+    int white = QColor(255,255,255).rgb();
+    int black = QColor(0,0,0).rgb();
+    int green = QColor(0,100,0).rgb();
 	int width = pActiveImage->width();
 	int height = pActiveImage->height();
 

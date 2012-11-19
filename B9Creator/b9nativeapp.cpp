@@ -1,6 +1,7 @@
 #include <QWidget>
 #include "b9nativeapp.h"
 
+
 // It's safe to call this function on any platform.
 // It will only have an effect on the Mac.
 void B9NativeApp::set_smaller_text_osx(QWidget *w)
