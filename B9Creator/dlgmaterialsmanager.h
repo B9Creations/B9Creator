@@ -52,6 +52,8 @@ private slots:
 
     void on_buttonBoxSaveCancel_rejected();
 
+    void on_doubleSpinBox_valueChanged(double arg1);
+
 private:
     Ui::DlgMaterialsManager *ui;
     void setUp();

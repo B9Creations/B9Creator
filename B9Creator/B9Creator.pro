@@ -80,7 +80,8 @@ SOURCES += main.cpp\
     b9layout/modeldata.cpp \
     b9layout/loop.cpp \
     b9layout/b9layout.cpp \
-    b9slice/b9slice.cpp
+    b9slice/b9slice.cpp \
+    dlgprintprep.cpp
 
 HEADERS  += mainwindow.h \
     logfilemanager.h \
@@ -116,7 +117,8 @@ HEADERS  += mainwindow.h \
     b9layout/loop.h \
     OS_GL_Wrapper.h \
     b9layout/b9layout.h \
-    b9slice/b9slice.h
+    b9slice/b9slice.h \
+    dlgprintprep.h
 
 FORMS    += mainwindow.ui \
     b9terminal.ui \
@@ -128,7 +130,8 @@ FORMS    += mainwindow.ui \
     dlgmaterialsmanager.ui \
     b9print.ui \
     b9layout/slicedebugwindow.ui \
-    b9layout/b93dmain.ui
+    b9layout/b93dmain.ui \
+    dlgprintprep.ui
 
 RESOURCES += \
     b9edit/sliceeditview.qrc \

@@ -20,14 +20,17 @@ public:
     void setMaterialLabel(QString sLabel){m_sMaterialLabel = sLabel;}
     void setMaterialDescription(QString sLabel){m_sMaterialDescription = sLabel;}
 
+    double getTattach(int iXY){return m_aAttachTimes[iXY];}
     double getTbase(int iXY, int iZ){return m_aTimes[iXY][iZ][0];}
     double getTover(int iXY, int iZ){return m_aTimes[iXY][iZ][1];}
+    void setTattach(int iXY, double dSeconds){m_aAttachTimes[iXY]=dSeconds;}
     void setTbase(int iXY, int iZ, double dSeconds){m_aTimes[iXY][iZ][0]=dSeconds;}
     void setTover(int iXY, int iZ, double dSeconds){m_aTimes[iXY][iZ][1]=dSeconds;}
 
 private:
     void initDefaults();
     double m_aTimes [XYCOUNT][ZCOUNT][TCOUNT]; // Cure times in seconds
+    double m_aAttachTimes [XYCOUNT]; // Cure times in seconds for first layer
     QString m_sMaterialLabel, m_sMaterialDescription;
 
 public: // sorting friends
@@ -56,12 +59,15 @@ public:
     bool isFactoryEntry(int iMat){return m_Materials[iMat]->isFactoryEntry();}
     QString getMaterialDescription(int index){return m_Materials[index]->getMaterialDescription();}
 
+    QString getTattach(int iMat, int iXY) {return QString::number(m_Materials[iMat]->getTattach(iXY));}
     QString getTbase(int iMat, int iXY, int iZ){return QString::number(m_Materials[iMat]->getTbase(iXY, iZ));}
     QString getTover(int iMat, int iXY, int iZ){return QString::number(m_Materials[iMat]->getTover(iXY, iZ));}
 
+    void setTattach(int iMat, int iXY,double dT){m_Materials[iMat]->setTattach(iXY, dT);}
     void setTbase(int iMat, int iXY, int iZ, double dT){m_Materials[iMat]->setTbase(iXY, iZ, dT);}
     void setTover(int iMat, int iXY, int iZ, double dT){m_Materials[iMat]->setTover(iXY, iZ, dT);}
 
+    QString getCurTattach(){return QString::number(m_Materials[m_iCurMatIndex]->getTattach(m_iCurXYIndex));}
     QString getCurTbaseAtZ(int iZ){return QString::number(m_Materials[m_iCurMatIndex]->getTbase(m_iCurXYIndex, iZ));}
     QString getCurToverAtZ(int iZ){return QString::number(m_Materials[m_iCurMatIndex]->getTover(m_iCurXYIndex, iZ));}
 
@@ -80,6 +86,9 @@ public:
     int getCurMatIndex(){return m_iCurMatIndex;}
     int getCurXYIndex(){return m_iCurXYIndex;}
     int getCurZIndex(){return m_iCurZIndex;}
+
+    int getCurTbaseAtZinMS(double zMM);
+    int getCurToverAtZinMS(double zMM);
 
 signals:
 

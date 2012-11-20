@@ -72,6 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(pMW4, SIGNAL(eventHiding()),this, SLOT(handleW4Hide()));
 
     ui->commandPrint->setEnabled(false);
+
 }
 
 MainWindow::~MainWindow()
@@ -89,7 +90,7 @@ void MainWindow::showSplash()
 {
     if(m_pSplash!=NULL){
         m_pSplash->show();
-        //m_pSplash->showMessage("Version 1.0");
+        m_pSplash->showMessage("Version 1.0");
         QTimer::singleShot(3000,this,SLOT(hideSplash()));
     }
     else
@@ -102,7 +103,7 @@ void MainWindow::showAbout()
 {
     if(m_pSplash!=NULL){
         m_pSplash->show();
-        //m_pSplash->showMessage("Version 1.0");
+        m_pSplash->showMessage("Version 1.0");
     }
 }
 
@@ -191,7 +192,56 @@ void MainWindow::checkConnected(QString sMsg)
 
 void MainWindow::on_commandPrint_clicked(bool checked)
 {
+//    doPrint();
+//    return;
+
     if(pTerminal->isConnected()) {
+        /////////////////////////////////////////////////
+        // Open the .b9j file
+        m_pCPJ->clearAll();
+        QFileDialog dialog(0);
+        QString openFile = dialog.getOpenFileName(this,"Select a B9Creator Job File to print", QDir::currentPath(), tr("B9Creator Job Files (*.b9j)"));
+        if(openFile.isEmpty()) return;
+        QFile file(openFile);
+        if(!m_pCPJ->loadCPJ(&file)) {
+            QMessageBox msgBox;
+            msgBox.setText("Error Loading File.  Unknown Version?");
+            msgBox.exec();
+            return;
+        }
+        m_pCPJ->showSupports(true);
+        int iXYPixelMicrons = m_pCPJ->getXYPixelmm()*1000;
+        if( iXYPixelMicrons != (int)pTerminal->getXYPixelSize()){
+            QMessageBox msgBox;
+            msgBox.setText("WARNING");
+            msgBox.setInformativeText("The XY pixel size of the selected job file ("+QString::number(iXYPixelMicrons)+" µm) does not agree with the Printer's calibrated XY pixel size ("+QString::number(pTerminal->getXYPixelSize())+" µm)!\n\n"
+                                      "Printing will likely result in an object with incorrect scale and/or apsect ratio.\n\n"
+                                      "Do you wish to continue?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::No);
+            int ret = msgBox.exec();
+            if(ret==QMessageBox::No)return;
+        }
+
+        m_pPrintPrep = new DlgPrintPrep(m_pCPJ, pTerminal, this);
+        connect (m_pPrintPrep, SIGNAL(accepted()),this,SLOT(doPrint()));
+        m_pPrintPrep->exec();
+    }
+
+}
+
+void MainWindow::doPrint()
+{
+    // print using variables set by wizard...
+    this->hide(); // Comment this out if not hiding mainwindow while showing this window
+    pMW4->show();
+    pLogManager->setPrinting(true); // Stop logfile entries when printing
+    pMW4->print3D(m_pCPJ, 0, 0, m_pPrintPrep->m_iTbaseMS, m_pPrintPrep->m_iToverMS, m_pPrintPrep->m_iTattachMS, 0, false, false);
+
+    return;
+
+    if(pTerminal->isConnected()) {
+
 
         /////////////////////////////////////////////////
         //  Stubbing in wizard's job for now
@@ -253,4 +303,5 @@ void MainWindow::on_commandPrint_clicked(bool checked)
 
         /////////////////////////////////////
     }
+
 }

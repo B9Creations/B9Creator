@@ -91,6 +91,7 @@ public:
     bool getPrintPreview(){return m_bPrintPreview;}
     void createNormalizedMask(double XYPS=0.1, double dZ = 257.0, double dOhMM = 91.088); //call when we show or resize
 
+    int getXYPixelSize(){return pPrinterComm->getXYPixelSize();}
 
 public slots:
     void dlgEditMatCat();
@@ -225,7 +226,6 @@ private:
     bool m_bPrimaryScreen;
     bool m_bPrintPreview;
     bool m_bUsePrimaryMonitor;
-    bool m_bXYPixelSizeFromPrinter;
 
     QTimer *m_pResetTimer;
     QTimer *m_pPReleaseCycleTimer;
@@ -237,7 +237,6 @@ private:
     bool m_bWaiverAccepted;
     bool m_bWavierActive;
     bool m_bNeedsWarned;
-    bool m_bSecondTimeoutAttempt;
 };
 
 #endif // B9TERMINAL_H

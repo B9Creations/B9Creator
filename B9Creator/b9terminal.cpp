@@ -114,8 +114,6 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     m_bWaiverAccepted = false;
     m_bWavierActive = false;
     m_bNeedsWarned = true;
-    m_bSecondTimeoutAttempt = false;
-    m_bXYPixelSizeFromPrinter=false;
 
     ui->setupUi(this);
     ui->commStatus->setText("Searching for B9Creator...");
@@ -460,7 +458,6 @@ void B9Terminal::onBC_XYPixelSize(int iPS){
     int i=2;
     if(iPS==50)i=0;
     else if(iPS==75)i=1;
-    m_bXYPixelSizeFromPrinter=true;
     ui->comboBoxXPPixelSize->setCurrentIndex(i);
 }
 
@@ -658,7 +655,6 @@ void B9Terminal::onBC_CurrentVatPercentOpen(int iPO){
 
 void B9Terminal::onBC_PrintReleaseCycleFinished()
 {
-    m_bSecondTimeoutAttempt = false;
     m_pPReleaseCycleTimer->stop();
     ui->lineEditCycleStatus->setText("Cycle Complete.");
     ui->pushButtonPrintBase->setEnabled(true);
@@ -670,18 +666,7 @@ void B9Terminal::onBC_PrintReleaseCycleFinished()
 void B9Terminal::onReleaseCycleTimeout()
 {
     m_pPReleaseCycleTimer->stop();
-    QSettings settings;
-    double dTimeoutFactor = settings.value("ReleaseCycleNext_TimeOutFactor",1.5).toDouble();
-    if(!m_bSecondTimeoutAttempt && dTimeoutFactor < 2.0){
-        qDebug()<<"Release Cycle 1st Timeout.";
-        // We'll keep waiting
-        m_bSecondTimeoutAttempt = true;
-        settings.setValue("ReleaseCycleNext_TimeOutFactor",dTimeoutFactor + 0.1);
-        int iTimeout = getEstNextCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
-        m_pPReleaseCycleTimer->start(iTimeout * settings.value("ReleaseCycleNext_TimeOutFactor",1.5).toDouble());
-        return;
-    }
-    qDebug()<<"Release Cycle 2nd Timeout.";
+    qDebug()<<"Release Cycle Timeout.";
     on_pushButtonStop_clicked(); // STOP!
     ui->lineEditCycleStatus->setText("ERROR: TimeOut");
     ui->pushButtonPrintBase->setEnabled(true);
@@ -700,7 +685,7 @@ void B9Terminal::on_pushButtonPrintBase_clicked()
     SetCycleParameters();
     int iTimeout = getEstBaseCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("B"+ui->lineEditTgtZPU->text());
-    m_pPReleaseCycleTimer->start(iTimeout * 1.1); // Timeout after 110% of estimated time required
+    //m_pPReleaseCycleTimer->start(iTimeout * 1.5); // Timeout after 150% of estimated time required
 }
 
 void B9Terminal::on_pushButtonPrintNext_clicked()
@@ -710,11 +695,10 @@ void B9Terminal::on_pushButtonPrintNext_clicked()
     ui->pushButtonPrintNext->setEnabled(false);
     ui->pushButtonPrintFinal->setEnabled(false);
 
-    QSettings settings;
     SetCycleParameters();
     int iTimeout = getEstNextCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("N"+ui->lineEditTgtZPU->text());
-    m_pPReleaseCycleTimer->start(iTimeout * settings.value("ReleaseCycleNext_TimeOutFactor",1.5).toDouble()); // Timeout after 150% of estimated time required
+    //m_pPReleaseCycleTimer->start(iTimeout * 3.0); // Timeout after 300% of estimated time required
 }
 
 void B9Terminal::on_pushButtonPrintFinal_clicked()
@@ -724,11 +708,8 @@ void B9Terminal::on_pushButtonPrintFinal_clicked()
     ui->pushButtonPrintBase->setEnabled(false);
     ui->pushButtonPrintNext->setEnabled(false);
     ui->pushButtonPrintFinal->setEnabled(false);
-
     SetCycleParameters();
-    int iTimeout = getEstFinalCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
-    pPrinterComm->SendCmd("F"+ui->lineEditTgtZPU->text());
-    m_pPReleaseCycleTimer->start(iTimeout * 1.5); // Timeout after 150% of estimated time required
+    //pPrinterComm->SendCmd("F"+ui->lineEditTgtZPU->text());
 }
 
 void B9Terminal::SetCycleParameters(){
@@ -802,7 +783,6 @@ void B9Terminal::rcFinishPrint(double dDeltaMM)
     if(newPos>ui->lineEditUpperZLimPU->text().toInt())newPos = ui->lineEditUpperZLimPU->text().toInt();
     setTgtAltitudePU(newPos);
     on_pushButtonPrintFinal_clicked();
-    rcProjectorPwr(false);
 }
 
 void B9Terminal::rcSetCPJ(CrushedPrintJob *pCPJ)
@@ -1045,11 +1025,8 @@ void B9Terminal::on_comboBoxXPPixelSize_currentIndexChanged(int index)
         default:
             break;
     }
-    if(!m_bXYPixelSizeFromPrinter) {
-        pPrinterComm->SendCmd(sCmd);
-        pPrinterComm->SendCmd("A"); // Force refresh of printer stats
-    }
-    m_bXYPixelSizeFromPrinter = false;
+    pPrinterComm->SendCmd(sCmd);
+    pPrinterComm->SendCmd("A"); // Force refresh of printer stats
 }
 
 void B9Terminal::on_pushButtonCycleSettings_clicked()

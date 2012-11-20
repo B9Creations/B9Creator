@@ -46,6 +46,8 @@
 #include "b9print.h"
 #include "b9terminal.h"
 #include "helpsystem.h"
+#include "dlgprintprep.h"
+
 
 namespace Ui {
 class MainWindow;
@@ -81,6 +83,7 @@ private slots:
     void on_commandEdit_clicked(bool checked);
     void on_commandPrint_clicked(bool checked);
     void showHelp();
+    void doPrint();
 
 private:
     Ui::MainWindow *ui;
@@ -95,6 +98,7 @@ private:
     B9Print *pMW4;
     CrushedPrintJob *m_pCPJ;
     B9Terminal *pTerminal;
+    DlgPrintPrep* m_pPrintPrep;
 
     void closeEvent(QCloseEvent *event);
 };

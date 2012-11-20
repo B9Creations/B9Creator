@@ -46,24 +46,20 @@ bool bGlobalPrinting;
 QString sLogFileName;
 void messageHandler(QtMsgType type, const char *msg)
 {
-//#ifndef QT_NO_DEBUG
     QFile outFile(sLogFileName);
     QTextStream ts;
     QString txt;
     txt = QDateTime::currentDateTime().toString("yy.MM.dd hh:mm:ss.zzz");
-//#endif
     switch (type) {
     case QtDebugMsg:
-//#ifndef QT_NO_DEBUG
         if(!bGlobalPrinting){
-        fprintf(stderr, "Debug: %s\n", msg);
-        txt += QString("  : %1").arg(msg);
-        outFile.open(QIODevice::WriteOnly | QIODevice::Append);
-        ts.setDevice(&outFile);
-        ts << txt << "\r" << endl;
-        outFile.close();
+            fprintf(stderr, "Debug: %s\n", msg);
+            txt += QString("  : %1").arg(msg);
+            outFile.open(QIODevice::WriteOnly | QIODevice::Append);
+            ts.setDevice(&outFile);
+            ts << txt << "\r" << endl;
+            outFile.close();
         }
-//#endif
         break;
     case QtWarningMsg:
         fprintf(stderr, "Warning: %s\n", msg);

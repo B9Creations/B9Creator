@@ -100,18 +100,21 @@ void DlgMaterialsManager::setUp()
         ui->comboBoxMaterial->clear();
         ui->tableWidget->clear();
         ui->lineEditDescription->clear();
+        ui->buttonBoxSaveCancel->button(QDialogButtonBox::SaveAll)->setEnabled(false);
         return;
     }
     else if(m_pCatalog->isFactoryEntry(m_pCatalog->getCurMatIndex())){
         ui->groupBox_ExposureSettings->setEnabled(false);
         ui->pushButtonDuplicate->setEnabled(true);
         ui->pushButtonDelete->setEnabled(true);
+        ui->buttonBoxSaveCancel->button(QDialogButtonBox::SaveAll)->setEnabled(true);
     }
     else
     {
         ui->groupBox_ExposureSettings->setEnabled(true);
         ui->pushButtonDuplicate->setEnabled(true);
         ui->pushButtonDelete->setEnabled(true);
+        ui->buttonBoxSaveCancel->button(QDialogButtonBox::SaveAll)->setEnabled(true);
     }
 
     setWindowTitle("Materials Catalog: "+m_pCatalog->getModelName()+".b9m");
@@ -150,6 +153,8 @@ void DlgMaterialsManager::fillData(int iMatIndex, int iXYIndex)
         ui->tableWidget->clearContents();
         return;
     }
+    ui->buttonBoxSaveCancel->button(QDialogButtonBox::SaveAll)->setEnabled(true);
+
     if(m_bLoading)return;
     if(iMatIndex<0||iXYIndex<0)return;
     m_bLoading = true;
@@ -159,6 +164,8 @@ void DlgMaterialsManager::fillData(int iMatIndex, int iXYIndex)
 
     ui->comboBoxMaterial->setCurrentIndex(m_pCatalog->getCurMatIndex());
     ui->comboBoxXY->setCurrentIndex(m_pCatalog->getCurXYIndex());
+
+    ui->doubleSpinBox->setValue(m_pCatalog->getCurTattach().toDouble());
 
     // Fill table with current Material and current XY
     for(int r=0; r<ui->tableWidget->rowCount();r++){
@@ -178,6 +185,7 @@ void DlgMaterialsManager::stuffData()
 {
     if(m_bLoading)return;
     if(m_pCatalog->getMaterialCount()<1)return;
+    m_pCatalog->setTattach(m_pCatalog->getCurMatIndex(),m_pCatalog->getCurXYIndex(),ui->doubleSpinBox->text().toDouble());
     for(int r=0; r<ui->tableWidget->rowCount();r++){
         m_pCatalog->setTbase(m_pCatalog->getCurMatIndex(),m_pCatalog->getCurXYIndex(),r,ui->tableWidget->item(r,0)->text().toDouble());
         m_pCatalog->setTover(m_pCatalog->getCurMatIndex(),m_pCatalog->getCurXYIndex(),r,ui->tableWidget->item(r,1)->text().toDouble());
@@ -224,6 +232,10 @@ void DlgMaterialsManager::on_comboBoxXY_currentIndexChanged(int index)
 
 void DlgMaterialsManager::on_pushButtonDelete_clicked()
 {
+    if(m_pCatalog->getMaterialCount()<2){
+        QMessageBox msg;msg.setText("Can not delete, you must leave at least one material in the catalog.");msg.exec();
+        return;
+    }
     if(QMessageBox::warning(this, tr("Delete Material"),tr("Are you sure you wish to delete this material from the Catalog?"),QMessageBox::Yes|QMessageBox::No)==QMessageBox::No)return;
     m_bLoading=true;
     int iC = m_pCatalog->getCurMatIndex();
@@ -252,7 +264,7 @@ void DlgMaterialsManager::on_pushButtonAdd_clicked()
     QString sDecrip = QInputDialog::getText(this, tr("Material ID"),
                                              tr("Enter a short, unique Identifier for this Material:"), QLineEdit::Normal,
                                              "Material Description", &ok);
-        if (!ok) return;
+    if (!ok) return;
 
     m_pCatalog->addMaterial(sMatID, sDecrip);
     m_bLoading=true;
@@ -316,3 +328,8 @@ void DlgMaterialsManager::on_buttonBoxSaveCancel_rejected()
     m_pCatalog->load(m_pCatalog->getModelName());
 }
 
+
+void DlgMaterialsManager::on_doubleSpinBox_valueChanged(double arg1)
+{
+    m_pCatalog->setTattach(m_pCatalog->getCurMatIndex(),m_pCatalog->getCurXYIndex(),arg1);
+}

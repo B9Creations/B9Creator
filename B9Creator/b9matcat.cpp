@@ -10,10 +10,12 @@ B9MatCatItem::B9MatCatItem()
 
 void B9MatCatItem::initDefaults()
 {
-    for(int xy = 0; xy < XYCOUNT; xy ++)
+    for(int xy = 0; xy < XYCOUNT; xy ++){
+        m_aAttachTimes[xy] = 1.0;
         for(int z = 0; z < ZCOUNT; z++)
             for(int t = 0; t < TCOUNT; t++)
                 m_aTimes[xy][z][t] = 0.0; // Set all to unused
+    }
 
 }
 
@@ -76,9 +78,11 @@ void B9MatCat::streamOut(QDataStream* pOut)
     *pOut << (quint32)m_Materials.count();
     for(int i=0; i<m_Materials.count(); i++){
         *pOut << m_Materials[i]->getFactoryMaterialLabel() << m_Materials[i]->getMaterialDescription();
-        for(int xy = 0; xy < XYCOUNT; xy++)
+        for(int xy = 0; xy < XYCOUNT; xy++){
+            *pOut << m_Materials[i]->getTattach(xy);
             for(int z = 0; z < ZCOUNT; z++)
                 *pOut << m_Materials[i]->getTbase(xy,z) << m_Materials[i]->getTover(xy,z);
+        }
     }
 }
 
@@ -86,7 +90,7 @@ void B9MatCat::streamIn(QDataStream* pIn)
 {
     m_Materials.clear();
     QString s1, s2;
-    double d1, d2;
+    double d0, d1, d2;
     int iCount = 0;
     *pIn >> iCount;
     for(int i=0; i<iCount; i++){
@@ -94,12 +98,15 @@ void B9MatCat::streamIn(QDataStream* pIn)
         *pIn >> s1 >> s2;
         m_Materials[i]->setMaterialLabel(s1);
         m_Materials[i]->setMaterialDescription(s2);
-        for(int xy = 0; xy < XYCOUNT; xy++)
+        for(int xy = 0; xy < XYCOUNT; xy++){
+            *pIn >> d0;
+            m_Materials[i]->setTattach(xy,d0);
             for(int z = 0; z < ZCOUNT; z++){
                 *pIn >> d1 >> d2;
                 m_Materials[i]->setTbase(xy,z,d1);
                 m_Materials[i]->setTover(xy,z,d2);
             }
+        }
     }
 
 }
@@ -115,10 +122,13 @@ void B9MatCat::clear()
     m_Materials[0]->setMaterialLabel("Untitled Material");
     m_Materials[0]->setMaterialDescription("New Material - please enter data");
     for(int xy = 0; xy < XYCOUNT; xy++)
+    {
+        m_Materials[0]->setTattach(xy,1.0);
         for(int z = 0; z < ZCOUNT; z++){
             m_Materials[0]->setTbase(xy,z,0.0);
             m_Materials[0]->setTover(xy,z,0.0);
         }
+    }
 }
 QString B9MatCat::getXYLabel(int iXY)
 {
@@ -168,8 +178,8 @@ QString B9MatCat::getZLabel(int iZ)
 
 double B9MatCat::getZinMM(int iZ)
 {
-    // return valid increments for iZ values of 1-16
-    if(iZ<0||iZ>16)return -1.0;
+    // return valid increments for iZ values of 0-15
+    if(iZ<0||iZ>15)return -1.0;
     return (iZ+1) * 0.00635;
 }
 
@@ -184,10 +194,36 @@ void B9MatCat::addDupMat(QString sName, QString sDescription, int iOrigin){
     B9MatCatItem* pNew = new B9MatCatItem;
     pNew->setMaterialLabel(sName);
     pNew->setMaterialDescription(sDescription);
-    for(int xy = 0; xy < XYCOUNT; xy ++)
+    for(int xy = 0; xy < XYCOUNT; xy ++){
+        pNew->setTattach(xy,m_Materials[iOrigin]->getTattach(xy));
         for(int z = 0; z < ZCOUNT; z++){
             pNew->setTbase(xy, z, m_Materials[iOrigin]->getTbase(xy,z));
             pNew->setTover(xy, z, m_Materials[iOrigin]->getTover(xy,z));
         }
+    }
     m_Materials.append(pNew);
+}
+
+int B9MatCat::getCurTbaseAtZinMS(double zMM){
+    int iLowTime, iHighTime;
+    double lowMatch = getZinMM(0);
+    double highMatch = getZinMM(15);
+    for(int i=0;i <16; i++){
+        if(getZinMM(i)<=zMM){lowMatch = getZinMM(i);iLowTime = getTbase(m_iCurMatIndex, m_iCurXYIndex, i).toInt();}
+        if(getZinMM(i)>=zMM){highMatch = getZinMM(i);iHighTime = getTbase(m_iCurMatIndex, m_iCurXYIndex, i).toInt();break;}
+    }
+    if(iHighTime==iLowTime)return (double)iHighTime*1000.0;
+    return 1000.0*((((zMM-lowMatch)/(highMatch-lowMatch))*(double)(iHighTime - iLowTime))+ (double)iLowTime);
+}
+
+int B9MatCat::getCurToverAtZinMS(double zMM){
+    int iLowTime, iHighTime;
+    double lowMatch = getZinMM(0);
+    double highMatch = getZinMM(15);
+    for(int i=0;i <16; i++){
+        if(getZinMM(i)<=zMM){lowMatch = getZinMM(i);iLowTime = getTover(m_iCurMatIndex, m_iCurXYIndex, i).toInt();}
+        if(getZinMM(i)>=zMM){highMatch = getZinMM(i);iHighTime = getTover(m_iCurMatIndex, m_iCurXYIndex, i).toInt();break;}
+    }
+    if(iHighTime==iLowTime)return (double)iHighTime*1000.0;
+    return 1000.0*((((zMM-lowMatch)/(highMatch-lowMatch))*(double)(iHighTime - iLowTime))+ (double)iLowTime);
 }
