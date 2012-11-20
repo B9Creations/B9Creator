@@ -115,6 +115,7 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     m_bWavierActive = false;
     m_bNeedsWarned = true;
     m_bSecondTimeoutAttempt = false;
+    m_bXYPixelSizeFromPrinter=false;
 
     ui->setupUi(this);
     ui->commStatus->setText("Searching for B9Creator...");
@@ -264,6 +265,7 @@ void B9Terminal::sendCommand()
 void B9Terminal::onBC_LostCOMM(){
     //Broadcast an alert
     if(!isEnabled())emit signalAbortPrint("ERROR: Lost Printer Connection.  Possible reasons: Power Loss, USB cord unplugged.");
+    qDebug() << "BC_LostCOMM signal received.";
 }
 
 void B9Terminal::onBC_ConnectionStatusDetailed(QString sText)
@@ -458,6 +460,7 @@ void B9Terminal::onBC_XYPixelSize(int iPS){
     int i=2;
     if(iPS==50)i=0;
     else if(iPS==75)i=1;
+    m_bXYPixelSizeFromPrinter=true;
     ui->comboBoxXPPixelSize->setCurrentIndex(i);
 }
 
@@ -668,18 +671,17 @@ void B9Terminal::onReleaseCycleTimeout()
 {
     m_pPReleaseCycleTimer->stop();
     QSettings settings;
-    double dTimeoutFactor = settings.value("ReleaseCycle_BaseTimeOutFactor",1.5).toInt();
+    double dTimeoutFactor = settings.value("ReleaseCycleNext_TimeOutFactor",1.5).toDouble();
     if(!m_bSecondTimeoutAttempt && dTimeoutFactor < 2.0){
         qDebug()<<"Release Cycle 1st Timeout.";
         // We'll keep waiting
         m_bSecondTimeoutAttempt = true;
-        settings.setValue("ReleaseCycle_BaseTimeOutFactor",dTimeoutFactor + 0.1);
+        settings.setValue("ReleaseCycleNext_TimeOutFactor",dTimeoutFactor + 0.1);
         int iTimeout = getEstNextCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
-        m_pPReleaseCycleTimer->start(iTimeout * settings.value("ReleaseCycle_BaseTimeOutFactor",1.5).toInt());
+        m_pPReleaseCycleTimer->start(iTimeout * settings.value("ReleaseCycleNext_TimeOutFactor",1.5).toDouble());
         return;
     }
     qDebug()<<"Release Cycle 2nd Timeout.";
-return;  //TODO FIX THIS!
     on_pushButtonStop_clicked(); // STOP!
     ui->lineEditCycleStatus->setText("ERROR: TimeOut");
     ui->pushButtonPrintBase->setEnabled(true);
@@ -712,7 +714,7 @@ void B9Terminal::on_pushButtonPrintNext_clicked()
     SetCycleParameters();
     int iTimeout = getEstNextCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("N"+ui->lineEditTgtZPU->text());
-    m_pPReleaseCycleTimer->start(iTimeout * settings.value("ReleaseCycle_BaseTimeOutFactor",1.5).toInt()); // Timeout after 150% of estimated time required
+    m_pPReleaseCycleTimer->start(iTimeout * settings.value("ReleaseCycleNext_TimeOutFactor",1.5).toDouble()); // Timeout after 150% of estimated time required
 }
 
 void B9Terminal::on_pushButtonPrintFinal_clicked()
@@ -1043,8 +1045,11 @@ void B9Terminal::on_comboBoxXPPixelSize_currentIndexChanged(int index)
         default:
             break;
     }
-    pPrinterComm->SendCmd(sCmd);
-    pPrinterComm->SendCmd("A"); // Force refresh of printer stats
+    if(!m_bXYPixelSizeFromPrinter) {
+        pPrinterComm->SendCmd(sCmd);
+        pPrinterComm->SendCmd("A"); // Force refresh of printer stats
+    }
+    m_bXYPixelSizeFromPrinter = false;
 }
 
 void B9Terminal::on_pushButtonCycleSettings_clicked()

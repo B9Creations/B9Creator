@@ -132,7 +132,7 @@ QString B9Layout::Open()
 
 
 	QString filename = QFileDialog::getOpenFileName(this,
-             tr("Open Layout"), settings.value("LayoutDir").toString(), tr("B9Layout (*.B9L)"));
+             tr("Open Layout"), settings.value("LayoutDir").toString(), tr("B9Layout (*.b9l)"));
 
 	if(filename.isEmpty())
     {return "";}
@@ -183,7 +183,7 @@ void B9Layout::SaveAs()
 
     QString filename = QFileDialog::getSaveFileName(this, tr("Save Layout"),
                     settings.value("LayoutDir").toString(),
-                            tr("B9 Layout (*.B9L)"));
+                            tr("B9 Layout (*.b9l)"));
 	if(filename.isEmpty())
 	{
 		return;
@@ -827,7 +827,7 @@ void B9Layout::SliceWorldToJob(QString filename)
 	//make a loading bar
 	LoadingBar progressbar(0, numlayers, this);
 	QObject::connect(&progressbar,SIGNAL(rejected()),this,SLOT(CancelSlicing()));
-	progressbar.setDescription("Processing World..");
+    progressbar.setDescription("Processing Layout..");
 	progressbar.setValue(0);
 	QApplication::processEvents();
 
@@ -847,7 +847,7 @@ void B9Layout::SliceWorldToJob(QString filename)
     pMasterJob->clearAll(numlayers);//fills the master job with the needed layers
 
 
-	progressbar.setDescription("Slicing World..");
+    progressbar.setDescription("Slicing Layout..");
 	progressbar.setMax(numlayers*nummodels);
 	progressbar.setValue(0);
 	//for each modelinstance

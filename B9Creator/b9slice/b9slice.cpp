@@ -64,9 +64,11 @@ void B9Slice::Slice(){
 
     pMain->project->SetPixelThickness(ui->thicknesscombo->currentText().toDouble());
 
-
     pMain->SliceWorld();
 
+    hide();
+
+    QMessageBox::information(0,"Finished","SLICING COMPLETED\n\nAll layers sliced and job file saved.");
 
 }
 

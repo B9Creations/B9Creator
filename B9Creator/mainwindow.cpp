@@ -60,7 +60,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->showMessage(MSG_SEARCHING);
 
     pMW1 = new B9Layout(0);
-    pMW1->setWindowTitle("Layout");
     pMW2 = new B9Slice(0,pMW1);
     pMW3 = new B9Edit(0);
     pMW4 = new B9Print(pTerminal, 0);
@@ -92,6 +91,10 @@ void MainWindow::showSplash()
         m_pSplash->show();
         //m_pSplash->showMessage("Version 1.0");
         QTimer::singleShot(3000,this,SLOT(hideSplash()));
+    }
+    else
+    {
+        qDebug()<< "m_pSplash==NULL, could not show splash screen.";
     }
 }
 
@@ -153,6 +156,7 @@ void MainWindow::handleW4Hide()
 {
     this->show();  // Comment this out if not hiding mainwindow while showing this window
     ui->commandPrint->setChecked(false);
+    pLogManager->setPrinting(false);
 }
 
 void MainWindow::on_commandLayout_clicked(bool checked)
@@ -243,6 +247,8 @@ void MainWindow::on_commandPrint_clicked(bool checked)
         if(ret==QMessageBox::Cancel)return;
         bool bPrintPreview = false;
         if(ret==QMessageBox::Yes)bPrintPreview=true;
+
+        pLogManager->setPrinting(true); // Stop logfile entries when printing
         pMW4->print3D(m_pCPJ, 0, 0, dTbase*1000, dTover*1000, dTattach*1000, iLayerCount, bPrintPreview, bPrintPreview);
 
         /////////////////////////////////////

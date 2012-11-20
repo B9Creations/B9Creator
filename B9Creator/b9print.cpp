@@ -367,6 +367,7 @@ void B9Print::exposureOfTOverLayersFinished(){
         m_pTerminal->setPrintPreview(false);
         m_pTerminal->onScreenCountChanged();
         hide();
+        QMessageBox::information(0,"Finished","PRINT COMPLETED\n\nAll "+QString::number(m_iLastLayer)+" layers built.");
     }
     else
     {

@@ -253,7 +253,7 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="actionSettings"/>
+    <addaction name="actionB9Creator_Terminal_Utility"/>
     <addaction name="actionMaterialsCatalog"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -263,11 +263,6 @@
      <string>&amp;Help</string>
     </property>
     <addaction name="actionContents"/>
-    <addaction name="actionIndex"/>
-    <addaction name="actionContext"/>
-    <addaction name="separator"/>
-    <addaction name="actionB9Creator_Terminal_Utility"/>
-    <addaction name="actionExit_Open_Log_File"/>
     <addaction name="separator"/>
     <addaction name="actionAbout_B9Creator"/>
    </widget>
@@ -281,7 +276,7 @@
   </action>
   <action name="actionAbout_B9Creator">
    <property name="text">
-    <string>About &amp;B9Creator</string>
+    <string>&amp;About B9Creator</string>
    </property>
   </action>
   <action name="actionIndex">
@@ -304,7 +299,7 @@
   </action>
   <action name="actionContents">
    <property name="text">
-    <string>Contents</string>
+    <string>&amp;Contents</string>
    </property>
   </action>
   <action name="actionContext">
@@ -381,7 +376,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionContext</sender>
+   <sender>actionContents</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>showHelp()</slot>

@@ -125,10 +125,6 @@ void B9Edit::newJob()
 	emit setZLayer(ZLayer);
 	cPJ.setZLayer(ZLayer);
 
-
-	ui.xyinfo->setText("(0.1 mm, 0.0039 in)");
-	ui.zinfo->setText("(0.1 mm, 0.0039 in)");
-
 	sDirPath = "";
 	emit selectedDirChanged(sDirPath);
 	
@@ -185,9 +181,6 @@ void B9Edit::openJob(QString infile)
     emit setDescription(cPJ.getDescription());
     emit setXYPixel(QString().number(cPJ.getXYPixel().toDouble()*1000));
     emit setZLayer(QString().number(cPJ.getZLayer().toDouble()*1000));
-
-	ui.xyinfo->setText("(" + cPJ.getXYPixel() + " mm, " + QString().number(cPJ.getXYPixel().toDouble()/25.4,'f',4) + " in)");
-	ui.zinfo->setText("(" + cPJ.getZLayer() + " mm, " + QString().number(cPJ.getZLayer().toDouble()/25.4,'f',4) + " in)");
 
 	dirtied = false;
 
@@ -466,9 +459,6 @@ void B9Edit::importSlicesFromSvg(QString file, double pixelsizemicrons)
 
     cPJ.setName(QFileInfo(file).baseName());
     emit setName(cPJ.getName());
-    ui.xyinfo->setText("(" + QString().number(pixelsizemm) + " mm, " + QString().number(pixelsizemm/25.4) + " in)");
-    ui.zinfo->setText("(" + QString().number(pixelsizemm) + " mm, " + QString().number(pixelsizemm/25.4) + " in)");
-
 
 	//make a new instance of the loadingbar.
 	LoadingBar load(0,layers,this);
@@ -481,8 +471,6 @@ void B9Edit::importSlicesFromSvg(QString file, double pixelsizemicrons)
 	QPainter painter(&img);
 
 	cPJ.clearAll();
-
-   // QImage temp(img);
 
     for( int i = 0; i <= layers; i++)
 	{
@@ -566,9 +554,6 @@ void B9Edit::importSlicesFromSlc(QString file, double pixelsizemicrons)
 
         cPJ.setName(QFileInfo(file).baseName());
         emit setName(cPJ.getName());
-        ui.xyinfo->setText("(" + QString().number(pixelsizemm) + " mm, " + QString().number(pixelsizemm/25.4) + " in)");
-        ui.zinfo->setText("(" + QString().number(pixelsizemm) + " mm, " + QString().number(pixelsizemm/25.4) + " in)");
-
     //////////
 
     QDataStream slcstream(&slcfile);

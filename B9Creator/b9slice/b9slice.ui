@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>386</width>
-    <height>322</height>
+    <height>245</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>B9Creator - Slice</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -42,7 +42,13 @@
          <bool>true</bool>
         </property>
         <property name="toolTip">
-         <string>Directory of the current layout</string>
+         <string>Selected Layout File</string>
+        </property>
+        <property name="statusTip">
+         <string/>
+        </property>
+        <property name="whatsThis">
+         <string>Selected Layout File</string>
         </property>
         <property name="readOnly">
          <bool>true</bool>
@@ -52,10 +58,13 @@
       <item>
        <widget class="QPushButton" name="LayoutBrowse">
         <property name="toolTip">
-         <string>Layout file to slice</string>
+         <string>Select Layout file to slice</string>
+        </property>
+        <property name="whatsThis">
+         <string>Select Layout file to slice</string>
         </property>
         <property name="text">
-         <string>Browse</string>
+         <string>Browse...</string>
         </property>
        </widget>
       </item>
@@ -79,7 +88,10 @@
          <item>
           <widget class="QLineEdit" name="jobname">
            <property name="toolTip">
-            <string>Enter the job name here</string>
+            <string>Enter short  job name here</string>
+           </property>
+           <property name="whatsThis">
+            <string>Enter short  job name here</string>
            </property>
           </widget>
          </item>
@@ -97,6 +109,9 @@
          <item>
           <widget class="QLineEdit" name="jobdesc">
            <property name="toolTip">
+            <string>Enter the job description here</string>
+           </property>
+           <property name="whatsThis">
             <string>Enter the job description here</string>
            </property>
           </widget>
@@ -118,7 +133,10 @@
             <bool>false</bool>
            </property>
            <property name="toolTip">
-            <string>The pixel dimentions the layout was set up for</string>
+            <string>The layout's saved dimensions</string>
+           </property>
+           <property name="whatsThis">
+            <string>The layout's saved dimensions</string>
            </property>
           </widget>
          </item>
@@ -139,7 +157,10 @@
             <bool>false</bool>
            </property>
            <property name="toolTip">
-            <string>how large each pixel will be in microns</string>
+            <string>The x &amp; y size of each sliced pixel in microns</string>
+           </property>
+           <property name="whatsThis">
+            <string>The x &amp; y size of each sliced pixel in microns</string>
            </property>
           </widget>
          </item>
@@ -169,7 +190,10 @@
             </sizepolicy>
            </property>
            <property name="toolTip">
-            <string>How thick each slice is in microns</string>
+            <string>Select the slice thickness in microns</string>
+           </property>
+           <property name="whatsThis">
+            <string>Select the slice thickness in microns</string>
            </property>
            <item>
             <property name="text">
@@ -259,44 +283,20 @@
      </widget>
     </item>
     <item>
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeType">
-       <enum>QSizePolicy::Expanding</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item>
      <widget class="QPushButton" name="SliceButton">
       <property name="toolTip">
-       <string>Begin slicing</string>
+       <string>Slice the layout</string>
+      </property>
+      <property name="whatsThis">
+       <string>Slice the layout</string>
       </property>
       <property name="text">
-       <string>Slice</string>
+       <string>Slice...</string>
       </property>
      </widget>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>386</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections>

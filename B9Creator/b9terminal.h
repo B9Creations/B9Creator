@@ -225,6 +225,7 @@ private:
     bool m_bPrimaryScreen;
     bool m_bPrintPreview;
     bool m_bUsePrimaryMonitor;
+    bool m_bXYPixelSizeFromPrinter;
 
     QTimer *m_pResetTimer;
     QTimer *m_pPReleaseCycleTimer;

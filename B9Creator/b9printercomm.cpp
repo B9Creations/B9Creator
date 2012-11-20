@@ -201,15 +201,15 @@ void B9PrinterComm::watchDog()
         m_serialDevice = NULL;
     }
     //Attempt to pick up were we lost contact if we find the port again within a short time
-    m_Status.setResumeOnReconnect(true);
     qDebug() << "WATCHDOG:  LOST CONTACT WITH B9CREATOR!";
     emit updateConnectionStatus(MSG_SEARCHING);
     emit BC_ConnectionStatusDetailed("Lost Contact with B9Creator.  Searching...");
+    m_Status.reset();
+    m_Status.setResumeOnReconnect(true);
     handleLostComm();
 }
 
 void B9PrinterComm::handleLostComm(){
-    m_Status.reset();
     emit BC_LostCOMM();
 }
 
@@ -387,6 +387,7 @@ bool B9PrinterComm::OpenB9CreatorCommPort(QString sPortName)
 }
 
 void B9PrinterComm::restoreState(){
+
     // send the print parameters & set the last known z position as current, do not cycle the vat!
 //TODO  everything mentioned in the above comment!  If we are printing and waiting on cycle completed msg, assume we
     // missed it and transmit an alternate "Cycle_Error" type message so we can resume the print

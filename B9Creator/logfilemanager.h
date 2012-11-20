@@ -41,6 +41,7 @@ public:
     LogFileManager(QString sLogfile = "LogFile.txt", QString sHeader = "Log File Entries");
     ~LogFileManager();
     void openLogFileInFolder();
+    void setPrinting(bool bPrinting);
 };
 
 #endif // LOGFILEMANAGER_H

@@ -41,6 +41,8 @@
 #include <QApplication>
 #include <QDesktopServices>
 
+bool bGlobalPrinting;
+
 QString sLogFileName;
 void messageHandler(QtMsgType type, const char *msg)
 {
@@ -53,12 +55,14 @@ void messageHandler(QtMsgType type, const char *msg)
     switch (type) {
     case QtDebugMsg:
 //#ifndef QT_NO_DEBUG
+        if(!bGlobalPrinting){
         fprintf(stderr, "Debug: %s\n", msg);
         txt += QString("  : %1").arg(msg);
         outFile.open(QIODevice::WriteOnly | QIODevice::Append);
         ts.setDevice(&outFile);
         ts << txt << "\r" << endl;
         outFile.close();
+        }
 //#endif
         break;
     case QtWarningMsg:
@@ -76,6 +80,7 @@ void messageHandler(QtMsgType type, const char *msg)
 
 LogFileManager::LogFileManager(QString sLogFile, QString sHeader)
 {
+    bGlobalPrinting = false;
     QFile::remove(sLogFile);
     sLogFileName = sLogFile;
 
@@ -90,6 +95,11 @@ LogFileManager::LogFileManager(QString sLogFile, QString sHeader)
 LogFileManager::~LogFileManager()
 {
     qInstallMsgHandler(0);
+}
+
+void LogFileManager::setPrinting(bool bPrinting)
+{
+    bGlobalPrinting = bPrinting;
 }
 
 void LogFileManager::openLogFileInFolder()
