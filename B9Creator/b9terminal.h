@@ -97,6 +97,7 @@ public slots:
     void dlgEditMatCat();
 
     void rcResetHomePos();
+    void rcResetCurrentPositionPU(int iCurPos);
     void rcBasePrint(double dBaseMM); // Position for Base Layer Exposure.
     void rcNextPrint(double dNextMM); // Position for Next Layer Exposure.
     void rcFinishPrint(double dDeltaMM); // Calculates a final Z position at current + dDelta, closes vat, raises z, turns off projector.
@@ -109,9 +110,12 @@ public slots:
     void rcCreateToverMap(int iRadius){pProjector->createToverMap(iRadius);}
     bool rcClearTimedPixels(int iLevel){return pProjector->clearTimedPixels(iLevel);}
     void rcSetProjMessage(QString sMsg);
+    void rcGotoFillAfterReset(int iFillLevel);
 
     void showIt(){show();setEnabledWarned();}
     void onScreenCountChanged(int iCount = 0);  // Signal that the number of monitors has changed
+
+    void updateCycleValues(){pSettings->updateValues();}
 
 signals:
     void signalAbortPrint(QString sMessage);
@@ -230,6 +234,8 @@ private:
     QTimer *m_pResetTimer;
     QTimer *m_pPReleaseCycleTimer;
     QTimer *m_pVatTimer;
+
+    int m_iFillLevel;
 
     void setEnabledWarned(); // Set the enabled status based on connection and user response
     void warnSingleMonitor();

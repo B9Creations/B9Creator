@@ -47,7 +47,7 @@ private slots:
     void on_pushButtonAbort_clicked(QString sAbortText="User Directed Abort.");
 
 private:
-    enum {PRINT_NO, PRINT_RELEASING, PRINT_EXPOSING, PRINT_ABORT, PRINT_DONE};
+    enum {PRINT_NO, PRINT_SETUP, PRINT_RELEASING, PRINT_EXPOSING, PRINT_ABORT, PRINT_DONE};
     enum {PAUSE_NO, PAUSE_WAIT, PAUSE_YES};
 
     void keyPressEvent(QKeyEvent * pEvent);		// Handle key press events

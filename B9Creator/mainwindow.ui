@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>203</width>
-    <height>241</height>
+    <width>190</width>
+    <height>240</height>
    </rect>
   </property>
   <property name="palette">
@@ -90,76 +90,66 @@
    <property name="focusPolicy">
     <enum>Qt::NoFocus</enum>
    </property>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>181</width>
-      <height>180</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
-      <widget class="QCommandLinkButton" name="commandLayout">
-       <property name="toolTip">
-        <string>Prepare a Layout containing your 3D Model(s)</string>
-       </property>
-       <property name="statusTip">
-        <string/>
-       </property>
-       <property name="text">
-        <string>Layout</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCommandLinkButton" name="commandSlice">
-       <property name="toolTip">
-        <string>Slice your 3D Layout in preparation for printing</string>
-       </property>
-       <property name="text">
-        <string>Slice</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCommandLinkButton" name="commandEdit">
-       <property name="toolTip">
-        <string>Modifiy supports, correct slicing errors or import data from a 3rd party slicer</string>
-       </property>
-       <property name="statusTip">
-        <string/>
-       </property>
-       <property name="text">
-        <string>Edit</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCommandLinkButton" name="commandPrint">
-       <property name="toolTip">
-        <string>Select your Print Job and begin the printing process.</string>
-       </property>
-       <property name="text">
-        <string>Print</string>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QCommandLinkButton" name="commandLayout">
+      <property name="toolTip">
+       <string>Prepare a Layout containing your 3D Model(s)</string>
+      </property>
+      <property name="statusTip">
+       <string/>
+      </property>
+      <property name="text">
+       <string>Layout</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QCommandLinkButton" name="commandSlice">
+      <property name="toolTip">
+       <string>Slice your 3D Layout in preparation for printing</string>
+      </property>
+      <property name="text">
+       <string>Slice</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QCommandLinkButton" name="commandEdit">
+      <property name="toolTip">
+       <string>Modifiy supports, correct slicing errors or import data from a 3rd party slicer</string>
+      </property>
+      <property name="statusTip">
+       <string/>
+      </property>
+      <property name="text">
+       <string>Edit</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QCommandLinkButton" name="commandPrint">
+      <property name="toolTip">
+       <string>Select your Print Job and begin the printing process.</string>
+      </property>
+      <property name="text">
+       <string>Print</string>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="palette">
@@ -216,7 +206,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>203</width>
+     <width>190</width>
      <height>21</height>
     </rect>
    </property>
@@ -298,6 +288,9 @@
    </property>
   </action>
   <action name="actionContents">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Contents</string>
    </property>
@@ -317,7 +310,7 @@
   </action>
   <action name="actionB9Creator_Terminal_Utility">
    <property name="text">
-    <string>B9Creator &amp;Terminal Utility</string>
+    <string>B9Creator &amp;Terminal Utility...</string>
    </property>
    <property name="toolTip">
     <string>Monitor Serial Communications</string>

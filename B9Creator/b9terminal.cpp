@@ -93,14 +93,14 @@ void PCycleSettings::setFactorySettings()
 {
     m_iRSpd1 = m_iLSpd1 = 85;
     m_iRSpd2 = m_iLSpd2 = 85;
-    m_iOpenSpd1 = 0;
+    m_iOpenSpd1 = 25;
     m_iCloseSpd1 = 100;
     m_iOpenSpd2 = m_iCloseSpd2 = 100;
     m_dBreatheClosed1 = 1;
-    m_dSettleOpen1 = 1;
+    m_dSettleOpen1 = 3;
     m_dBreatheClosed2 = 0;
     m_dSettleOpen2 = 0;
-    m_dOverLift1 = 5.0;
+    m_dOverLift1 = 3.0;
     m_dOverLift2 = 0.0;
     m_dBTClearInMM = 5.0;
 }
@@ -114,6 +114,7 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     m_bWaiverAccepted = false;
     m_bWavierActive = false;
     m_bNeedsWarned = true;
+    m_iFillLevel = -1;
 
     ui->setupUi(this);
     ui->commStatus->setText("Searching for B9Creator...");
@@ -177,6 +178,11 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
 B9Terminal::~B9Terminal()
 {
     delete ui;
+    if(pProjector!=NULL){
+        pProjector->hide();
+        pProjector->close();
+        delete pProjector;
+    }
     delete pPrinterComm;
     qDebug() << "Terminal End";
 }
@@ -184,10 +190,22 @@ B9Terminal::~B9Terminal()
 void B9Terminal::dlgEditMatCat()
 {
     DlgMaterialsManager dlgMatMan(m_pCatalog,0);
-    int index = pPrinterComm->getXYPixelSize();
-    index /= 25;
-    index -= 2;
-    dlgMatMan.setXY(index);
+
+    QSettings settings;
+    int indexMat=0;
+    for(int i=0; i<m_pCatalog->getMaterialCount(); i++) {
+        if(settings.value("CurrentMaterialLabel","B9R-1-Red").toString()==m_pCatalog->getMaterialLabel(i)) {
+            indexMat = i;
+            break;
+        }
+    }
+    m_pCatalog->setCurMatIndex(indexMat);
+
+    int indexXY = 0;
+    if(settings.value("CurrentXYLabel","100").toString()=="75 (µm)")indexXY=1;
+    else if(settings.value("CurrentXYLabel","100").toString()=="100 (µm)")indexXY = 2;
+    dlgMatMan.setXY(indexXY);
+    m_pCatalog->setCurXYIndex(indexXY);
     dlgMatMan.exec();
 }
 
@@ -408,6 +426,12 @@ void B9Terminal::onMotionResetComplete()
     else ui->lineEditNeedsInit->setText("Seeking");
     ui->lineEditZDiff->setText(QString::number(pPrinterComm->getLastHomeDiff()).toAscii());
     m_pResetTimer->stop();
+
+    // Check for post reset go to fill command
+    if(m_iFillLevel>=0){
+        pPrinterComm->SendCmd("G"+QString::number(m_iFillLevel));
+        m_iFillLevel=-1;
+    }
 }
 
 void B9Terminal::onMotionResetTimeout(){
@@ -709,7 +733,7 @@ void B9Terminal::on_pushButtonPrintFinal_clicked()
     ui->pushButtonPrintNext->setEnabled(false);
     ui->pushButtonPrintFinal->setEnabled(false);
     SetCycleParameters();
-    //pPrinterComm->SendCmd("F"+ui->lineEditTgtZPU->text());
+    pPrinterComm->SendCmd("F"+ui->lineEditTgtZPU->text());
 }
 
 void B9Terminal::SetCycleParameters(){
@@ -747,6 +771,15 @@ void B9Terminal::rcProjectorPwr(bool bPwrOn){
 void B9Terminal::rcResetHomePos(){
     on_pushButtonCmdReset_clicked();
 }
+
+void B9Terminal::rcGotoFillAfterReset(int iFillLevel){
+    m_iFillLevel = iFillLevel;
+}
+
+void B9Terminal::rcResetCurrentPositionPU(int iCurPos){
+    pPrinterComm->SendCmd("O"+QString::number(iCurPos));
+}
+
 void B9Terminal::rcBasePrint(double dBaseMM)
 {
     setTgtAltitudeMM(dBaseMM);
@@ -960,7 +993,7 @@ void B9Terminal::onScreenCountChanged(int iCount){
         if(pPrinterComm->getProjectorStatus()==B9PrinterStatus::PS_ON)
             if(!isEnabled())emit signalAbortPrint("Print Aborted:  Connection to Projector Lost or Changed During Print Cycle");
     }
-    pProjector = new B9Projector(true, this);
+    pProjector = new B9Projector(true, 0, Qt::WindowStaysOnTopHint);
     makeProjectorConnections();
     int i=0;
     int screenCount = m_pDesktop->screenCount();

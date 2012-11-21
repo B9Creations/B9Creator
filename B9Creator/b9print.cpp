@@ -178,9 +178,9 @@ void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, i
         ui->lineEditProjectorStatus->setText("OFF:  'Print Preview' Mode");
         ui->pushButtonPauseResume->setEnabled(true);
         ui->pushButtonAbort->setEnabled(true);
-        m_iPrintState = PRINT_RELEASING;
+        m_iPrintState = PRINT_SETUP;
         m_dLayerThickness = m_pCPJ->getZLayer().toDouble();
-        m_pTerminal->rcBasePrint(curLayerIndexMM());
+        m_pTerminal->rcBasePrint(-150 * 0.00635);
     }
 }
 void B9Print::on_updateProjector(B9PrinterStatus::ProjectorStatus eStatus)
@@ -189,9 +189,9 @@ void B9Print::on_updateProjector(B9PrinterStatus::ProjectorStatus eStatus)
         // Projector is warmed up and on!
         ui->pushButtonPauseResume->setEnabled(true); // Enable pause/resume & abort now
         ui->pushButtonAbort->setEnabled(true);
-        m_iPrintState = PRINT_RELEASING;
+        m_iPrintState = PRINT_SETUP;
         m_dLayerThickness = m_pCPJ->getZLayer().toDouble();
-        m_pTerminal->rcBasePrint(curLayerIndexMM());
+        m_pTerminal->rcBasePrint(-150 * 0.00635);
     }
 }
 
@@ -250,7 +250,29 @@ void B9Print::setSlice(int iSlice)
 
 void B9Print::exposeTBaseLayer(){
     //Release & reposition cycle completed, time to expose the new layer
-    if(m_iPrintState==PRINT_NO || m_iPrintState == PRINT_DONE || m_iPrintState == PRINT_ABORT)return;
+    if(m_iPrintState==PRINT_NO || m_iPrintState == PRINT_ABORT)return;
+
+    if(m_iPrintState==PRINT_SETUP){
+        //We've used B-100 to overshoot and get to here,
+        // now reset current position to -150 and issue B0 to start normal cycle
+        m_pTerminal->rcResetCurrentPositionPU(-100);
+        m_pTerminal->rcBasePrint(0);
+        m_iPrintState = PRINT_RELEASING;
+        return;
+    }
+
+    if(m_iPrintState == PRINT_DONE){
+        m_pTerminal->setEnabled(true);
+        if(m_pTerminal->getPrintPreview()){
+            m_pTerminal->setUsePrimaryMonitor(false);
+            m_pTerminal->setPrintPreview(false);
+        }
+        m_pTerminal->onScreenCountChanged();
+        hide();
+        QMessageBox::information(0,"Finished","PRINT COMPLETED\n\nAll "+QString::number(m_iLastLayer)+" layers built.");
+        return;
+    }
+
     if(m_bAbort){
         // We're done, release and raise
         m_pTerminal->rcSetCPJ(NULL); //blank
@@ -297,8 +319,6 @@ void B9Print::startExposeTOverLayers(){
     m_iMinimumTintMS = m_vSettings.value("m_iMinimumTintMS",50).toInt(); // We default to 50ms but adjust it upwards when it gets hit.
     m_iMinimumTintMSWorstCase=m_iMinimumTintMS;
 
-//    qDebug() << " MinTintMS " << m_iMinimumTintMS;
-
     int iAdjTover = m_pTerminal->getLampAdjustedExposureTime(m_iTover);
     m_iTintNum = (int)((double)iAdjTover/(double)m_iMinimumTintMS);
     if(m_iTintNum > 255) m_iTintNum = 255; // maximum number of time intervals we chop Tover into is 256
@@ -310,7 +330,6 @@ void B9Print::startExposeTOverLayers(){
 
 void B9Print::exposureOfCurTintLayerFinished(){
     // Turn off the pixels at the curent point
-//    qDebug() <<"INTERVAL COUNT " << m_iCurTintIndex;
     if(m_pTerminal->rcClearTimedPixels((double)m_iCurTintIndex*255.0/(double)m_iTintNum) || m_iCurTintIndex>=m_iTintNum)
     {
         exposureOfTOverLayersFinished();  // We're done with Tover
@@ -327,7 +346,6 @@ void B9Print::exposureOfCurTintLayerFinished(){
     else
     {
         if(m_iCurTintIndex==1)m_iMinimumTintMSWorstCase=m_iMinimumTintMS-iAdjustedInt;
-//        qDebug()<<"Adjusting Minimum Tover interval size " << m_iMinimumTintMSWorstCase << "ms";
         exposureOfCurTintLayerFinished(); // If this is getting called, we're taking too long!
         return;
     }
@@ -335,6 +353,7 @@ void B9Print::exposureOfCurTintLayerFinished(){
 
 void B9Print::exposureOfTOverLayersFinished(){
     if(m_iPrintState==PRINT_NO)return;
+
     m_pTerminal->rcSetCPJ(NULL); //blank
     //Cycle to next layer or finish
     if(m_iPaused==PAUSE_WAIT){
@@ -360,14 +379,7 @@ void B9Print::exposureOfTOverLayersFinished(){
         // We're done, release and raise
         m_iPrintState=PRINT_DONE;
         m_pTerminal->rcFinishPrint(25.4); //Finish at current z position + 25.4 mm, turn Projector Off
-        setProjMessage("Finished!");
-        ui->lineEditLayerCount->setText("Finished!");
-        m_pTerminal->setEnabled(true);
-        m_pTerminal->setUsePrimaryMonitor(false);
-        m_pTerminal->setPrintPreview(false);
-        m_pTerminal->onScreenCountChanged();
-        hide();
-        QMessageBox::information(0,"Finished","PRINT COMPLETED\n\nAll "+QString::number(m_iLastLayer)+" layers built.");
+        return;
     }
     else
     {

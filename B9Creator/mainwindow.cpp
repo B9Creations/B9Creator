@@ -55,7 +55,6 @@ MainWindow::MainWindow(QWidget *parent) :
     pTerminal->setEnabled(true);
 
     connect(pTerminal, SIGNAL(updateConnectionStatus(QString)), ui->statusBar, SLOT(showMessage(QString)));
-    connect(pTerminal, SIGNAL(updateConnectionStatus(QString)), this, SLOT(checkConnected(QString)));
 
     ui->statusBar->showMessage(MSG_SEARCHING);
 
@@ -70,15 +69,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(pMW2, SIGNAL(eventHiding()),this, SLOT(handleW2Hide()));
     connect(pMW3, SIGNAL(eventHiding()),this, SLOT(handleW3Hide()));
     connect(pMW4, SIGNAL(eventHiding()),this, SLOT(handleW4Hide()));
-
-    ui->commandPrint->setEnabled(false);
-
 }
 
 MainWindow::~MainWindow()
 {
     delete m_pCPJ;
-    delete pTerminal;
+    if(pTerminal!=NULL) delete pTerminal;
     qDebug() << "Program End";
     if(m_bOpenLogOnExit)
         pLogManager->openLogFileInFolder(); // Show log file location
@@ -90,12 +86,7 @@ void MainWindow::showSplash()
 {
     if(m_pSplash!=NULL){
         m_pSplash->show();
-        m_pSplash->showMessage("Version 1.0");
         QTimer::singleShot(3000,this,SLOT(hideSplash()));
-    }
-    else
-    {
-        qDebug()<< "m_pSplash==NULL, could not show splash screen.";
     }
 }
 
@@ -135,6 +126,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
     pMW3->hide();
     pMW4->hide();
     pTerminal->hide();
+    delete pTerminal;
+    pTerminal = NULL;
     event->accept();
 }
 
@@ -185,49 +178,38 @@ void MainWindow::on_commandEdit_clicked(bool checked)
     else pMW3->hide();
 }
 
-void MainWindow::checkConnected(QString sMsg)
-{
-    ui->commandPrint->setEnabled(pTerminal->isConnected());
-}
-
 void MainWindow::on_commandPrint_clicked(bool checked)
 {
-//    doPrint();
-//    return;
-
-    if(pTerminal->isConnected()) {
-        /////////////////////////////////////////////////
-        // Open the .b9j file
-        m_pCPJ->clearAll();
-        QFileDialog dialog(0);
-        QString openFile = dialog.getOpenFileName(this,"Select a B9Creator Job File to print", QDir::currentPath(), tr("B9Creator Job Files (*.b9j)"));
-        if(openFile.isEmpty()) return;
-        QFile file(openFile);
-        if(!m_pCPJ->loadCPJ(&file)) {
-            QMessageBox msgBox;
-            msgBox.setText("Error Loading File.  Unknown Version?");
-            msgBox.exec();
-            return;
-        }
-        m_pCPJ->showSupports(true);
-        int iXYPixelMicrons = m_pCPJ->getXYPixelmm()*1000;
-        if( iXYPixelMicrons != (int)pTerminal->getXYPixelSize()){
-            QMessageBox msgBox;
-            msgBox.setText("WARNING");
-            msgBox.setInformativeText("The XY pixel size of the selected job file ("+QString::number(iXYPixelMicrons)+" µm) does not agree with the Printer's calibrated XY pixel size ("+QString::number(pTerminal->getXYPixelSize())+" µm)!\n\n"
-                                      "Printing will likely result in an object with incorrect scale and/or apsect ratio.\n\n"
-                                      "Do you wish to continue?");
-            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-            msgBox.setDefaultButton(QMessageBox::No);
-            int ret = msgBox.exec();
-            if(ret==QMessageBox::No)return;
-        }
-
-        m_pPrintPrep = new DlgPrintPrep(m_pCPJ, pTerminal, this);
-        connect (m_pPrintPrep, SIGNAL(accepted()),this,SLOT(doPrint()));
-        m_pPrintPrep->exec();
+    /////////////////////////////////////////////////
+    // Open the .b9j file
+    m_pCPJ->clearAll();
+    QFileDialog dialog(0);
+    QString openFile = dialog.getOpenFileName(this,"Select a B9Creator Job File to print", QDir::currentPath(), tr("B9Creator Job Files (*.b9j)"));
+    if(openFile.isEmpty()) return;
+    QFile file(openFile);
+    if(!m_pCPJ->loadCPJ(&file)) {
+        QMessageBox msgBox;
+        msgBox.setText("Error Loading File.  Unknown Version?");
+        msgBox.exec();
+        return;
+    }
+    m_pCPJ->showSupports(true);
+    int iXYPixelMicrons = m_pCPJ->getXYPixelmm()*1000;
+    if( pTerminal->isConnected()&& iXYPixelMicrons != (int)pTerminal->getXYPixelSize()){
+        QMessageBox msgBox;
+        msgBox.setText("WARNING");
+        msgBox.setInformativeText("The XY pixel size of the selected job file ("+QString::number(iXYPixelMicrons)+" µm) does not agree with the Printer's calibrated XY pixel size ("+QString::number(pTerminal->getXYPixelSize())+" µm)!\n\n"
+                                  "Printing will likely result in an object with incorrect scale and/or apsect ratio.\n\n"
+                                  "Do you wish to continue?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        int ret = msgBox.exec();
+        if(ret==QMessageBox::No)return;
     }
 
+    m_pPrintPrep = new DlgPrintPrep(m_pCPJ, pTerminal, this);
+    connect (m_pPrintPrep, SIGNAL(accepted()),this,SLOT(doPrint()));
+    m_pPrintPrep->exec();
 }
 
 void MainWindow::doPrint()
@@ -235,73 +217,8 @@ void MainWindow::doPrint()
     // print using variables set by wizard...
     this->hide(); // Comment this out if not hiding mainwindow while showing this window
     pMW4->show();
-    pLogManager->setPrinting(true); // Stop logfile entries when printing
-    pMW4->print3D(m_pCPJ, 0, 0, m_pPrintPrep->m_iTbaseMS, m_pPrintPrep->m_iToverMS, m_pPrintPrep->m_iTattachMS, 0, false, false);
+    pLogManager->setPrinting(true); // set to true to Stop logfile entries when printing
+    pMW4->print3D(m_pCPJ, 0, 0, m_pPrintPrep->m_iTbaseMS, m_pPrintPrep->m_iToverMS, m_pPrintPrep->m_iTattachMS, m_pPrintPrep->m_iLastLayer, m_pPrintPrep->m_bDryRun, m_pPrintPrep->m_bDryRun);
 
     return;
-
-    if(pTerminal->isConnected()) {
-
-
-        /////////////////////////////////////////////////
-        //  Stubbing in wizard's job for now
-        // Open the .b9j file
-        m_pCPJ->clearAll();
-        QFileDialog dialog(0);
-        QString openFile = dialog.getOpenFileName(this,"Open B9Creator Job File", QDir::currentPath(), tr("B9Creator Job Files (*.b9j);;All files (*.*)"));
-        if(openFile.isEmpty()) return;
-        this->hide(); // Comment this out if not hiding mainwindow while showing this window
-        pMW4->show();
-        QFile file(openFile);
-        if(!m_pCPJ->loadCPJ(&file)) {
-            QMessageBox msgBox;
-            msgBox.setText("Error Loading File.  Unknown Version?");
-            msgBox.exec();
-
-            pMW4->hide();
-            return;
-
-        }
-        m_pCPJ->showSupports(true);
-
-
-        QSettings settings;
-
-        bool ok;
-        double dTbase = QInputDialog::getDouble(this, tr("TbaseTime"),
-                                           tr("Exposure Base Time:"), settings.value("TbaseTime",10).toInt(), 1, 20, 2, &ok);
-        if (!ok){pMW4->hide();return; }
-
-        double dTover = QInputDialog::getDouble(this, tr("ToverTime"),
-                                           tr("Exposure Edge Cure Time:"), settings.value("ToverTime",15).toInt(), 1, 20, 2, &ok);
-        if (!ok){pMW4->hide();return; }
-
-        double dTattach = QInputDialog::getDouble(this, tr("Attach Layer Cure Time"),
-                                                  tr("Attach (first)Layer Cure Time:"),settings.value("AttachLayerCureTime",30).toInt(), 1, 40, 2, &ok);
-        if (!ok){pMW4->hide();return; }
-
-        int iLayerCount = QInputDialog::getInt(this, tr("How many layers to print?"),
-                                     tr("Enter the number of layers to print (0 for all layers):"), 0, 0, 10000, 1, &ok);
-        if (!ok){pMW4->hide();return; }
-
-        settings.setValue("TbaseTime",(double)dTbase);
-        settings.setValue("ToverTime",(double)dTover);
-        settings.setValue("AttachLayerCureTime",(double)dTattach);
-
-        QMessageBox msgBox;
-        msgBox.setText("Ready to print");
-        msgBox.setInformativeText("Click Yes if you wish this to just be a 'Print Preview', or No to print normally.");
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::No);
-        int ret = msgBox.exec();
-        if(ret==QMessageBox::Cancel)return;
-        bool bPrintPreview = false;
-        if(ret==QMessageBox::Yes)bPrintPreview=true;
-
-        pLogManager->setPrinting(true); // Stop logfile entries when printing
-        pMW4->print3D(m_pCPJ, 0, 0, dTbase*1000, dTover*1000, dTattach*1000, iLayerCount, bPrintPreview, bPrintPreview);
-
-        /////////////////////////////////////
-    }
-
 }

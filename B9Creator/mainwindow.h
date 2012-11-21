@@ -70,7 +70,6 @@ public slots:
     void showLogAndExit();
     void showTerminal();
     void showCatalog();
-    void checkConnected(QString sMsg);
 
     void showAbout();
     void setSplash(QSplashScreen * splash){m_pSplash = splash;}
@@ -86,6 +85,7 @@ private slots:
     void doPrint();
 
 private:
+    void closeEvent ( QCloseEvent * event );
     Ui::MainWindow *ui;
     LogFileManager *pLogManager;
     bool m_bOpenLogOnExit;
@@ -99,8 +99,6 @@ private:
     CrushedPrintJob *m_pCPJ;
     B9Terminal *pTerminal;
     DlgPrintPrep* m_pPrintPrep;
-
-    void closeEvent(QCloseEvent *event);
 };
 
 #endif // MAINWINDOW_H

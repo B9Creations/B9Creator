@@ -1,6 +1,7 @@
 #include "dlgmaterialsmanager.h"
 #include "ui_dlgmaterialsmanager.h"
 #include <QSpinBox>
+#include <QSettings>
 #include <QMessageBox>
 #include <QInputDialog>
 
@@ -62,8 +63,6 @@ void DlgMaterialsManager::updateEnabledStates()
     ui->pushButtonDuplicate->setEnabled(false);
     ui->pushButtonDelete->setEnabled(false);
     ui->tableWidget->setEnabled(false);
-    //ui->tableWidget->setColumnHidden(0,true);
-    //ui->tableWidget->setColumnHidden(1,true);
     if(m_pCatalog->getMaterialCount()>0)
     {
         // There are materials avaialable.
@@ -321,11 +320,17 @@ void DlgMaterialsManager::on_buttonBoxSaveCancel_accepted()
 {
     stuffData();
     m_pCatalog->save();
+    QSettings settings;
+    settings.setValue("CurrentMaterialLabel",ui->comboBoxMaterial->currentText());
+    settings.setValue("CurrentXYLabel",ui->comboBoxXY->currentText());
 }
 
 void DlgMaterialsManager::on_buttonBoxSaveCancel_rejected()
 {
     m_pCatalog->load(m_pCatalog->getModelName());
+    QSettings settings;
+    settings.setValue("CurrentMaterialLabel",ui->comboBoxMaterial->currentText());
+    settings.setValue("CurrentXYLabel",ui->comboBoxXY->currentText());
 }
 
 

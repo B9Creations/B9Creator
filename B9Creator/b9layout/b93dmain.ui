@@ -814,7 +814,7 @@
   </action>
   <action name="actionDrop_To_Floor">
    <property name="text">
-    <string>Drop To Floor</string>
+    <string>Snap To Floor</string>
    </property>
    <property name="toolTip">
     <string>Drop To Floor (Move selected object in Z until lowest portion is at zero)</string>
