@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_bOpenLogOnExit = false;
     qDebug() << "Program Start";
 
-    pTerminal = new B9Terminal(0);
+    pTerminal = new B9Terminal(QApplication::desktop());
     pTerminal->setEnabled(true);
 
     connect(pTerminal, SIGNAL(updateConnectionStatus(QString)), ui->statusBar, SLOT(showMessage(QString)));
@@ -74,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete m_pCPJ;
-    if(pTerminal!=NULL) delete pTerminal;
+    delete pTerminal;
     qDebug() << "Program End";
     if(m_bOpenLogOnExit)
         pLogManager->openLogFileInFolder(); // Show log file location
@@ -85,6 +85,9 @@ MainWindow::~MainWindow()
 void MainWindow::showSplash()
 {
     if(m_pSplash!=NULL){
+        m_pSplash->showMessage("Version 1.0.beta\n"
+                               "Visit www.b9creator.com for support.\n"
+                               "Copyright 2012 - B9Creations, LLC",Qt::AlignTop|Qt::AlignRight,Qt::yellow);
         m_pSplash->show();
         QTimer::singleShot(3000,this,SLOT(hideSplash()));
     }
@@ -93,8 +96,10 @@ void MainWindow::showSplash()
 void MainWindow::showAbout()
 {
     if(m_pSplash!=NULL){
+        m_pSplash->showMessage("Version 1.0.beta\n"
+                               "Visit www.b9creator.com for support.\n"
+                               "Copyright 2012 - B9Creations, LLC",Qt::AlignTop|Qt::AlignRight,Qt::yellow);
         m_pSplash->show();
-        m_pSplash->showMessage("Version 1.0");
     }
 }
 
@@ -126,8 +131,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     pMW3->hide();
     pMW4->hide();
     pTerminal->hide();
-    delete pTerminal;
-    pTerminal = NULL;
     event->accept();
 }
 

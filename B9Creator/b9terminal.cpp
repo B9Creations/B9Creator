@@ -51,10 +51,10 @@ void PCycleSettings::loadSettings()
     m_iRSpd1 = settings.value("RSpd1",85).toInt();
     m_iLSpd1 = settings.value("LSpd1",85).toInt();
     m_iCloseSpd1 = settings.value("CloseSpd1",100).toInt();
-    m_iOpenSpd1 = settings.value("OpenSpd1",0).toInt();
+    m_iOpenSpd1 = settings.value("OpenSpd1",25).toInt();
     m_dBreatheClosed1 = settings.value("BreatheClosed1",1).toDouble();
     m_dSettleOpen1 = settings.value("SettleOpen1",1).toDouble();
-    m_dOverLift1 = settings.value("OverLift1",5).toDouble();
+    m_dOverLift1 = settings.value("OverLift1",3).toDouble();
 
     m_iRSpd2 = settings.value("RSpd2",85).toInt();
     m_iLSpd2 = settings.value("LSpd2",85).toInt();
@@ -178,11 +178,7 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
 B9Terminal::~B9Terminal()
 {
     delete ui;
-    if(pProjector!=NULL){
-        pProjector->hide();
-        pProjector->close();
-        delete pProjector;
-    }
+    delete pProjector;
     delete pPrinterComm;
     qDebug() << "Terminal End";
 }
@@ -385,10 +381,14 @@ void B9Terminal::onBC_ProjStatusChanged()
 
     // Update the power button state
     if(pPrinterComm->isProjectorPowerCmdOn()){
+        pProjector->show();
+        activateWindow();
         ui->pushButtonProjPower->setChecked(true);
         ui->pushButtonProjPower->setText("ON");
     }
     else{
+        pProjector->hide();
+        activateWindow();
         ui->pushButtonProjPower->setChecked(false);
         ui->pushButtonProjPower->setText("OFF");
     }
@@ -993,7 +993,7 @@ void B9Terminal::onScreenCountChanged(int iCount){
         if(pPrinterComm->getProjectorStatus()==B9PrinterStatus::PS_ON)
             if(!isEnabled())emit signalAbortPrint("Print Aborted:  Connection to Projector Lost or Changed During Print Cycle");
     }
-    pProjector = new B9Projector(true, 0, Qt::WindowStaysOnTopHint);
+    pProjector = new B9Projector(true, 0,Qt::WindowStaysOnTopHint);
     makeProjectorConnections();
     int i=0;
     int screenCount = m_pDesktop->screenCount();
@@ -1025,6 +1025,7 @@ void B9Terminal::onScreenCountChanged(int iCount){
     pProjector->setGeometry(screenGeometry);
     if(!m_bPrimaryScreen){
         pProjector->showFullScreen(); // Only show it if it is a secondary monitor
+        pProjector->hide();
         activateWindow(); // if not using primary monitor, take focus back to here.
     }
     else if(m_bPrintPreview||(pPrinterComm->getProjectorStatus() != B9PrinterStatus::PS_OFF &&

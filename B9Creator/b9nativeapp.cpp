@@ -6,6 +6,7 @@
 // It will only have an effect on the Mac.
 void B9NativeApp::set_smaller_text_osx(QWidget *w)
 {
+    return; //not using the small fonts right now...
     if(w==0)return;
 
     // By default, none of these size attributes are set.
