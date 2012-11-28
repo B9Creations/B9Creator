@@ -60,7 +60,6 @@ void B9PrinterStatus::reset(){
 
     lastMsgTime.start();
     bResetInProgress = false;
-    bDoResume = false;
     setLampHrs(-1); // unknown
 }
 
@@ -150,6 +149,7 @@ bool B9FirmwareUpdate::UploadHex(QString sCurPort)
 
 B9PrinterComm::B9PrinterComm()
 {
+    m_bIsPrinting = false;
     pPorts = new QList<QextPortInfo>;
     pEnumerator = new QextSerialEnumerator();
     m_serialDevice = NULL;
@@ -157,7 +157,7 @@ B9PrinterComm::B9PrinterComm()
     m_Status.reset();
     m_iWarmUpDelayMS = 15000;
     qDebug() << "B9Creator COMM Start";
-    QTimer::singleShot(2000, this, SLOT(RefreshCommPortItems())); // Check in 2 seconds
+    QTimer::singleShot(500, this, SLOT(RefreshCommPortItems())); // Check in .5 seconds
 }
 
 B9PrinterComm::~B9PrinterComm()
@@ -181,7 +181,7 @@ void B9PrinterComm::watchDog()
     // we expect the last readReady signal from the Printer to have happened within the last 10 seconds
     // Unless the printer is busy finding the home location
     int iTimeLimit = 10000;
-    if(m_Status.getHomeStatus() == B9PrinterStatus::HS_SEEKING) iTimeLimit = 60000;
+    if(m_Status.getHomeStatus() == B9PrinterStatus::HS_SEEKING) iTimeLimit = 90000;
 
     if( m_serialDevice != NULL && m_Status.getLastMsgElapsedTime() <= iTimeLimit){
         // Still in Contact with the B9Creator
@@ -205,7 +205,6 @@ void B9PrinterComm::watchDog()
     emit updateConnectionStatus(MSG_SEARCHING);
     emit BC_ConnectionStatusDetailed("Lost Contact with B9Creator.  Searching...");
     m_Status.reset();
-    m_Status.setResumeOnReconnect(true);
     handleLostComm();
 }
 
@@ -215,12 +214,13 @@ void B9PrinterComm::handleLostComm(){
 
 void B9PrinterComm::startWatchDogTimer()
 {
-    // We call the watchdog every 20 seconds
-    QTimer::singleShot(20000, this, SLOT(watchDog())); // Check in 10 seconds
+    // We call the watchdog every 10 seconds
+    QTimer::singleShot(10000, this, SLOT(watchDog())); // Check in 10 seconds
 }
 
 void B9PrinterComm::RefreshCommPortItems()
 {
+    if(m_bIsPrinting)return; // We assume we stay connected during the print proccess.  If we are disconnected, the watchdog timer will fire
     QString sCommPortStatus = MSG_SEARCHING;
     QString sCommPortDetailedStatus = MSG_SEARCHING;
     QString sPortName;
@@ -377,23 +377,7 @@ bool B9PrinterComm::OpenB9CreatorCommPort(QString sPortName)
         sNoFirmwareAurdinoPort = sPortName;
         return false;
     }
-
-    if(m_Status.resumeOnReconnect()&& m_Status.getLastMsgElapsedTime()<30000){
-        // We were connected not too long ago, let's pick up where we left off
-        m_Status.setResumeOnReconnect(false);
-        restoreState();
-    }
     return true;
-}
-
-void B9PrinterComm::restoreState(){
-
-    // send the print parameters & set the last known z position as current, do not cycle the vat!
-//TODO  everything mentioned in the above comment!  If we are printing and waiting on cycle completed msg, assume we
-    // missed it and transmit an alternate "Cycle_Error" type message so we can resume the print
-// setHomeStatus() to HS_FOUND after setting known z position as current!
-
-    qDebug() << "TODORestoring State to last known values.";
 }
 
 void B9PrinterComm::ReadAvailable() {

@@ -259,7 +259,7 @@ void B9Terminal::setEnabledWarned(){
             m_bWavierActive = false;
         }
     }
-    ui->groupBoxMain->setEnabled(m_bWaiverAccepted&&pPrinterComm->isConnected());
+    ui->groupBoxMain->setEnabled(m_bWaiverAccepted&&pPrinterComm->isConnected()&&ui->lineEditNeedsInit->text()!="Seeking");
 }
 
 void B9Terminal::hideEvent(QHideEvent *event)
@@ -557,7 +557,6 @@ void B9Terminal::on_lineEditTgtZInches_editingFinished()
 
 void B9Terminal::setTgtAltitudePU(int iTgtPU)
 {
-//    qDebug()<<"TgtPU"<<iTgtPU;
     double dTgtMM = (iTgtPU * pPrinterComm->getPU())/100000.0;
     ui->lineEditTgtZPU->setText(QString::number(iTgtPU));
     ui->lineEditTgtZMM->setText(QString::number(dTgtMM,'g',8));
@@ -709,7 +708,7 @@ void B9Terminal::on_pushButtonPrintBase_clicked()
     SetCycleParameters();
     int iTimeout = getEstBaseCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("B"+ui->lineEditTgtZPU->text());
-    //m_pPReleaseCycleTimer->start(iTimeout * 1.5); // Timeout after 150% of estimated time required
+    m_pPReleaseCycleTimer->start(iTimeout * 1.2); // Timeout after 120% of estimated time required
 }
 
 void B9Terminal::on_pushButtonPrintNext_clicked()
@@ -722,7 +721,7 @@ void B9Terminal::on_pushButtonPrintNext_clicked()
     SetCycleParameters();
     int iTimeout = getEstNextCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("N"+ui->lineEditTgtZPU->text());
-    //m_pPReleaseCycleTimer->start(iTimeout * 3.0); // Timeout after 300% of estimated time required
+    m_pPReleaseCycleTimer->start(iTimeout * 1.2); // Timeout after 120% of estimated time required
 }
 
 void B9Terminal::on_pushButtonPrintFinal_clicked()
@@ -1047,20 +1046,26 @@ void B9Terminal::createNormalizedMask(double XYPS, double dZ, double dOhMM)
 void B9Terminal::on_comboBoxXPPixelSize_currentIndexChanged(int index)
 {
     QString sCmd;
+    bool bUnChanged = false;
     switch (index){
         case 0: // 50 microns
             sCmd = "U50";
+            if(getXYPixelSize()==50)bUnChanged=true;
             break;
         case 1: // 75 microns
             sCmd = "U75";
+            if(getXYPixelSize()==75)bUnChanged=true;
             break;
         case 2: // 100 mircons
             sCmd = "U100";
+            if(getXYPixelSize()==100)bUnChanged=true;
         default:
             break;
     }
-    pPrinterComm->SendCmd(sCmd);
-    pPrinterComm->SendCmd("A"); // Force refresh of printer stats
+    if(!bUnChanged){
+        pPrinterComm->SendCmd(sCmd);
+        pPrinterComm->SendCmd("A"); // Force refresh of printer stats
+    }
 }
 
 void B9Terminal::on_pushButtonCycleSettings_clicked()

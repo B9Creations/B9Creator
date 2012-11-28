@@ -115,9 +115,6 @@ public:
     int getLastHomeDiff() {return m_iLastHomeDiff;}
     void setLastHomeDiff(int iDiff) {m_iLastHomeDiff = iDiff;}
 
-    bool resumeOnReconnect() {return bDoResume;}
-    void setResumeOnReconnect(bool bResume) {bDoResume = bResume;}
-
     void resetLastMsgTime() {lastMsgTime.start();}
     int getLastMsgElapsedTime() {return lastMsgTime.elapsed();}
 
@@ -127,7 +124,6 @@ public:
 private:
     QTime lastMsgTime; // Updated on every serial readReady signal
     bool bResetInProgress; // Set to True during home location reset
-    bool bDoResume; // set to true if we wish to resume after disconnect
 
     int iV1,iV2,iV3; // version values
     QString m_sModel; // Product Model Description
@@ -236,6 +232,9 @@ private slots:
     void RefreshCommPortItems();
     void watchDog();  // Checks to see we're receiving regular updates from the Ardunio
 
+public:
+    bool m_bIsPrinting;
+
 private:
     QextSerialPort *m_serialDevice;
     QextSerialEnumerator *pEnumerator;		// enumerator for finding available comm ports
@@ -248,7 +247,6 @@ private:
 
     bool OpenB9CreatorCommPort(QString sPortName);
     void startWatchDogTimer();
-    void restoreState();
     void handleLostComm();
     bool handleProjectorBC(int iBC);
     QTime startWarmingTime;

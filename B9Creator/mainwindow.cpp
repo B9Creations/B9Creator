@@ -85,7 +85,7 @@ MainWindow::~MainWindow()
 void MainWindow::showSplash()
 {
     if(m_pSplash!=NULL){
-        m_pSplash->showMessage("Version 1.0.beta\n"
+        m_pSplash->showMessage("Version 1.0.2.beta\n"
                                "Visit www.b9creator.com for support.\n"
                                "Copyright 2012 - B9Creations, LLC",Qt::AlignTop|Qt::AlignRight,Qt::yellow);
         m_pSplash->show();
@@ -96,7 +96,7 @@ void MainWindow::showSplash()
 void MainWindow::showAbout()
 {
     if(m_pSplash!=NULL){
-        m_pSplash->showMessage("Version 1.0.beta\n"
+        m_pSplash->showMessage("Version 1.0.2.beta\n"
                                "Visit www.b9creator.com for support.\n"
                                "Copyright 2012 - B9Creations, LLC",Qt::AlignTop|Qt::AlignRight,Qt::yellow);
         m_pSplash->show();
@@ -154,6 +154,7 @@ void MainWindow::handleW4Hide()
     this->show();  // Comment this out if not hiding mainwindow while showing this window
     ui->commandPrint->setChecked(false);
     pLogManager->setPrinting(false);
+    pTerminal->setIsPrinting(false);
 }
 
 void MainWindow::on_commandLayout_clicked(bool checked)
@@ -210,6 +211,7 @@ void MainWindow::on_commandPrint_clicked(bool checked)
         if(ret==QMessageBox::No)return;
     }
 
+
     m_pPrintPrep = new DlgPrintPrep(m_pCPJ, pTerminal, this);
     connect (m_pPrintPrep, SIGNAL(accepted()),this,SLOT(doPrint()));
     m_pPrintPrep->exec();
@@ -221,6 +223,7 @@ void MainWindow::doPrint()
     this->hide(); // Comment this out if not hiding mainwindow while showing this window
     pMW4->show();
     pLogManager->setPrinting(true); // set to true to Stop logfile entries when printing
+    pTerminal->setIsPrinting(true);
     pMW4->print3D(m_pCPJ, 0, 0, m_pPrintPrep->m_iTbaseMS, m_pPrintPrep->m_iToverMS, m_pPrintPrep->m_iTattachMS, m_pPrintPrep->m_iLastLayer, m_pPrintPrep->m_bDryRun, m_pPrintPrep->m_bDryRun);
 
     return;

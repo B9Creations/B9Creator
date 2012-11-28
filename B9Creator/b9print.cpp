@@ -219,7 +219,7 @@ void B9Print::on_pushButtonPauseResume_clicked()
 void B9Print::on_pushButtonAbort_clicked(QString sAbortText)
 {
     m_sAbortMessage = sAbortText;
-    if(m_sAbortMessage.contains("Jammed Mechanism")||
+    if(m_sAbortMessage.contains("Jammed Mechanism")||m_sAbortMessage.contains("Lost Printer Connection")||
        (m_sAbortMessage.contains("Projector"))){ //&&(m_iPrintState == PRINT_NO&&m_iPaused==PAUSE_NO))){
         // Special cases, always handle it asap.
         m_pTerminal->rcSetCPJ(NULL); //blank
