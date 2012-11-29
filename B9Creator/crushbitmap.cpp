@@ -177,6 +177,13 @@ void CrushedBitMap::inflateSlice(QImage* pImage, int xOffset, int yOffset, bool 
 	}
 
 	if(bUseNaturalSize){
+        if(m_iWidth<1 || m_iHeight<1){
+            m_iWidth = pImage->width();
+            m_iHeight = pImage->height();
+            *pImage = QImage(m_iWidth,m_iHeight,QImage::Format_ARGB32_Premultiplied);
+            pImage->fill(qRgba(0,0,0,255));
+            return;
+        }
         // Using the slice's natural size, so we create a new QImage of this size and fill it with black pixels
         *pImage = QImage(m_iWidth,m_iHeight,QImage::Format_ARGB32_Premultiplied);
         pImage->fill(qRgba(0,0,0,255));
@@ -435,6 +442,7 @@ void CrushedPrintJob::streamInCPJ(QDataStream* pIn)
 		mSlices[i].streamInCMB(pIn);
 		mTotalWhitePixels += mSlices[i].getWhitePixels();
 		QRect tExtent =  mSlices[i].getExtents();
+        if(mSlices[i].getHeight()<0 || mSlices[i].getWidth()<0)continue;
 		if(mSlices[i].getExtents().left()   < mJobExtents.left()  ) mJobExtents.setLeft(  mSlices[i].getExtents().left()); 
 		if(mSlices[i].getExtents().right()  > mJobExtents.right() ) mJobExtents.setRight( mSlices[i].getExtents().right());
 		if(mSlices[i].getExtents().bottom() > mJobExtents.bottom()) mJobExtents.setBottom(mSlices[i].getExtents().bottom()); 

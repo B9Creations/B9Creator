@@ -97,6 +97,7 @@ public:
         pPrinterComm->m_bIsPrinting = bFlag;
         if(!bFlag) QTimer::singleShot(2000, pPrinterComm, SLOT(RefreshCommPortItems()));}
 
+
 public slots:
     void dlgEditMatCat();
 

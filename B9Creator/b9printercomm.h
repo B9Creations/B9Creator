@@ -194,7 +194,7 @@ public:
     int getLastHomeDiff() {return m_Status.getLastHomeDiff();}
     B9PrinterStatus::HomeStatus getHomeStatus() {return m_Status.getHomeStatus();}
     void setHomeStatus(B9PrinterStatus::HomeStatus eHS) {m_Status.setHomeStatus(eHS);}
-
+    QString errorString();
 
 signals:
     void updateConnectionStatus(QString sText); // Connected or Searching

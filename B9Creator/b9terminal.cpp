@@ -688,14 +688,21 @@ void B9Terminal::onBC_PrintReleaseCycleFinished()
 
 void B9Terminal::onReleaseCycleTimeout()
 {
-    m_pPReleaseCycleTimer->stop();
-    qDebug()<<"Release Cycle Timeout.";
-    on_pushButtonStop_clicked(); // STOP!
-    ui->lineEditCycleStatus->setText("ERROR: TimeOut");
-    ui->pushButtonPrintBase->setEnabled(true);
-    ui->pushButtonPrintNext->setEnabled(true);
-    ui->pushButtonPrintFinal->setEnabled(true);
-    if(!isEnabled())emit signalAbortPrint("ERROR: Cycle Timed Out.  Possible reasons: Power Loss, Jammed Mechanism.");
+    if(false){  // Set to true if we wish to abort due to the timeout.
+        m_pPReleaseCycleTimer->stop();
+        qDebug()<<"Release Cycle Timeout.";
+        on_pushButtonStop_clicked(); // STOP!
+        ui->lineEditCycleStatus->setText("ERROR: TimeOut");
+        ui->pushButtonPrintBase->setEnabled(true);
+        ui->pushButtonPrintNext->setEnabled(true);
+        ui->pushButtonPrintFinal->setEnabled(true);
+        if(!isEnabled())emit signalAbortPrint("ERROR: Cycle Timed Out.  Possible reasons: Power Loss, Jammed Mechanism.");
+        return;
+    }
+    else {
+        qDebug()<<"Release Cycle Timeout.  IGNORED";
+        qDebug()<<"Serial Port Last Error:  "<<pPrinterComm->errorString();
+    }
 }
 
 void B9Terminal::on_pushButtonPrintBase_clicked()

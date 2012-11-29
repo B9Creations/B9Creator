@@ -344,7 +344,7 @@ bool B9PrinterComm::OpenB9CreatorCommPort(QString sPortName)
         m_serialDevice->setDataBits(DATA_8);
         m_serialDevice->setParity(PAR_NONE);
         m_serialDevice->setStopBits(STOP_1);
-        m_serialDevice->setFlowControl(FLOW_HARDWARE);
+        m_serialDevice->setFlowControl(FLOW_OFF);
         m_serialDevice->setDtr(true);   // Reset the Aurduino
         m_serialDevice->setDtr(false);
 
@@ -378,6 +378,10 @@ bool B9PrinterComm::OpenB9CreatorCommPort(QString sPortName)
         return false;
     }
     return true;
+}
+
+QString B9PrinterComm::errorString(){
+    return m_serialDevice->errorString();
 }
 
 void B9PrinterComm::ReadAvailable() {

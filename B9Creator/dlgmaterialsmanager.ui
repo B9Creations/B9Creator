@@ -292,6 +292,12 @@
       </item>
       <item row="3" column="1">
        <widget class="QSpinBox" name="spinBoxNumberOfAttachLayers">
+        <property name="toolTip">
+         <string>Number of Layers to cure for the above length of time</string>
+        </property>
+        <property name="whatsThis">
+         <string>Number of Layers to cure for the above length of time</string>
+        </property>
         <property name="minimum">
          <number>1</number>
         </property>
@@ -356,6 +362,7 @@
   <tabstop>pushButtonDelete</tabstop>
   <tabstop>comboBoxXY</tabstop>
   <tabstop>doubleSpinBox</tabstop>
+  <tabstop>spinBoxNumberOfAttachLayers</tabstop>
   <tabstop>tableWidget</tabstop>
   <tabstop>buttonBoxSaveCancel</tabstop>
  </tabstops>

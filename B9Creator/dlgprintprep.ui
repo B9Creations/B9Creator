@@ -1102,10 +1102,10 @@
          </palette>
         </property>
         <property name="toolTip">
-         <string>Exposure time for the Attach (first) Layer cure in seconds.</string>
+         <string>Number of Layers to cure for the above length of time</string>
         </property>
         <property name="whatsThis">
-         <string>Exposure time for the Attach (first) Layer cure in seconds.</string>
+         <string>Number of Layers to cure for the above length of time</string>
         </property>
         <property name="readOnly">
          <bool>true</bool>
@@ -1309,6 +1309,7 @@
   <tabstop>comboBoxMaterial</tabstop>
   <tabstop>pushButtonMatCat</tabstop>
   <tabstop>lineEditTattach</tabstop>
+  <tabstop>lineEditNumAttach</tabstop>
   <tabstop>lineEditTbase</tabstop>
   <tabstop>lineEditTOver</tabstop>
   <tabstop>lineEditVolume</tabstop>
