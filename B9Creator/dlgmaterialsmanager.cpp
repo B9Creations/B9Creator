@@ -165,6 +165,7 @@ void DlgMaterialsManager::fillData(int iMatIndex, int iXYIndex)
     ui->comboBoxXY->setCurrentIndex(m_pCatalog->getCurXYIndex());
 
     ui->doubleSpinBox->setValue(m_pCatalog->getCurTattach().toDouble());
+    ui->spinBoxNumberOfAttachLayers->setValue(m_pCatalog->getCurNumberAttach().toInt());
 
     // Fill table with current Material and current XY
     for(int r=0; r<ui->tableWidget->rowCount();r++){
@@ -337,4 +338,9 @@ void DlgMaterialsManager::on_buttonBoxSaveCancel_rejected()
 void DlgMaterialsManager::on_doubleSpinBox_valueChanged(double arg1)
 {
     m_pCatalog->setTattach(m_pCatalog->getCurMatIndex(),m_pCatalog->getCurXYIndex(),arg1);
+}
+
+void DlgMaterialsManager::on_spinBoxNumberOfAttachLayers_valueChanged(int arg1)
+{
+    m_pCatalog->setNumberAttach(m_pCatalog->getCurMatIndex(),m_pCatalog->getCurXYIndex(),arg1);
 }

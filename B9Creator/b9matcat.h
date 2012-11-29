@@ -21,9 +21,11 @@ public:
     void setMaterialDescription(QString sLabel){m_sMaterialDescription = sLabel;}
 
     double getTattach(int iXY){return m_aAttachTimes[iXY];}
+    int getNumberAttach(int iXY){return m_aAttachNumber[iXY];}
     double getTbase(int iXY, int iZ){return m_aTimes[iXY][iZ][0];}
     double getTover(int iXY, int iZ){return m_aTimes[iXY][iZ][1];}
     void setTattach(int iXY, double dSeconds){m_aAttachTimes[iXY]=dSeconds;}
+    void setNumberAttach(int iXY, int iNumber) {m_aAttachNumber[iXY]=iNumber;}
     void setTbase(int iXY, int iZ, double dSeconds){m_aTimes[iXY][iZ][0]=dSeconds;}
     void setTover(int iXY, int iZ, double dSeconds){m_aTimes[iXY][iZ][1]=dSeconds;}
 
@@ -31,6 +33,7 @@ private:
     void initDefaults();
     double m_aTimes [XYCOUNT][ZCOUNT][TCOUNT]; // Cure times in seconds
     double m_aAttachTimes [XYCOUNT]; // Cure times in seconds for first layer
+    int m_aAttachNumber [XYCOUNT]; // Number of layers to overcure
     QString m_sMaterialLabel, m_sMaterialDescription;
 
 public: // sorting friends
@@ -64,10 +67,12 @@ public:
     QString getTover(int iMat, int iXY, int iZ){return QString::number(m_Materials[iMat]->getTover(iXY, iZ));}
 
     void setTattach(int iMat, int iXY,double dT){m_Materials[iMat]->setTattach(iXY, dT);}
+    void setNumberAttach(int iMat, int iXY,int iNum){m_Materials[iMat]->setNumberAttach(iXY, iNum);}
     void setTbase(int iMat, int iXY, int iZ, double dT){m_Materials[iMat]->setTbase(iXY, iZ, dT);}
     void setTover(int iMat, int iXY, int iZ, double dT){m_Materials[iMat]->setTover(iXY, iZ, dT);}
 
     QString getCurTattach(){return QString::number(m_Materials[m_iCurMatIndex]->getTattach(m_iCurXYIndex));}
+    QString getCurNumberAttach(){return QString::number(m_Materials[m_iCurMatIndex]->getNumberAttach(m_iCurXYIndex));}
     QString getCurTbaseAtZ(int iZ){return QString::number(m_Materials[m_iCurMatIndex]->getTbase(m_iCurXYIndex, iZ));}
     QString getCurToverAtZ(int iZ){return QString::number(m_Materials[m_iCurMatIndex]->getTover(m_iCurXYIndex, iZ));}
 

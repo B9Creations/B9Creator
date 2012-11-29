@@ -222,9 +222,9 @@ void MainWindow::doPrint()
     // print using variables set by wizard...
     this->hide(); // Comment this out if not hiding mainwindow while showing this window
     pMW4->show();
-    pLogManager->setPrinting(true); // set to true to Stop logfile entries when printing
+    pLogManager->setPrinting(false); // set to true to Stop logfile entries when printing
     pTerminal->setIsPrinting(true);
-    pMW4->print3D(m_pCPJ, 0, 0, m_pPrintPrep->m_iTbaseMS, m_pPrintPrep->m_iToverMS, m_pPrintPrep->m_iTattachMS, m_pPrintPrep->m_iLastLayer, m_pPrintPrep->m_bDryRun, m_pPrintPrep->m_bDryRun);
+    pMW4->print3D(m_pCPJ, 0, 0, m_pPrintPrep->m_iTbaseMS, m_pPrintPrep->m_iToverMS, m_pPrintPrep->m_iTattachMS, m_pPrintPrep->m_iNumAttach, m_pPrintPrep->m_iLastLayer, m_pPrintPrep->m_bDryRun, m_pPrintPrep->m_bDryRun);
 
     return;
 }

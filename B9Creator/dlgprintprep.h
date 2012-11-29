@@ -44,6 +44,7 @@ private slots:
 
 public:
     int m_iTattachMS;
+    int m_iNumAttach;
     int m_iTbaseMS;
     int m_iToverMS;
     bool m_bDryRun;

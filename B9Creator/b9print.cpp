@@ -16,6 +16,8 @@ B9Print::B9Print(B9Terminal *pTerm, QWidget *parent) :
     ui->lineEditProjectorOutput->setText("");
 
     m_iTbase = m_iTover = 0;
+    m_iTattach = 0;
+    m_iNumAttach = 1;
     m_iXOff = m_iYOff =0;
     m_iPrintState = PRINT_NO;
     m_iPaused = PAUSE_NO;
@@ -130,7 +132,7 @@ void B9Print::on_signalAbortPrint()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, int iTover, int iTattach, int iLastLayer, bool bPrintPreview, bool bUsePrimaryMonitor)
+void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, int iTover, int iTattach, int iNumAttach, int iLastLayer, bool bPrintPreview, bool bUsePrimaryMonitor)
 {
     // Note if, iLastLayer < 1, print ALL layers.
     // if bPrintPreview, run without turning on the projector
@@ -146,7 +148,7 @@ void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, i
     m_pTerminal->setEnabled(false);
     m_pCPJ = pCPJ;
     m_pTerminal->createNormalizedMask(m_pCPJ->getXYPixelmm());
-    m_iTbase = iTbase; m_iTover = iTover; m_iTattach = iTattach;
+    m_iTbase = iTbase; m_iTover = iTover; m_iTattach = iTattach; m_iNumAttach = iNumAttach;
     m_iXOff = iXOff; m_iYOff = iYOff;
     m_iCurLayerNumber = 0;
     m_iPaused = PAUSE_NO;
@@ -298,7 +300,7 @@ void B9Print::exposeTBaseLayer(){
     m_iPrintState = PRINT_EXPOSING;
     // set timer
     int iAdjExposure = m_pTerminal->getLampAdjustedExposureTime(m_iTbase);
-    if(m_iCurLayerNumber==0) iAdjExposure = m_pTerminal->getLampAdjustedExposureTime(m_iTattach);  //Layer 0 has different exposure timing
+    if(m_iCurLayerNumber<m_iNumAttach) iAdjExposure = m_pTerminal->getLampAdjustedExposureTime(m_iTattach);  //First layers may have different exposure timing
     if(iAdjExposure>0){
         QTimer::singleShot(iAdjExposure-m_vClock.elapsed(), this, SLOT(startExposeTOverLayers()));
         return;

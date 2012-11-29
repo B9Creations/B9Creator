@@ -54,6 +54,8 @@ private slots:
 
     void on_doubleSpinBox_valueChanged(double arg1);
 
+    void on_spinBoxNumberOfAttachLayers_valueChanged(int arg1);
+
 private:
     Ui::DlgMaterialsManager *ui;
     void setUp();

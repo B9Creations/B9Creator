@@ -14,6 +14,7 @@ DlgPrintPrep::DlgPrintPrep(CrushedPrintJob* pCPJ, B9Terminal* pTerminal, QWidget
     m_pTerminal = pTerminal;
     m_pCPJ = pCPJ;
     m_iTattachMS=0;
+    m_iNumAttach = 1;
     m_iTbaseMS=0;
     m_iToverMS=0;
     m_bDryRun = false;
@@ -77,6 +78,10 @@ void DlgPrintPrep::on_comboBoxMaterial_currentIndexChanged(const QString &arg1)
     double dTattach = m_pTerminal->getMatCat()->getCurTattach().toDouble();
     ui->lineEditTattach->setText(QString::number(dTattach,'f',3));
     m_iTattachMS = dTattach*1000;
+
+    int iNumAttach = m_pTerminal->getMatCat()->getCurNumberAttach().toInt();
+    ui->lineEditNumAttach->setText(QString::number(iNumAttach));
+    m_iNumAttach = iNumAttach;
 
     int iTbaseMS = m_pTerminal->getMatCat()->getCurTbaseAtZinMS(m_pCPJ->getZLayermm());
     ui->lineEditTbase->setText(QString::number((double)iTbaseMS/1000.0,'f',3));
