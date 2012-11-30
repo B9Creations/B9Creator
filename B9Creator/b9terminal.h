@@ -228,6 +228,9 @@ private:
     B9MatCat* m_pCatalog;
     QString m_sModelName;
     PCycleSettings *pSettings;
+    int m_iD, m_iE, m_iJ, m_iK, m_iL, m_iW, m_iX;
+    void resetLastSentCycleSettings();
+
     B9PrinterComm *pPrinterComm;
     LogFileManager *pLogManager;
     B9Projector *pProjector;

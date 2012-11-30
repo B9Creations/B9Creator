@@ -96,10 +96,10 @@ void PCycleSettings::setFactorySettings()
     m_iOpenSpd1 = 25;
     m_iCloseSpd1 = 100;
     m_iOpenSpd2 = m_iCloseSpd2 = 100;
-    m_dBreatheClosed1 = 1;
-    m_dSettleOpen1 = 3;
-    m_dBreatheClosed2 = 0;
-    m_dSettleOpen2 = 0;
+    m_dBreatheClosed1 = 1.0;
+    m_dSettleOpen1 = 3.0;
+    m_dBreatheClosed2 = 0.0;
+    m_dSettleOpen2 = 0.5;
     m_dOverLift1 = 3.0;
     m_dOverLift2 = 0.0;
     m_dBTClearInMM = 5.0;
@@ -125,6 +125,7 @@ B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
     onBC_ModelInfo("B9C1");
 
     pSettings = new PCycleSettings;
+    resetLastSentCycleSettings();
 
     // Always set up the B9PrinterComm in the Terminal constructor
     pPrinterComm = new B9PrinterComm;
@@ -181,6 +182,10 @@ B9Terminal::~B9Terminal()
     delete pProjector;
     delete pPrinterComm;
     qDebug() << "Terminal End";
+}
+
+void B9Terminal::resetLastSentCycleSettings(){
+    m_iD=m_iE=m_iJ=m_iK=m_iL=m_iW=m_iX = -1;
 }
 
 void B9Terminal::dlgEditMatCat()
@@ -296,12 +301,18 @@ void B9Terminal::onUpdatePrinterComm(QString sText)
 {
     QString html = "<font color=\"Black\">" + sText + "</font><br>";
     ui->textEditCommOut->insertHtml(html);
+    html = ui->textEditCommOut->toHtml();
+    ui->textEditCommOut->clear();
+    ui->textEditCommOut->insertHtml(html.right(2000));
     ui->textEditCommOut->setAlignment(Qt::AlignBottom);
 }
 void B9Terminal::onUpdateRAWPrinterComm(QString sText)
 {
     QString html = "<font color=\"Blue\">" + sText + "</font><br>";
     ui->textEditCommOut->insertHtml(html);
+    html = ui->textEditCommOut->toHtml();
+    ui->textEditCommOut->clear();
+    ui->textEditCommOut->insertHtml(html.right(2000));
     ui->textEditCommOut->setAlignment(Qt::AlignBottom);
 }
 
@@ -416,6 +427,7 @@ void B9Terminal::on_pushButtonCmdReset_clicked()
     // Remote activation of Reset (Find Home) Motion
     m_pResetTimer->start(iTimeoutEstimate);
     pPrinterComm->SendCmd("R");
+    resetLastSentCycleSettings();
 }
 
 void B9Terminal::onMotionResetComplete()
@@ -442,11 +454,11 @@ void B9Terminal::onMotionResetTimeout(){
     if(isEnabled())msg.exec();
 }
 
-
 void B9Terminal::onBC_ModelInfo(QString sModel){
     m_sModelName = sModel;
     m_pCatalog->load(m_sModelName);
     ui->lineEditModelInfo->setText(m_sModelName);
+    resetLastSentCycleSettings();
 }
 
 void B9Terminal::onBC_FirmVersion(QString sVersion){
@@ -629,6 +641,7 @@ void B9Terminal::on_pushButtonStop_clicked()
     ui->pushButtonPrintNext->setEnabled(true);
     ui->pushButtonPrintFinal->setEnabled(true);
     ui->groupBoxVAT->setEnabled(true);
+    resetLastSentCycleSettings();
 }
 
 void B9Terminal::on_checkBoxVerbose_clicked(bool checked)
@@ -688,9 +701,9 @@ void B9Terminal::onBC_PrintReleaseCycleFinished()
 
 void B9Terminal::onReleaseCycleTimeout()
 {
-    if(false){  // Set to true if we wish to abort due to the timeout.
-        m_pPReleaseCycleTimer->stop();
-        qDebug()<<"Release Cycle Timeout.";
+    m_pPReleaseCycleTimer->stop();
+    if(true){  // Set to true if we wish to abort due to the timeout.
+        qDebug()<<"Release Cycle Timeout.  Possible reasons: Power Loss, Jammed Mechanism.";
         on_pushButtonStop_clicked(); // STOP!
         ui->lineEditCycleStatus->setText("ERROR: TimeOut");
         ui->pushButtonPrintBase->setEnabled(true);
@@ -700,7 +713,7 @@ void B9Terminal::onReleaseCycleTimeout()
         return;
     }
     else {
-        qDebug()<<"Release Cycle Timeout.  IGNORED";
+        qDebug()<<"Release Cycle Timeout.  Possible reasons: Power Loss, Jammed Mechanism. IGNORED";
         qDebug()<<"Serial Port Last Error:  "<<pPrinterComm->errorString();
     }
 }
@@ -711,7 +724,7 @@ void B9Terminal::on_pushButtonPrintBase_clicked()
     ui->pushButtonPrintBase->setEnabled(false);
     ui->pushButtonPrintNext->setEnabled(false);
     ui->pushButtonPrintFinal->setEnabled(false);
-
+    resetLastSentCycleSettings();
     SetCycleParameters();
     int iTimeout = getEstBaseCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("B"+ui->lineEditTgtZPU->text());
@@ -743,31 +756,32 @@ void B9Terminal::on_pushButtonPrintFinal_clicked()
 }
 
 void B9Terminal::SetCycleParameters(){
-
+    int iD, iE, iJ, iK, iL, iW, iX;
     if(pSettings->m_dBTClearInMM*100000/pPrinterComm->getPU()>ui->lineEditTgtZPU->text().toInt()){
-        pPrinterComm->SendCmd("D"+QString::number((int)(pSettings->m_dBreatheClosed1*1000))); // Breathe delay time
-        pPrinterComm->SendCmd("E"+QString::number((int)(pSettings->m_dSettleOpen1*1000))); // Settle delay time
-
-        pPrinterComm->SendCmd("J"+QString::number((int)(pSettings->m_dOverLift1*100000/(double)pPrinterComm->getPU()))); // Overlift Raise Gap coverted to PU
-
-        pPrinterComm->SendCmd("K"+QString::number(pSettings->m_iRSpd1));  // Raise Speed
-        pPrinterComm->SendCmd("L"+QString::number(pSettings->m_iLSpd1));  // Lower Speed
-
-        pPrinterComm->SendCmd("W"+QString::number(pSettings->m_iOpenSpd1));  // Vat open speed
-        pPrinterComm->SendCmd("X"+QString::number(pSettings->m_iCloseSpd1)); // Vat close speed
+        iD = (int)(pSettings->m_dBreatheClosed1*1000.0); // Breathe delay time
+        iE = (int)(pSettings->m_dSettleOpen1*1000.0); // Settle delay time
+        iJ = (int)(pSettings->m_dOverLift1*100000.0/(double)pPrinterComm->getPU()); // Overlift Raise Gap coverted to PU
+        iK = pSettings->m_iRSpd1;  // Raise Speed
+        iL = pSettings->m_iLSpd1;  // Lower Speed
+        iW = pSettings->m_iOpenSpd1;  // Vat open speed
+        iX = pSettings->m_iCloseSpd1; // Vat close speed
     }
     else{
-        pPrinterComm->SendCmd("D"+QString::number((int)(pSettings->m_dBreatheClosed2*1000))); // Breathe delay time
-        pPrinterComm->SendCmd("E"+QString::number((int)(pSettings->m_dSettleOpen2*1000))); // Settle delay time
-
-        pPrinterComm->SendCmd("J"+QString::number((int)(pSettings->m_dOverLift2*100000/(double)pPrinterComm->getPU()))); // Overlift Raise Gap coverted to PU
-
-        pPrinterComm->SendCmd("K"+QString::number(pSettings->m_iRSpd2));  // Raise Speed
-        pPrinterComm->SendCmd("L"+QString::number(pSettings->m_iLSpd2));  // Lower Speed
-
-        pPrinterComm->SendCmd("W"+QString::number(pSettings->m_iOpenSpd2));  // Vat open speed
-        pPrinterComm->SendCmd("X"+QString::number(pSettings->m_iCloseSpd2)); // Vat close speed
+        iD = (int)(pSettings->m_dBreatheClosed2*1000.0); // Breathe delay time
+        iE = (int)(pSettings->m_dSettleOpen2*1000.0); // Settle delay time
+        iJ = (int)(pSettings->m_dOverLift2*100000.0/(double)pPrinterComm->getPU()); // Overlift Raise Gap coverted to PU
+        iK = pSettings->m_iRSpd2;  // Raise Speed
+        iL = pSettings->m_iLSpd2;  // Lower Speed
+        iW = pSettings->m_iOpenSpd2;  // Vat open speed
+        iX = pSettings->m_iCloseSpd2; // Vat close speed
     }
+    if(iD!=m_iD){pPrinterComm->SendCmd("D"+QString::number(iD)); m_iD = iD;}
+    if(iE!=m_iE){pPrinterComm->SendCmd("E"+QString::number(iE)); m_iE = iE;}
+    if(iJ!=m_iJ){pPrinterComm->SendCmd("J"+QString::number(iJ)); m_iJ = iJ;}
+    if(iK!=m_iK){pPrinterComm->SendCmd("K"+QString::number(iK)); m_iK = iK;}
+    if(iL!=m_iL){pPrinterComm->SendCmd("L"+QString::number(iL)); m_iL = iL;}
+    if(iW!=m_iW){pPrinterComm->SendCmd("W"+QString::number(iW)); m_iW = iW;}
+    if(iX!=m_iX){pPrinterComm->SendCmd("X"+QString::number(iX)); m_iX = iX;}
 }
 
 void B9Terminal::rcProjectorPwr(bool bPwrOn){

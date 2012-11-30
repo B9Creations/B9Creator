@@ -108,7 +108,7 @@ QString B9Print::updateTimes()
 double B9Print::curLayerIndexMM()
 {
     // layer "0" has zero thickness
-    return m_iCurLayerNumber * m_dLayerThickness;
+    return (double)m_iCurLayerNumber * m_dLayerThickness + 0.00001;
 }
 
 void B9Print::on_signalAbortPrint()
@@ -122,7 +122,7 @@ void B9Print::on_signalAbortPrint()
     else
         m_pTerminal->rcFinishPrint(5); //Finish at current z position + 5 mm, turn Projector Off
 
-    m_pTerminal->onScreenCountChanged(); // toggles off the screen if need for primary monitor setups
+    m_pTerminal->onScreenCountChanged(); // toggles off the screen if needed for primary monitor setups
     hide();
     m_pTerminal->setUsePrimaryMonitor(false);
     m_pTerminal->setPrintPreview(false);
@@ -180,7 +180,7 @@ void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, i
         ui->lineEditProjectorStatus->setText("OFF:  'Print Preview' Mode");
         ui->pushButtonPauseResume->setEnabled(true);
         ui->pushButtonAbort->setEnabled(true);
-        m_iPrintState = PRINT_SETUP;
+        m_iPrintState = PRINT_SETUP1;
         m_dLayerThickness = m_pCPJ->getZLayer().toDouble();
         m_pTerminal->rcBasePrint(-150 * 0.00635);
     }
@@ -191,7 +191,7 @@ void B9Print::on_updateProjector(B9PrinterStatus::ProjectorStatus eStatus)
         // Projector is warmed up and on!
         ui->pushButtonPauseResume->setEnabled(true); // Enable pause/resume & abort now
         ui->pushButtonAbort->setEnabled(true);
-        m_iPrintState = PRINT_SETUP;
+        m_iPrintState = PRINT_SETUP1;
         m_dLayerThickness = m_pCPJ->getZLayer().toDouble();
         m_pTerminal->rcBasePrint(-150 * 0.00635);
     }
@@ -254,13 +254,20 @@ void B9Print::exposeTBaseLayer(){
     //Release & reposition cycle completed, time to expose the new layer
     if(m_iPrintState==PRINT_NO || m_iPrintState == PRINT_ABORT)return;
 
-    if(m_iPrintState==PRINT_SETUP){
-        //We've used B-100 to overshoot and get to here,
-        // now reset current position to -150 and issue B0 to start normal cycle
-        m_pTerminal->rcResetCurrentPositionPU(-100);
-        m_pTerminal->rcBasePrint(0);
-        m_iPrintState = PRINT_RELEASING;
+    if(m_iPrintState==PRINT_SETUP1){
+        //We've used B-150 to overshoot and get to here,
+        // now reset current position to 0 and move to +80
+        m_pTerminal->rcResetCurrentPositionPU(0);
+        m_pTerminal->rcBasePrint(80 * 0.00635);
+        m_iPrintState = PRINT_SETUP2;
         return;
+    }
+
+    if(m_iPrintState==PRINT_SETUP2){
+        //We should now be flush
+        // reset current position 0 and continue
+        m_pTerminal->rcResetCurrentPositionPU(0);
+        m_iPrintState = PRINT_RELEASING;
     }
 
     if(m_iPrintState == PRINT_DONE){

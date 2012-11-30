@@ -530,7 +530,12 @@ void B9PrinterComm::ReadAvailable() {
                 emit BC_ModelInfo(m_Status.getModel());
                 break;
 
+            case 'Y':  // Current Z Home position in PU's
+                // ignored
+                break;
+
             default:
+                qDebug() <<"WARNING:  IGNORED UNKNOWN CMD:  " << m_sSerialString << "\n";
                 break;
             }
             m_sSerialString=""; // Line processed, clear it for next line
@@ -552,7 +557,6 @@ void B9PrinterComm::setProjectorPowerCmd(bool bPwrFlag){
 }
 
 bool B9PrinterComm::handleProjectorBC(int iBC){
-    //qDebug()<<"HandleProjectorBC" << m_Status.isProjectorPowerCmdOn() << iBC << m_Status.getProjectorStatus();
     bool bStatusChanged = false;
     if(m_Status.isProjectorPowerCmdOn() && iBC == 0){
         // Projector commanded ON but current report is OFF
