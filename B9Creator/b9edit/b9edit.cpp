@@ -8,16 +8,20 @@
 //  Copyright 2011-2012 B9Creations, LLC
 //  B9Creations(tm) and B9Creator(tm) are trademarks of B9Creations, LLC
 //
-//  This work is licensed under the:
-//      "Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License"
+//  This file is part of B9Creator
 //
-//  To view a copy of this license, visit:
-//      http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US
+//    B9Creator is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
 //
+//    B9Creator is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
 //
-//  For updates and to download the lastest version, visit:
-//      http://github.com/B9Creations or
-//      http://b9creator.com
+//    You should have received a copy of the GNU General Public License
+//    along with B9Creator .  If not, see <http://www.gnu.org/licenses/>.
 //
 //  The above copyright notice and this permission notice shall be
 //    included in all copies or substantial portions of the Software.
@@ -31,6 +35,7 @@
 //    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 *************************************************************************************/
+
 #include "b9edit.h"
 #include "loadingbar.h"
 #include <QFileInfo>
@@ -139,10 +144,11 @@ void B9Edit::newJob()
 }
 void B9Edit::openJob(QString infile)
 {
+    QSettings settings;
     if(infile.isEmpty())
     {
         QFileDialog dialog(this);
-        infile = dialog.getOpenFileName(this,"Open B9 Job", GetDir(),tr("B9 Job Files (*.b9j);;All files (*.*)"));
+        infile = dialog.getOpenFileName(this,"Open B9 Job", settings.value("WorkingDir").toString(),tr("B9 Job Files (*.b9j);;All files (*.*)"));
         if(infile.isEmpty())//user hits cancel....
             return;
     }
@@ -213,8 +219,9 @@ void B9Edit::saveJob()
 }
 void B9Edit::saveJobAs()
 {
+    QSettings settings;
 	QFileDialog dialog(this);
-    QString saveFile = dialog.getSaveFileName(this,"Save B9 Job", GetDir() + "//" + sName,tr("B9 Job Files (*.b9j);;All files (*.*)"));
+    QString saveFile = dialog.getSaveFileName(this,"Save B9 Job",settings.value("WorkingDir").toString() + "//" + sName,tr("B9 Job Files (*.b9j);;All files (*.*)"));
 	QFile file(saveFile);
 	SetDir(QFileInfo(file).absolutePath());
 	if(!cPJ.saveCPJ(&file))
@@ -226,8 +233,9 @@ void B9Edit::saveJobAs()
 //Import
 void B9Edit::importSlices()//button access , branches to firstfile() or loadsvg()
 {
-	QFileDialog dialog(this);
-    QString openFile = dialog.getOpenFileName(this,"Select First Of Multiple Images", GetDir(),tr("Image Files (*.bmp *.png *.jpg *.jpeg *.tiff *.tif *.svg *.slc);;All files (*.*)"));
+    QSettings settings;
+    QFileDialog dialog(this);
+    QString openFile = dialog.getOpenFileName(this,"Select First Of Multiple Images", settings.value("WorkingDir").toString(),tr("Image Files (*.bmp *.png *.jpg *.jpeg *.tiff *.tif *.svg *.slc);;All files (*.*)"));
 	if(openFile.isEmpty()) return;
 
 	SetDir(QFileInfo(openFile).absolutePath());
@@ -901,8 +909,9 @@ void B9Edit::ExportToFolder()
 	QImage buff;
 
 	//folder dialog
+    QSettings settings;
 	QFileDialog dialog(this);
-	QString folder = dialog.getExistingDirectory(this,"Select Folder", GetDir());
+    QString folder = dialog.getExistingDirectory(this,"Select Folder", settings.value("WorkingDir").toString());
 
 	if(folder.isEmpty())
 		return;
@@ -955,13 +964,13 @@ void B9Edit::ExportToFolder()
 //persistent directory
 void B9Edit::SetDir(QString dir)
 {
-    QSettings settings("B9Creations", "B9Edit");
-	settings.setValue("defaultdir", dir);
+    QSettings settings;
+    settings.setValue("WorkingDir", dir);
 }
 QString B9Edit::GetDir()
 {
-    QSettings settings("B9Creations", "B9Edit");
-    if(settings.value("defaultdir").toString() == "")
+    QSettings settings;
+    if(settings.value("WorkingDir").toString() == "")
     {
         QDir currdir = QCoreApplication::applicationDirPath();
         #ifdef Q_WS_MAC
@@ -975,10 +984,10 @@ QString B9Edit::GetDir()
         #ifdef Q_WS_WIN
              currdir = QDir::home();
         #endif
-        settings.setValue("defaultdir", currdir.absolutePath());
+        settings.setValue("WorkingDir", currdir.absolutePath());
     }
 
-	return settings.value("defaultdir").toString();
+    return settings.value("WorkingDir").toString();
 }
 //editview
 void B9Edit::ShowSliceWindow()

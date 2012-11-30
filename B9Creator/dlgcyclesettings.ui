@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>398</width>
-    <height>318</height>
+    <width>406</width>
+    <height>374</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Printer Cycle Settings</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_4">
    <item row="0" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox_3">
      <property name="title">
-      <string>Printer Release Cycle Settings</string>
+      <string>Printer Cycle Settings</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_3">
+     <layout class="QGridLayout" name="gridLayout_5">
       <item row="0" column="0" colspan="2">
        <widget class="QGroupBox" name="groupBox">
         <property name="title">
@@ -437,7 +437,80 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
+      <item row="1" column="2" rowspan="2">
+       <widget class="QGroupBox" name="groupBox_4">
+        <property name="title">
+         <string>Dynamic Z-axis 'Find Zero' Settings</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_16">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Hard Down(mm)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QDoubleSpinBox" name="doubleSpinBoxHardZDown">
+           <property name="toolTip">
+            <string>We go lower than 'zero' by this amount, expecting to hit bottom, motor will 'skip' a bit.</string>
+           </property>
+           <property name="whatsThis">
+            <string>We go lower than 'zero' by this amount, expecting to hit bottom, motor will 'skip' a bit.  Adjust this value so it only skips a few times.</string>
+           </property>
+           <property name="decimals">
+            <number>5</number>
+           </property>
+           <property name="maximum">
+            <double>1.270000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.006350000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_17">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Up to Flush (mm)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QDoubleSpinBox" name="doubleSpinBoxZFlush">
+           <property name="toolTip">
+            <string>After we hit hard bottom, move up this much to flush the Build Table with the PDMS</string>
+           </property>
+           <property name="whatsThis">
+            <string>After we hit hard bottom, move up this much to flush the Build Table with the PDMS.  This value should normally be less than the Hard Down Value.</string>
+           </property>
+           <property name="decimals">
+            <number>5</number>
+           </property>
+           <property name="maximum">
+            <double>1.270000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.006350000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
        <widget class="QPushButton" name="pushButtonRestoreDefaults">
         <property name="focusPolicy">
          <enum>Qt::StrongFocus</enum>
@@ -490,6 +563,8 @@
   <tabstop>doubleSpinBoxBreathe2</tabstop>
   <tabstop>doubleSpinBoxSettle2</tabstop>
   <tabstop>doubleSpinBoxBTCutoff</tabstop>
+  <tabstop>doubleSpinBoxHardZDown</tabstop>
+  <tabstop>doubleSpinBoxZFlush</tabstop>
   <tabstop>pushButtonRestoreDefaults</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>

@@ -8,16 +8,20 @@
 //  Copyright 2011-2012 B9Creations, LLC
 //  B9Creations(tm) and B9Creator(tm) are trademarks of B9Creations, LLC
 //
-//  This work is licensed under the:
-//      "Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License"
+//  This file is part of B9Creator
 //
-//  To view a copy of this license, visit:
-//      http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US
+//    B9Creator is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
 //
+//    B9Creator is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
 //
-//  For updates and to download the lastest version, visit:
-//      http://github.com/B9Creations or
-//      http://b9creator.com
+//    You should have received a copy of the GNU General Public License
+//    along with B9Creator .  If not, see <http://www.gnu.org/licenses/>.
 //
 //  The above copyright notice and this permission notice shall be
 //    included in all copies or substantial portions of the Software.
@@ -31,6 +35,7 @@
 //    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 *************************************************************************************/
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -85,7 +90,7 @@ MainWindow::~MainWindow()
 void MainWindow::showSplash()
 {
     if(m_pSplash!=NULL){
-        m_pSplash->showMessage("Version 1.0.2c.beta\n"
+        m_pSplash->showMessage("Version 1.1.beta\n"
                                "Visit www.b9creator.com for support.\n"
                                "Copyright 2012 - B9Creations, LLC",Qt::AlignTop|Qt::AlignRight,Qt::yellow);
         m_pSplash->show();
@@ -96,7 +101,7 @@ void MainWindow::showSplash()
 void MainWindow::showAbout()
 {
     if(m_pSplash!=NULL){
-        m_pSplash->showMessage("Version 1.0.2c.beta\n"
+        m_pSplash->showMessage("Version 1.1.beta\n"
                                "Visit www.b9creator.com for support.\n"
                                "Copyright 2012 - B9Creations, LLC",Qt::AlignTop|Qt::AlignRight,Qt::yellow);
         m_pSplash->show();
@@ -182,14 +187,16 @@ void MainWindow::on_commandEdit_clicked(bool checked)
     else pMW3->hide();
 }
 
-void MainWindow::on_commandPrint_clicked(bool checked)
+void MainWindow::on_commandPrint_clicked()
 {
     /////////////////////////////////////////////////
     // Open the .b9j file
     m_pCPJ->clearAll();
     QFileDialog dialog(0);
-    QString openFile = dialog.getOpenFileName(this,"Select a B9Creator Job File to print", QDir::currentPath(), tr("B9Creator Job Files (*.b9j)"));
+    QSettings settings;
+    QString openFile = dialog.getOpenFileName(this,"Select a B9Creator Job File to print", settings.value("WorkingDir").toString(), tr("B9Creator Job Files (*.b9j)"));
     if(openFile.isEmpty()) return;
+    settings.setValue("WorkingDir", QFileInfo(openFile).absolutePath());
     QFile file(openFile);
     if(!m_pCPJ->loadCPJ(&file)) {
         QMessageBox msgBox;

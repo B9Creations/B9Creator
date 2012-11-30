@@ -1295,7 +1295,7 @@
       <string>Open the Release Cycle Dialog</string>
      </property>
      <property name="text">
-      <string>Printer Release Cycle Settings...</string>
+      <string>Printer Cycle Settings...</string>
      </property>
     </widget>
    </item>

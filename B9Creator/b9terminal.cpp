@@ -8,16 +8,20 @@
 //  Copyright 2011-2012 B9Creations, LLC
 //  B9Creations(tm) and B9Creator(tm) are trademarks of B9Creations, LLC
 //
-//  This work is licensed under the:
-//      "Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License"
+//  This file is part of B9Creator
 //
-//  To view a copy of this license, visit:
-//      http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US
+//    B9Creator is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
 //
+//    B9Creator is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
 //
-//  For updates and to download the lastest version, visit:
-//      http://github.com/B9Creations or
-//      http://b9creator.com
+//    You should have received a copy of the GNU General Public License
+//    along with B9Creator .  If not, see <http://www.gnu.org/licenses/>.
 //
 //  The above copyright notice and this permission notice shall be
 //    included in all copies or substantial portions of the Software.
@@ -31,6 +35,7 @@
 //    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 *************************************************************************************/
+
 #include <QtDebug>
 #include <QMessageBox>
 #include <QSettings>
@@ -65,6 +70,9 @@ void PCycleSettings::loadSettings()
     m_dOverLift2 = settings.value("OverLift2",0).toDouble();
 
     m_dBTClearInMM = settings.value("BTClearInMM",5.0).toDouble();
+
+    m_dHardZDownMM = settings.value("HardDownZMM",0.9525).toDouble();
+    m_dZFlushMM    = settings.value("ZFlushMM",   0.7620).toDouble();
 }
 
 void PCycleSettings::saveSettings()
@@ -87,6 +95,9 @@ void PCycleSettings::saveSettings()
     settings.setValue("OverLift2",m_dOverLift2);
 
     settings.setValue("BTClearInMM",m_dBTClearInMM);
+
+    settings.setValue("HardDownZMM",m_dHardZDownMM);
+    settings.setValue("ZFlushMM",   m_dZFlushMM   );
 }
 
 void PCycleSettings::setFactorySettings()
@@ -103,6 +114,8 @@ void PCycleSettings::setFactorySettings()
     m_dOverLift1 = 3.0;
     m_dOverLift2 = 0.0;
     m_dBTClearInMM = 5.0;
+    m_dHardZDownMM = 0.9525;
+    m_dZFlushMM = 0.7620;
 }
 
 B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
@@ -534,10 +547,9 @@ void B9Terminal::on_lineEditTgtZMM_editingFinished()
     double dTest = QString::number(dValue).toDouble();
     if((dTest==0 && ui->lineEditTgtZMM->text().length()>2)|| dTest!=ui->lineEditTgtZMM->text().toDouble()||
             dValue<0 || dValue >200.00595){
-        int ret = QMessageBox::information(this, tr("Target Level (Inches) Out of Range"),
-                                       tr("Please enter an integer value between 0-7.87425.\n"
-                                          "This will be the altitude for the next layer.\n"),
-                                       QMessageBox::Ok);
+        QMessageBox::information(this, tr("Target Level (Inches) Out of Range"),
+                     tr("Please enter an integer value between 0-7.87425.\n"
+                     "This will be the altitude for the next layer.\n"),QMessageBox::Ok);
         dValue = 0;
         ui->lineEditTgtZMM->setText(QString::number(dValue));
         ui->lineEditTgtZMM->setFocus();
@@ -554,10 +566,9 @@ void B9Terminal::on_lineEditTgtZInches_editingFinished()
     double dTest = QString::number(dValue).toDouble();
     if((dTest==0 && ui->lineEditTgtZInches->text().length()>2)|| dTest!=ui->lineEditTgtZInches->text().toDouble()||
             dValue<0 || dValue >7.87425){
-        int ret = QMessageBox::information(this, tr("Target Level (Inches) Out of Range"),
-                                       tr("Please enter an integer value between 0-7.87425.\n"
-                                          "This will be the altitude for the next layer.\n"),
-                                       QMessageBox::Ok);
+        QMessageBox::information(this, tr("Target Level (Inches) Out of Range"),
+                     tr("Please enter an integer value between 0-7.87425.\n"
+                        "This will be the altitude for the next layer.\n"),QMessageBox::Ok);
         dValue = 0;
         ui->lineEditTgtZInches->setText(QString::number(dValue));
         ui->lineEditTgtZInches->setFocus();
@@ -1015,7 +1026,7 @@ void B9Terminal::onScreenCountChanged(int iCount){
     }
     pProjector = new B9Projector(true, 0,Qt::WindowStaysOnTopHint);
     makeProjectorConnections();
-    int i=0;
+    int i=iCount;
     int screenCount = m_pDesktop->screenCount();
     QRect screenGeometry;
 

@@ -1,3 +1,41 @@
+/*************************************************************************************
+//
+//  LICENSE INFORMATION
+//
+//  BCreator(tm)
+//  Software for the control of the 3D Printer, "B9Creator"(tm)
+//
+//  Copyright 2011-2012 B9Creations, LLC
+//  B9Creations(tm) and B9Creator(tm) are trademarks of B9Creations, LLC
+//
+//  This file is part of B9Creator
+//
+//    B9Creator is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    B9Creator is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with B9Creator .  If not, see <http://www.gnu.org/licenses/>.
+//
+//  The above copyright notice and this permission notice shall be
+//    included in all copies or substantial portions of the Software.
+//
+//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+//    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+//    LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+//    OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+//    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+*************************************************************************************/
+
 #include "b9layout.h"
 #include "crushbitmap.h"
 #include "slicecontext.h"
@@ -132,7 +170,7 @@ QString B9Layout::Open()
 
 
 	QString filename = QFileDialog::getOpenFileName(this,
-             tr("Open Layout"), settings.value("LayoutDir").toString(), tr("B9Layout (*.b9l)"));
+             tr("Open Layout"), settings.value("WorkingDir").toString(), tr("B9Layout (*.b9l)"));
 
 	if(filename.isEmpty())
     {return "";}
@@ -159,7 +197,7 @@ QString B9Layout::Open()
 	CleanModelData();// now delete unneeded model data
 
     //set recent directory.
-    settings.setValue("LayoutDir", QFileInfo(filename).absolutePath());
+    settings.setValue("WorkingDir", QFileInfo(filename).absolutePath());
 
     return filename;
 
@@ -182,7 +220,7 @@ void B9Layout::SaveAs()
     QSettings settings;
 
     QString filename = QFileDialog::getSaveFileName(this, tr("Save Layout"),
-                    settings.value("LayoutDir").toString(),
+                    settings.value("WorkingDir").toString(),
                             tr("B9 Layout (*.b9l)"));
 	if(filename.isEmpty())
 	{
@@ -196,7 +234,7 @@ void B9Layout::SaveAs()
 		return;
 	}
 
-    settings.setValue("LayoutDir",QFileInfo(filename).absolutePath());
+    settings.setValue("WorkingDir",QFileInfo(filename).absolutePath());
 }
 
 //interface
@@ -443,7 +481,7 @@ ModelInstance* B9Layout::AddModel(QString filepath)
 	if(filepath.isEmpty())
 	{
 		filepath = QFileDialog::getOpenFileName(this,
-            tr("Open Model"), settings.value("AddModelDir").toString(), tr("Models (*.stl *.obj)"));
+            tr("Open Model"), settings.value("WorkingDir").toString(), tr("Models (*.stl *.obj)"));
 
 		//cancel button
 		if(filepath.isEmpty())
@@ -468,7 +506,7 @@ ModelInstance* B9Layout::AddModel(QString filepath)
 	}
 
     //update registry
-    settings.setValue("AddModelDir",QFileInfo(filepath).absolutePath());
+    settings.setValue("WorkingDir",QFileInfo(filepath).absolutePath());
 	
 	//add to the list
 	ModelDataList.push_back(pNewModel);
@@ -764,7 +802,7 @@ void B9Layout::SliceWorld()
 {
     QSettings settings;
 
-    QString filename = QFileDialog::getSaveFileName(this, tr("Export Slices"), settings.value("JobDir").toString()+ "/" + project->GetJobName(), tr("B9 Job (*.b9j);;SLC (*.slc)"));
+    QString filename = QFileDialog::getSaveFileName(this, tr("Export Slices"), settings.value("WorkingDir").toString()+ "/" + project->GetJobName(), tr("B9 Job (*.b9j);;SLC (*.slc)"));
     if(filename.isEmpty())
 	{
 		return;
@@ -783,7 +821,7 @@ void B9Layout::SliceWorld()
 		return;
 	}
 
-    settings.setValue("JobDir",QFileInfo(filename).absolutePath());
+    settings.setValue("WorkingDir",QFileInfo(filename).absolutePath());
 
 
 }

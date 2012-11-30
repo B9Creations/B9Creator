@@ -1,3 +1,41 @@
+/*************************************************************************************
+//
+//  LICENSE INFORMATION
+//
+//  BCreator(tm)
+//  Software for the control of the 3D Printer, "B9Creator"(tm)
+//
+//  Copyright 2011-2012 B9Creations, LLC
+//  B9Creations(tm) and B9Creator(tm) are trademarks of B9Creations, LLC
+//
+//  This file is part of B9Creator
+//
+//    B9Creator is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
+//
+//    B9Creator is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with B9Creator .  If not, see <http://www.gnu.org/licenses/>.
+//
+//  The above copyright notice and this permission notice shall be
+//    included in all copies or substantial portions of the Software.
+//
+//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+//    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+//    LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+//    OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+//    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+*************************************************************************************/
+
 #include <QMessageBox>
 #include <QTimer>
 #include "b9print.h"
@@ -182,7 +220,7 @@ void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, i
         ui->pushButtonAbort->setEnabled(true);
         m_iPrintState = PRINT_SETUP1;
         m_dLayerThickness = m_pCPJ->getZLayer().toDouble();
-        m_pTerminal->rcBasePrint(-150 * 0.00635);
+        m_pTerminal->rcBasePrint(-m_pTerminal->getHardZDownMM()); // Dynamic Z Zero, overshoot zero until we are down hard and motor 'skips'
     }
 }
 void B9Print::on_updateProjector(B9PrinterStatus::ProjectorStatus eStatus)
@@ -193,7 +231,7 @@ void B9Print::on_updateProjector(B9PrinterStatus::ProjectorStatus eStatus)
         ui->pushButtonAbort->setEnabled(true);
         m_iPrintState = PRINT_SETUP1;
         m_dLayerThickness = m_pCPJ->getZLayer().toDouble();
-        m_pTerminal->rcBasePrint(-150 * 0.00635);
+        m_pTerminal->rcBasePrint(-m_pTerminal->getHardZDownMM()); // Dynamic Z Zero, overshoot zero until we are down hard and motor 'skips'
     }
 }
 
@@ -231,13 +269,15 @@ void B9Print::on_pushButtonAbort_clicked(QString sAbortText)
         return;
     }
 
-    if(m_iPrintState == PRINT_NO||m_iPrintState == PRINT_ABORT||m_iPaused==PAUSE_YES||m_iPaused==PAUSE_WAIT) return; // no abort if paused, not printing or already aborting
+//    if(m_iPrintState == PRINT_NO||m_iPrintState == PRINT_ABORT||m_iPaused==PAUSE_YES||m_iPaused==PAUSE_WAIT) return; // no abort if paused, not printing or already aborting
+    if(m_iPrintState == PRINT_NO||m_iPrintState == PRINT_ABORT||m_iPaused==PAUSE_WAIT) return; // no abort if pausing, not printing or already aborting
     ui->pushButtonAbort->setText("Aborting...");
     ui->lineEditLayerCount->setText("Aborting...");
     ui->pushButtonPauseResume->setEnabled(false);
     ui->pushButtonAbort->setEnabled(false);
     setProjMessage("Aborting...");
     m_bAbort = true;
+    if(m_iPaused==PAUSE_YES) on_pushButtonPauseResume_clicked();
 }
 
 void B9Print::setSlice(int iSlice)
@@ -255,10 +295,10 @@ void B9Print::exposeTBaseLayer(){
     if(m_iPrintState==PRINT_NO || m_iPrintState == PRINT_ABORT)return;
 
     if(m_iPrintState==PRINT_SETUP1){
-        //We've used B-150 to overshoot and get to here,
-        // now reset current position to 0 and move to +80
+        //We've used -  getHardZDownMM()to overshoot and get to here,
+        // now reset current position to 0 and move up to + getZFlushMM
         m_pTerminal->rcResetCurrentPositionPU(0);
-        m_pTerminal->rcBasePrint(80 * 0.00635);
+        m_pTerminal->rcBasePrint(m_pTerminal->getZFlushMM());
         m_iPrintState = PRINT_SETUP2;
         return;
     }
@@ -371,8 +411,9 @@ void B9Print::exposureOfTOverLayersFinished(){
         m_pTerminal->rcCloseVat();
         ui->pushButtonPauseResume->setText("Resume");
         ui->pushButtonPauseResume->setEnabled(true);
+        ui->pushButtonAbort->setEnabled(true);
         ui->lineEditLayerCount->setText("Paused.  Manual positioning toggle switches are enabled.");
-        m_pTerminal->rcSetProjMessage(" Paused.  Manual positioning toggle switches are enabled.  Press 'p' when ready to resume printing.");
+        m_pTerminal->rcSetProjMessage(" Paused.  Manual toggle switches are enabled.  Press 'p' when to resume printing, 'A' to abort.");
         return;
     }
 
