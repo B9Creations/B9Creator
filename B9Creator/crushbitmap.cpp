@@ -345,8 +345,8 @@ int CrushedBitMap::popBits(int iBits)
 	if (mIndex + iBits <= mBitarray.size() && iBits<33){
 		iReturn = 0;
 		for (int i=iBits-1; i>=0; i--) {
-			iReturn += (pow(2.0,i) * mBitarray.testBit(mIndex));
-			mIndex++;
+            iReturn = (iReturn<<1) + mBitarray.testBit(mIndex);
+            mIndex++;
 		}
 	}
 	return iReturn;
