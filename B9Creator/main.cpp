@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 {
     B9NativeApp a(argc, argv);
     MainWindow w;
-    QPixmap pixmap(QCoreApplication::applicationDirPath()+"/"+"splash.jpg");
+    QPixmap pixmap(QCoreApplication::applicationDirPath()+"/"+"splash.png");
     QSplashScreen splash(pixmap,Qt::WindowStaysOnTopHint);
     a.processEvents();
     w.setSplash(&splash);
