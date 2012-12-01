@@ -52,7 +52,7 @@ class SliceEditView : public QMainWindow
 {
 	Q_OBJECT
 public:
-	SliceEditView(QWidget *parent = 0, Qt::WFlags flags = Qt::WindowMinMaxButtonsHint|Qt::Window);
+    SliceEditView(QWidget *parent = 0, Qt::WFlags flags = Qt::Window);
 	~SliceEditView();
 
 	Ui::SliceEditViewClass ui;
