@@ -96,7 +96,7 @@ void B9PrinterStatus::setVersion(QString s)
 }
 
 bool B9PrinterStatus::isCurrentVersion(){
-    return getVersion() == CURRENTFIRMWARE;
+    return getVersion() >= CURRENTFIRMWARE;
 }
 
 bool B9PrinterStatus::isValidVersion(){
@@ -207,10 +207,12 @@ void B9PrinterComm::watchDog()
     }
     //Attempt to pick up were we lost contact if we find the port again within a short time
     qDebug() << "WATCHDOG:  LOST CONTACT WITH B9CREATOR!";
+
     emit updateConnectionStatus(MSG_SEARCHING);
     emit BC_ConnectionStatusDetailed("Lost Contact with B9Creator.  Searching...");
     m_Status.reset();
     handleLostComm();
+    RefreshCommPortItems();
 }
 
 void B9PrinterComm::handleLostComm(){

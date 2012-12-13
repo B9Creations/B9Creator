@@ -739,7 +739,7 @@ void B9Terminal::on_pushButtonPrintBase_clicked()
     SetCycleParameters();
     int iTimeout = getEstBaseCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("B"+ui->lineEditTgtZPU->text());
-    m_pPReleaseCycleTimer->start(iTimeout * 1.2); // Timeout after 120% of estimated time required
+    m_pPReleaseCycleTimer->start(iTimeout * 2.0); // Timeout after 200% of estimated time required
 }
 
 void B9Terminal::on_pushButtonPrintNext_clicked()
@@ -752,7 +752,7 @@ void B9Terminal::on_pushButtonPrintNext_clicked()
     SetCycleParameters();
     int iTimeout = getEstNextCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("N"+ui->lineEditTgtZPU->text());
-    m_pPReleaseCycleTimer->start(iTimeout * 1.2); // Timeout after 120% of estimated time required
+    m_pPReleaseCycleTimer->start(iTimeout * 2.0); // Timeout after 200% of estimated time required
 }
 
 void B9Terminal::on_pushButtonPrintFinal_clicked()
@@ -763,7 +763,9 @@ void B9Terminal::on_pushButtonPrintFinal_clicked()
     ui->pushButtonPrintNext->setEnabled(false);
     ui->pushButtonPrintFinal->setEnabled(false);
     SetCycleParameters();
+    int iTimeout = getEstFinalCycleTime(ui->lineEditCurZPosInPU->text().toInt(), ui->lineEditTgtZPU->text().toInt());
     pPrinterComm->SendCmd("F"+ui->lineEditTgtZPU->text());
+    m_pPReleaseCycleTimer->start(iTimeout * 2.0); // Timeout after 200% of estimated time required
 }
 
 void B9Terminal::SetCycleParameters(){
@@ -1118,7 +1120,10 @@ void B9Terminal::getKey(int iKey)
         emit pausePrint();
         break;
     case 65:        // Capital 'A' to abort
-        if(!isEnabled())emit signalAbortPrint("User Directed Abort.");
+        if(!isEnabled()){
+            m_pPReleaseCycleTimer->stop();
+            emit signalAbortPrint("User Directed Abort.");
+        }
         break;
     default:
         break;

@@ -260,7 +260,7 @@ void B9Print::on_pushButtonAbort_clicked(QString sAbortText)
 {
     m_sAbortMessage = sAbortText;
     if(m_sAbortMessage.contains("Jammed Mechanism")||m_sAbortMessage.contains("Lost Printer Connection")||
-       (m_sAbortMessage.contains("Projector"))){ //&&(m_iPrintState == PRINT_NO&&m_iPaused==PAUSE_NO))){
+       (m_sAbortMessage.contains("Projector"))){
         // Special cases, always handle it asap.
         m_pTerminal->rcSetCPJ(NULL); //blank
         ui->pushButtonAbort->setText("Abort");
@@ -269,7 +269,6 @@ void B9Print::on_pushButtonAbort_clicked(QString sAbortText)
         return;
     }
 
-//    if(m_iPrintState == PRINT_NO||m_iPrintState == PRINT_ABORT||m_iPaused==PAUSE_YES||m_iPaused==PAUSE_WAIT) return; // no abort if paused, not printing or already aborting
     if(m_iPrintState == PRINT_NO||m_iPrintState == PRINT_ABORT||m_iPaused==PAUSE_WAIT) return; // no abort if pausing, not printing or already aborting
     ui->pushButtonAbort->setText("Aborting...");
     ui->lineEditLayerCount->setText("Aborting...");
@@ -311,14 +310,14 @@ void B9Print::exposeTBaseLayer(){
     }
 
     if(m_iPrintState == PRINT_DONE){
+        m_iPrintState=PRINT_NO;
         m_pTerminal->setEnabled(true);
         if(m_pTerminal->getPrintPreview()){
-            m_pTerminal->setUsePrimaryMonitor(false);
             m_pTerminal->setPrintPreview(false);
+            m_pTerminal->setUsePrimaryMonitor(false);
         }
         m_pTerminal->onScreenCountChanged();
         hide();
-        QMessageBox::information(0,"Finished","PRINT COMPLETED\n\nAll "+QString::number(m_iLastLayer)+" layers built.");
         return;
     }
 
@@ -427,8 +426,12 @@ void B9Print::exposureOfTOverLayersFinished(){
     }
     else if(m_iCurLayerNumber==m_iLastLayer-1){
         // We're done, release and raise
+        ui->pushButtonAbort->setEnabled(false);
+        ui->pushButtonPauseResume->setEnabled(false);
         m_iPrintState=PRINT_DONE;
         m_pTerminal->rcFinishPrint(25.4); //Finish at current z position + 25.4 mm, turn Projector Off
+        ui->lineEditLayerCount->setText("Finished!");
+        setProjMessage("Finished!");
         return;
     }
     else
