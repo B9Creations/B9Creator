@@ -101,8 +101,8 @@ public:
     QString getMaterialDescription(int index){return m_Materials[index]->getMaterialDescription();}
 
     QString getTattach(int iMat, int iXY) {return QString::number(m_Materials[iMat]->getTattach(iXY));}
-    QString getTbase(int iMat, int iXY, int iZ){return QString::number(m_Materials[iMat]->getTbase(iXY, iZ));}
-    QString getTover(int iMat, int iXY, int iZ){return QString::number(m_Materials[iMat]->getTover(iXY, iZ));}
+    QString getTbase(int iMat, int iXY, int iZ){return QString::number((double)m_Materials[iMat]->getTbase(iXY, iZ),'f',3);}
+    QString getTover(int iMat, int iXY, int iZ){return QString::number((double)m_Materials[iMat]->getTover(iXY, iZ),'f',3);}
 
     void setTattach(int iMat, int iXY,double dT){m_Materials[iMat]->setTattach(iXY, dT);}
     void setNumberAttach(int iMat, int iXY,int iNum){m_Materials[iMat]->setNumberAttach(iXY, iNum);}

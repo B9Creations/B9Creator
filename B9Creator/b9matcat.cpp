@@ -250,25 +250,25 @@ void B9MatCat::addDupMat(QString sName, QString sDescription, int iOrigin){
 }
 
 int B9MatCat::getCurTbaseAtZinMS(double zMM){
-    int iLowTime, iHighTime;
+    double dLowTime, dHighTime;
     double lowMatch = getZinMM(0);
     double highMatch = getZinMM(15);
     for(int i=0;i <16; i++){
-        if(getZinMM(i)<=zMM){lowMatch = getZinMM(i);iLowTime = getTbase(m_iCurMatIndex, m_iCurXYIndex, i).toInt();}
-        if(getZinMM(i)>=zMM){highMatch = getZinMM(i);iHighTime = getTbase(m_iCurMatIndex, m_iCurXYIndex, i).toInt();break;}
+        if(getZinMM(i)<=zMM){lowMatch = getZinMM(i);dLowTime = getTbase(m_iCurMatIndex, m_iCurXYIndex, i).toDouble();}
+        if(getZinMM(i)>=zMM){highMatch = getZinMM(i);dHighTime = getTbase(m_iCurMatIndex, m_iCurXYIndex, i).toDouble();break;}
     }
-    if(iHighTime==iLowTime)return (double)iHighTime*1000.0;
-    return 1000.0*((((zMM-lowMatch)/(highMatch-lowMatch))*(double)(iHighTime - iLowTime))+ (double)iLowTime);
+    if(dHighTime==dLowTime)return 1000*dHighTime;
+    return 1000.0*((((zMM-lowMatch)/(highMatch-lowMatch))*(dHighTime - dLowTime))+ dLowTime);
 }
 
 int B9MatCat::getCurToverAtZinMS(double zMM){
-    int iLowTime, iHighTime;
+    double dLowTime, dHighTime;
     double lowMatch = getZinMM(0);
     double highMatch = getZinMM(15);
     for(int i=0;i <16; i++){
-        if(getZinMM(i)<=zMM){lowMatch = getZinMM(i);iLowTime = getTover(m_iCurMatIndex, m_iCurXYIndex, i).toInt();}
-        if(getZinMM(i)>=zMM){highMatch = getZinMM(i);iHighTime = getTover(m_iCurMatIndex, m_iCurXYIndex, i).toInt();break;}
+        if(getZinMM(i)<=zMM){lowMatch = getZinMM(i);dLowTime = getTover(m_iCurMatIndex, m_iCurXYIndex, i).toDouble();}
+        if(getZinMM(i)>=zMM){highMatch = getZinMM(i);dHighTime = getTover(m_iCurMatIndex, m_iCurXYIndex, i).toDouble();break;}
     }
-    if(iHighTime==iLowTime)return (double)iHighTime*1000.0;
-    return 1000.0*((((zMM-lowMatch)/(highMatch-lowMatch))*(double)(iHighTime - iLowTime))+ (double)iLowTime);
+    if(dHighTime==dLowTime)return dHighTime*1000.0;
+    return 1000.0*((((zMM-lowMatch)/(highMatch-lowMatch))*(dHighTime - dLowTime))+ dLowTime);
 }

@@ -82,7 +82,7 @@ public slots:
 	void updateName(QString s){sName=s; cPJ.setName(s); dirtied = true; updateWindowTitle();}
 	void updateDescription(QString s){sDescription=s; cPJ.setDescription(s); dirtied = true; updateWindowTitle();}
 	void updateXY(QString s){XYPixel=s; cPJ.setXYPixel(s); dirtied = true; updateWindowTitle();}
-	void updateZ(QString s){ZLayer=s; cPJ.setZLayer(s); dirtied = true; updateWindowTitle();}
+    void updateZ(QString s){ZLayer=s; cPJ.setZLayer(QString::number(s.toDouble()/1000.0,'f',6)); dirtied = true; updateWindowTitle();}
 	void updateSliceIndicator();
 	void updateWindowTitle();
 	
