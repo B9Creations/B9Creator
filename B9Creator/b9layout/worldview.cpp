@@ -452,14 +452,14 @@ void WorldView::mouseMoveEvent(QMouseEvent *event)
 
 
 
-	if (event->buttons() & Qt::RightButton) {
+    if ((event->buttons() & Qt::RightButton) && !shiftdown) {
 		setXRotation(xRot + 0.5 * dy);
 		setZRotation(zRot + 0.5 * dx);
 	}
 
     lastPos = event->pos();
 	
-	if(pandown)
+    if(pandown || (event->buttons() & Qt::RightButton && shiftdown))
 	{
 		pan += QVector3D(dx/5.0,dy/5.0,0);
 	}
@@ -512,7 +512,6 @@ void WorldView::mouseMoveEvent(QMouseEvent *event)
              for(unsigned int i = 0; i<pMain->GetSelectedInstances().size(); i++)
              {
                   pMain->GetSelectedInstances()[i]->Scale(QVector3D(dx*0.01,dx*0.01,dx*0.01));
-
              }
 
         }

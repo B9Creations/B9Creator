@@ -56,6 +56,7 @@ DlgPrintPrep::DlgPrintPrep(CrushedPrintJob* pCPJ, B9Terminal* pTerminal, QWidget
     m_iTbaseMS=0;
     m_iToverMS=0;
     m_bDryRun = false;
+    m_bMirrored = false;
 
     ui->pushButtonResetPrintAll->setEnabled(false);
 
@@ -185,6 +186,11 @@ void DlgPrintPrep::updateTimes()
     ui->lineEditVolume->setText(QString::number(dVolume,'f',1));
 }
 
+
+void DlgPrintPrep::on_checkBoxMirrored_clicked(bool checked)
+{
+    m_bMirrored = checked;
+}
 
 void DlgPrintPrep::on_checkBoxDryRun_clicked(bool checked)
 {

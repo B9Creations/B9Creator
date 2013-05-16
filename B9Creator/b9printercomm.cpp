@@ -115,7 +115,7 @@ bool B9FirmwareUpdate::UploadHex(QString sCurPort)
 {
     QDir appdir = QDir(QCoreApplication::applicationDirPath());
     QString launchcommand = "avrdude ";
-    QString args = "-Cavrdude.conf -v -v -v -v -patmega328p -carduino -P" + sCurPort + " -b115200 -D -Uflash:w:\"" + sHexFilePath + "\":i";
+    QString args = "-Cavrdude.conf -v -v -v -v -patmega328p -carduino -P" + sCurPort + " -b" + QString::number(FIRMWAREUPDATESPEED) + " -D -Uflash:w:\"" + sHexFilePath + "\":i";
 
     #ifdef Q_WS_MAC//in mac packages if avrdude is in recources
         appdir.cdUp();
@@ -149,6 +149,7 @@ bool B9FirmwareUpdate::UploadHex(QString sCurPort)
         return false;
     }
     qDebug() << "Firmware Update Complete";
+
     return true;
 }
 
@@ -285,6 +286,8 @@ void B9PrinterComm::RefreshCommPortItems()
          #else
             // Windows and OSX use portName to ID ports
             sPortName = pPorts->at(i).portName;
+
+
             // We filter ports by requiring vendorID value of 9025 (Arduino)
             if(pPorts->at(i).vendorID==9025 && OpenB9CreatorCommPort(sPortName)){
          #endif
@@ -318,7 +321,9 @@ void B9PrinterComm::RefreshCommPortItems()
             if(m_serialDevice!=NULL) {
                 m_serialDevice->flush();
                 m_serialDevice->close();
+
                 delete m_serialDevice;
+
             }
             m_serialDevice = NULL;
             m_Status.reset();
@@ -343,6 +348,9 @@ void B9PrinterComm::RefreshCommPortItems()
 bool B9PrinterComm::OpenB9CreatorCommPort(QString sPortName)
 {
     if(m_serialDevice!=NULL) qFatal("Error:  We found an open port handle that should have been deleted!");
+
+
+
 
     // Attempt to establish a serial connection with the B9Creator
     m_serialDevice = new QextSerialPort(sPortName, QextSerialPort::EventDriven, this);
@@ -554,6 +562,7 @@ void B9PrinterComm::setProjectorPowerCmd(bool bPwrFlag){
     if(bPwrFlag){
         SendCmd("P1"); // Turn On Command
         m_Status.setProjectorStatus(B9PrinterStatus::PS_TURNINGON);
+        if(m_bIsMirrored) SendCmd("P4"); else SendCmd("P3");
     }
     else {
         SendCmd("P0"); // Turn On Command

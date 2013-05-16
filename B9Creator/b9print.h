@@ -58,7 +58,7 @@ public:
     explicit B9Print(B9Terminal *pTerm, QWidget *parent = 0);
     ~B9Print();
     // If PrintPreview we do not power up the projector.  If UsePrimaryMonitor we force the output to the primary monitor
-    void print3D(CrushedPrintJob *pCPJ, int iXOff, int iYOff, int iTbase, int iTover, int iTattach, int iNumAttach = 1, int iLastLayer = 0, bool bPrintPreview = false, bool bUsePrimaryMonitor = false);
+    void print3D(CrushedPrintJob *pCPJ, int iXOff, int iYOff, int iTbase, int iTover, int iTattach, int iNumAttach = 1, int iLastLayer = 0, bool bPrintPreview = false, bool bUsePrimaryMonitor = false, bool bIsMirrored = false);
     
 signals:
     void eventHiding();

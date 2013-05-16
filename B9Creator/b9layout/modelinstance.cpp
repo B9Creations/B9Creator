@@ -60,6 +60,8 @@ ModelInstance::ModelInstance(ModelData* parent)
 	rot = QVector3D(0,0,0);
 	scale = QVector3D(1,1,1);
 
+    isFlipped = false;
+
 	maxbound = parent->maxbound;
 	minbound = parent->minbound;
 	
@@ -165,11 +167,18 @@ void ModelInstance::SetRot(QVector3D r)
 	this->rot = r;
 	CorrectRot();
 }
+
+void ModelInstance::SetFlipped(int flipped)
+{
+    isFlipped = flipped;
+}
+
+
 	
 //Incremental
 void ModelInstance::Scale(QVector3D scalar)
 {
-	SetScale(QVector3D(scale.x() + scalar.x(),scale.y() + scalar.y(),scale.z() + scalar.z()));
+    SetScale(QVector3D(scale.x() + scalar.x(),scale.y() + scalar.y(),scale.z() + scalar.z()));
 }
 void ModelInstance::Move(QVector3D translation)
 {
@@ -201,7 +210,10 @@ QVector3D ModelInstance::GetMinBound()
 {
 	return minbound;
 }
-
+bool ModelInstance::GetFlipped()
+{
+    return isFlipped;
+}
 
 
 //selection
@@ -224,6 +236,8 @@ void ModelInstance::SetSelected(bool sel)
 //render
 void ModelInstance::RenderGL()
 {
+
+
 	//do a smooth visual transition.
 	visualcolor.setRedF(visualcolor.redF() + (currcolor.redF() - visualcolor.redF())/2.0);
 	visualcolor.setGreenF(visualcolor.greenF() + (currcolor.greenF() - visualcolor.greenF())/2.0);
@@ -237,9 +251,13 @@ void ModelInstance::RenderGL()
 					glRotatef(rot.y(), 0.0, 1.0, 0.0);
 					glRotatef(rot.z(), 0.0, 0.0, 1.0);
 
-						glScalef(scale.x(),scale.y(),scale.z());
+                        glScalef(scale.x(),scale.y(),scale.z());
 							
+                        if(isFlipped)//choose which display list to used
+                            glCallList(pData->displaylistflippedindx);
+                        else
 							glCallList(pData->displaylistindx);
+
 							
 	glPopMatrix();
 }
@@ -255,7 +273,10 @@ void ModelInstance::RenderPickGL()
 					
 					glScalef(scale.x(),scale.y(),scale.z());
 						
-						glCallList(pData->displaylistindx);
+                    if(isFlipped)//choose which display list to use
+                        glCallList(pData->displaylistflippedindx);
+                    else
+                        glCallList(pData->displaylistindx);
 	glPopMatrix();
 }
 
@@ -270,20 +291,34 @@ void ModelInstance::BakeGeometry()
 
 	UnBakeGeometry();
 	
-	//while we are at it, update the instances bounds as well
-	maxbound = QVector3D(-999999.0,-999999.0,-999999.0);
-	minbound = QVector3D(999999.0,999999.0,999999.0);
+    //while we are at it, update the instances bounds as well (faster than doing UpdateBounds function)
+    //which uses unbaking and backing.
+    maxbound = QVector3D(-999999.0,-999999.0,-999999.0);
+    minbound = QVector3D(999999.0,999999.0,999999.0);
 
 	//copy the triangles from pData into the list with transforms applied
 	for(t = 0;t < pData->triList.size(); t++)
 	{
 		
-		Triangle3D* pNewTri = new Triangle3D(pData->triList[t]);
-		
-		for(v=0;v<3;v++)
+        //all data is copied
+        Triangle3D* pNewTri = new Triangle3D(pData->triList[t]);
+
+        //scale normal first
+        pNewTri->normal *= scale;
+        //if the instance is flipped, we want to set scale x inverted
+        if(isFlipped)
+            pNewTri->normal.setX(-pNewTri->normal.x());
+
+        pNewTri->normal.normalize();//force to unit length again
+
+
+        for(v=0;v<3;v++)
 		{
-			//scale first
-			pNewTri->vertex[v] += (pData->triList[t].vertex[v]*(scale - QVector3D(1,1,1)));
+            //scale triangle vertices
+            pNewTri->vertex[v] *= scale;
+            if(isFlipped)
+                pNewTri->vertex[v].setX(-pNewTri->vertex[v].x());
+
 
 			//Rotate second
 			RotateVector(pNewTri->vertex[v],rot.z(),QVector3D(0,0,1));//z
@@ -296,11 +331,15 @@ void ModelInstance::BakeGeometry()
 		}
 		//rotate the normal as well!
 		RotateVector(pNewTri->normal,rot.z(),QVector3D(0,0,1));
-		RotateVector(pNewTri->normal,rot.y(),QVector3D(0,1,0));
-		RotateVector(pNewTri->normal,rot.x(),QVector3D(1,0,0));
+        RotateVector(pNewTri->normal,rot.y(),QVector3D(0,1,0));
+        RotateVector(pNewTri->normal,rot.x(),QVector3D(1,0,0));
+
+
+
 	
 		//update the triangles bounds
 		pNewTri->UpdateBounds();
+
 
 		if(pNewTri->maxBound.x() > this->maxbound.x())
 		{
@@ -327,19 +366,20 @@ void ModelInstance::BakeGeometry()
 		{
 			this->minbound.setZ(pNewTri->minBound.z());
 		}
-		
-		triList.push_back(pNewTri);
+
+        triList.push_back(pNewTri);
 	}
 
-
+    qDebug() << "Baked instance";
 }
 void ModelInstance::UnBakeGeometry()
 {
-    for(unsigned int i=0;i<triList.size();i++)
+    for(unsigned long int i=0;i<triList.size();i++)
 	{
 		delete triList[i];
 	}
 	triList.clear();
+    qDebug() << "Unbaked instance";
 }
 void ModelInstance::UpdateBounds()
 {
@@ -376,14 +416,14 @@ void ModelInstance::CorrectRot()
 void ModelInstance::CorrectScale()
 {
 
-	if(scale.x() <= 0)
-		scale.setX(0);
+    if(scale.x() <= 0)
+        scale.setX(0);
 
-	if(scale.y() <= 0)
-		scale.setY(0);
+    if(scale.y() <= 0)
+        scale.setY(0);
 
-	if(scale.z() <= 0)
-		scale.setZ(0);
+    if(scale.z() <= 0)
+        scale.setZ(0);
 
 
 }

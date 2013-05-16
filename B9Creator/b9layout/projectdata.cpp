@@ -62,22 +62,46 @@
         SetDirtied(false);
 	}
 	bool ProjectData::Open(QString filepath) //returns success
-	{
+    {
+        int FileVersion;
 		bool jumpout = false;
 
 		double resx;
 		double resy;
-		
-		//input file operations here TODO
+        bool flipped = false;
+
+        QSettings settings;
+
+        //input file operations here
 		QFile file(filepath);
-		QString buff;
+        QString buff;//for io operations
+        QString modelpath;//current model this function is trying to load.
 		if(!file.open(QIODevice::ReadOnly))
 		{
 			return false;
-		}
+        }
+        SetDirtied(false);//presumably good from here so undirty the project
+
 		QTextStream in(&file);//begin text streaming.
-        mfilename = in.readLine();//get project name
-		
+
+
+        in >> buff;
+        if(buff == "ver")//we are looking at a post 1.4 b9 layout file
+        {
+            in >> buff;
+            FileVersion = buff.toInt();//should be 14 or greater.
+            in.skipWhiteSpace();
+            mfilename = in.readLine();//get project name
+        }
+        else//old file - we need to read first line for project name
+        {
+            FileVersion = 13;
+
+            in.seek(0);//go back and re-read.
+            mfilename = in.readLine();//get project name
+        }
+        qDebug() << "Layout Version: " << FileVersion;
+
 		buff = in.readLine();//eat startmodellist
 		while(!jumpout)
 		{
@@ -86,7 +110,8 @@
 			
 			if(buff != "endinstancelist")
 			{
-				ModelInstance* inst = pMain->AddModel(buff);
+                modelpath = buff;
+                ModelInstance* pinst = pMain->AddModel(modelpath);//inst will be null if it cant find the file.
 				
 				in >> buff;
 				double xp = buff.toDouble(); in >> buff;
@@ -99,12 +124,62 @@
 				in >> buff;
 				double xs = buff.toDouble(); in >> buff;
 				double ys = buff.toDouble(); in >> buff;
-				double zs = buff.toDouble();
-			
-				inst->SetPos(QVector3D(xp,yp,zp));
-				inst->SetRot(QVector3D(xr,yr,zr));
-				inst->SetScale(QVector3D(xs,ys,zs));
-                inst->UpdateBounds();//in order that zhieght is good and all.
+                double zs = buff.toDouble();
+                if(FileVersion >= 14)//version 14 added instance flipping
+                {
+                    in >> buff;
+                    flipped = (bool)buff.toInt();
+                }
+                else
+                    flipped = false;
+
+
+                if(pinst == NULL)
+                {
+                    SetDirtied(true);
+                    //1st chance to relocate the model..look in working directory.
+                    QString modelfilename = QFileInfo(modelpath).fileName();
+                    pinst = pMain->AddModel(QFileInfo(filepath).absolutePath() + "/" + modelfilename);
+
+                    if(pinst == NULL)//2nd chance popup dialog asking if the user wants to manually find the file.
+                    {
+                         QApplication::restoreOverrideCursor();
+                         QMessageBox msgBox;
+                         msgBox.setText("the model: " + modelfilename + "can not be located");
+                         msgBox.setInformativeText("Do you want to locate it manually?");
+                         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Discard);
+                         msgBox.setDefaultButton(QMessageBox::Yes);
+                         int response = msgBox.exec();
+                         if(response == QMessageBox::Yes)
+                         {
+                             QString correctedfilepath = QFileDialog::getOpenFileName(0, QString("Locate File: " + modelfilename),
+                         settings.value("WorkingDir").toString(),QString(modelfilename+"(*" + QFileInfo(modelfilename).suffix() + ")"));
+                             if(!correctedfilepath.isEmpty())
+                             {
+                                 pinst = pMain->AddModel(correctedfilepath);
+
+                             }
+
+
+                             if(pinst == NULL)//otherwise the user failed to find one
+                             {
+                                 QMessageBox msgBox;
+                                 msgBox.setText("substitute file unable to be inported.");
+                                 msgBox.exec();
+                             }
+
+
+                         }
+                    }
+                }
+                if(pinst != NULL)
+                {
+                    pinst->SetPos(QVector3D(xp,yp,zp));
+                    pinst->SetRot(QVector3D(xr,yr,zr));
+                    pinst->SetScale(QVector3D(xs,ys,zs));
+                    pinst->SetFlipped(flipped);
+                    pinst->UpdateBounds();//in order that zhieght is good and all.
+                }
 			}
 			else
 			{
@@ -119,7 +194,7 @@
 		SetResolution(QVector2D(resx,resy));
 		CalculateBuildArea();
 
-		SetDirtied(false);
+
         mfilename = filepath;
 		emit ProjectLoaded();
 		return true;
@@ -134,6 +209,7 @@
 			return false;
 		}
 		QTextStream out(&file);//begin text streaming.
+        out << "ver " << LAYOUT_FILE_VERSION << '\n';
 		out << filepath << '\n';//write project name
 		
 		out << "startinstancelist" << '\n';//begin model list
@@ -144,7 +220,8 @@
 				ModelInstance* inst = pMain->ModelDataList[m]->instList[i];
                 out << pMain->ModelDataList[m]->GetFilePath() << '\n' << inst->GetPos().x() <<" "<< inst->GetPos().y() <<" "<< inst->GetPos().z();
 				out <<" "<< inst->GetRot().x() <<" "<< inst->GetRot().y() <<" "<< inst->GetRot().z();
-				out <<" "<< inst->GetScale().x() <<" "<< inst->GetScale().y() <<" "<< inst->GetScale().z() << '\n';
+                out <<" "<< inst->GetScale().x() <<" "<< inst->GetScale().y() <<" "<< inst->GetScale().z();
+                out <<" " << inst->GetFlipped() << '\n';
 			}
 		}
 		out << "endinstancelist" << '\n';//end model list
@@ -221,7 +298,7 @@
         zthick = thick;
         SetDirtied(true);
     }
-	void ProjectData::SetResolution(QVector2D dim)
+    void ProjectData::SetResolution(QVector2D dim)
 	{
 		resolution = dim;
 		SetDirtied(true);

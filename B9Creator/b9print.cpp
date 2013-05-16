@@ -170,7 +170,7 @@ void B9Print::on_signalAbortPrint()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, int iTover, int iTattach, int iNumAttach, int iLastLayer, bool bPrintPreview, bool bUsePrimaryMonitor)
+void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, int iTover, int iTattach, int iNumAttach, int iLastLayer, bool bPrintPreview, bool bUsePrimaryMonitor, bool bIsMirrored)
 {
     // Note if, iLastLayer < 1, print ALL layers.
     // if bPrintPreview, run without turning on the projector
@@ -211,6 +211,7 @@ void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, i
         // Turn on the projector and set the warm up time in ms
         ui->pushButtonPauseResume->setEnabled(false);
         ui->pushButtonAbort->setEnabled(false);
+        m_pTerminal->rcIsMirrored(bIsMirrored);
         m_pTerminal->rcSetWarmUpDelay(20000);
         m_pTerminal->rcProjectorPwr(true);
     }

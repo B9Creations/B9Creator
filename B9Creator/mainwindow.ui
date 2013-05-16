@@ -77,6 +77,10 @@
   <property name="windowTitle">
    <string>B9Creator</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>:/B9Edit/icons/editoriconbright.png</normaloff>:/B9Edit/icons/editoriconbright.png</iconset>
+  </property>
   <property name="toolTip">
    <string/>
   </property>
@@ -207,7 +211,7 @@
      <x>0</x>
      <y>0</y>
      <width>190</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <property name="font">
@@ -252,8 +256,6 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
-    <addaction name="actionContents"/>
-    <addaction name="separator"/>
     <addaction name="actionAbout_B9Creator"/>
    </widget>
    <addaction name="menuFile"/>

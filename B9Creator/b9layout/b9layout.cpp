@@ -50,6 +50,8 @@
 #include "slicedebugger.h"
 #include "SlcExporter.h"
 
+#include "OS_Wrapper_Functions.h"
+
 
 //////////////////////////////////////////////////////
 //Public
@@ -82,7 +84,6 @@ B9Layout::B9Layout(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flag
 	ui.mainToolBar->addAction(ui.actionOpen_Project);
 	ui.mainToolBar->addAction(ui.actionSave);
 	ui.mainToolBar->addSeparator();
-
 
 	ui.mainToolBar->addAction(ui.actionSelection);
 	ui.mainToolBar->addAction(ui.actionMove);
@@ -132,6 +133,7 @@ void B9Layout::New()
 	project->New();
     UpdateBuildSpaceUI();
     project->SetDirtied(false);//because UpdatingBuildSpaceUI dirties things in a round about way.
+    pWorldView->CenterView();
 }
 QString B9Layout::Open()
 {
@@ -150,7 +152,6 @@ QString B9Layout::Open()
          msgBox.setDefaultButton(QMessageBox::Save);
         int ret = msgBox.exec();
 
-
         switch (ret)
         {
           case QMessageBox::Save:
@@ -166,7 +167,6 @@ QString B9Layout::Open()
               break;
         }
     }
-
 
 
 	QString filename = QFileDialog::getOpenFileName(this,
@@ -186,7 +186,7 @@ QString B9Layout::Open()
     UpdateBuildSpaceUI();
 
 
-    QApplication::setOverrideCursor(Qt::ArrowCursor);
+    QApplication::restoreOverrideCursor();
 	if(!success)
 	{
         QMessageBox::warning(this, tr("B9Layout"), tr("Unable To Open Layout"),QMessageBox::Ok);
@@ -219,7 +219,7 @@ void B9Layout::SaveAs()
 
     QSettings settings;
 
-    QString filename = QFileDialog::getSaveFileName(this, tr("Save Layout"),
+    QString filename = CROSS_OS_GetSaveFileName(this, tr("Save Layout"),
                     settings.value("WorkingDir").toString(),
                             tr("B9 Layout (*.b9l)"));
 	if(filename.isEmpty())
@@ -279,6 +279,10 @@ void B9Layout::SetProjectorPreset(int index)
         case 3:
             SetProjectorX(QString().number(1920));
             SetProjectorY(QString().number(1200));
+            break;
+        case 4:
+            SetProjectorX(QString().number(2048));
+            SetProjectorY(QString().number(1536));
 
             break;
         default:
@@ -318,6 +322,8 @@ void B9Layout::UpdateBuildSpaceUI()
         proi=2;
     else if(project->GetResolution() == QVector2D(1920,1200))
         proi=3;
+    else if(project->GetResolution() == QVector2D(2048,1536))
+        proi=4;
 
 
 
@@ -382,6 +388,8 @@ void B9Layout::UpdateTranslationInterface()
 		ui.scaley->setText(QString().number(inst->GetScale().y()));
 		ui.scalez->setText(QString().number(inst->GetScale().z()));
 
+        ui.flipx->setChecked(inst->GetFlipped());
+
 		ui.modelsizex->setText(QString().number(inst->GetMaxBound().x() - inst->GetMinBound().x()));
 		ui.modelsizey->setText(QString().number(inst->GetMaxBound().y() - inst->GetMinBound().y()));
 		ui.modelsizez->setText(QString().number(inst->GetMaxBound().z() - inst->GetMinBound().z()));
@@ -419,6 +427,7 @@ void B9Layout::PushTranslations()
 	SetSelectionScale(scalex.toDouble(),0,0,1);
 	SetSelectionScale(0,scaley.toDouble(),0,2);
 	SetSelectionScale(0,0,scalez.toDouble(),3);
+    SetSelectionFlipped(ui.flipx->isChecked());
 
     for(unsigned int i = 0; i < GetSelectedInstances().size(); i++)
 	{
@@ -426,7 +435,6 @@ void B9Layout::PushTranslations()
 	}
 	UpdateTranslationInterface();
 }
-
 void B9Layout::LockScale(bool lock)
 {
 	if(lock)
@@ -437,6 +445,7 @@ void B9Layout::LockScale(bool lock)
 		UpdateTranslationInterface();
 	}
 }
+
 
 //tools interface
 void B9Layout::SetToolPointer()
@@ -487,6 +496,12 @@ ModelInstance* B9Layout::AddModel(QString filepath)
 		if(filepath.isEmpty())
 			return NULL;
 	}
+    //by this point we should have a valid file path, if we dont - abort.
+    if(!QFileInfo(filepath).exists())
+    {
+        return NULL;
+    }
+
 	//if the file has already been opened and is in the project, we dont want to load in another! instead we want to make a new instance
     for(unsigned int i = 0; i < ModelDataList.size(); i++)
 	{
@@ -552,7 +567,6 @@ void B9Layout::CleanModelData()
 			delete ModelDataList[m];
 		}
 	}
-
 	ModelDataList.clear();
 	ModelDataList = templist;
 }
@@ -700,6 +714,19 @@ void B9Layout::SetSelectionScale(double x, double y, double z, int axis)
 		}
 	}
 }
+void B9Layout::SetSelectionFlipped(int flipped)
+{
+    int i;
+    std::vector<ModelInstance*> instList = GetSelectedInstances();
+
+    for(i=0; i < instList.size(); i++)
+    {
+        instList[i]->SetFlipped(flipped);
+    }
+
+}
+
+
 void B9Layout::DropSelectionToFloor()
 {
     unsigned int i;
@@ -707,7 +734,10 @@ void B9Layout::DropSelectionToFloor()
 	{
 		GetSelectedInstances()[i]->RestOnBuildSpace();
 	}
+    UpdateTranslationInterface();
 }
+
+
 void B9Layout::DuplicateSelection()
 {
     unsigned int i;
@@ -727,8 +757,8 @@ void B9Layout::DuplicateSelection()
 		double xsize = inst->GetMaxBound().x() - inst->GetMinBound().x();
 		double ysize = inst->GetMaxBound().y() - inst->GetMinBound().y();
 		
-		xkeep = 0;//inst->GetPos().x();
-		ykeep = 0;//inst->GetPos().y();
+        xkeep = 0;
+        ykeep = 0;
 		for(x = -project->GetBuildSpace().x()*0.5 + xsize/2; x <= project->GetBuildSpace().x()*0.5 - xsize/2; x += xsize + 1)
 		{
 			for(y = -project->GetBuildSpace().y()*0.5 + ysize/2; y <= project->GetBuildSpace().y()*0.5 - ysize/2; y += ysize + 1)
@@ -759,6 +789,7 @@ void B9Layout::DuplicateSelection()
 		newinst->SetPos(QVector3D(xkeep,ykeep,inst->GetPos().z()));
 		newinst->SetRot(inst->GetRot());
 		newinst->SetScale(inst->GetScale());
+        newinst->SetFlipped(inst->GetFlipped());
 		newinst->UpdateBounds();
 		SelectOnly(newinst);
 		
@@ -776,6 +807,7 @@ std::vector<ModelInstance*> B9Layout::GetSelectedInstances()
 	}
 	return insts;
 }
+
 void B9Layout::DeleteSelectedInstances()
 {
     unsigned int i;
@@ -791,18 +823,12 @@ void B9Layout::DeleteSelectedInstances()
 }
 
 
-
-//printing..
-
-
-
-
-
+//overall slicing routine
 void B9Layout::SliceWorld()
 {
     QSettings settings;
 
-    QString filename = QFileDialog::getSaveFileName(this, tr("Export Slices"), settings.value("WorkingDir").toString()+ "/" + project->GetJobName(), tr("B9 Job (*.b9j);;SLC (*.slc)"));
+    QString filename = CROSS_OS_GetSaveFileName(this, tr("Export Slices"), settings.value("WorkingDir").toString()+ "/" + project->GetJobName(), tr("B9 Job (*.b9j);;SLC (*.slc)"));
     if(filename.isEmpty())
 	{
 		return;
@@ -884,13 +910,12 @@ void B9Layout::SliceWorldToJob(QString filename)
 
     pMasterJob->clearAll(numlayers);//fills the master job with the needed layers
 
-
     progressbar.setDescription("Slicing Layout..");
 	progressbar.setMax(numlayers*nummodels);
 	progressbar.setValue(0);
-	//for each modelinstance
+    //FOR Each Model Instance
 	for(m=0;m<ModelDataList.size();m++)
-	{
+    {
 		for(i=0;i<ModelDataList[m]->instList.size();i++)
 		{
 			ModelInstance* inst = ModelDataList[m]->instList[i];
@@ -899,14 +924,14 @@ void B9Layout::SliceWorldToJob(QString filename)
 			//slice all layers and add to instance's job file
 			for(l = 0; l < numlayers; l++)
 			{
-                //make sure we are in the model's z - bounds
+                //if we are in the model's z - bounds
                 if((double)l*thickness <= inst->GetMaxBound().z() && (double)l*thickness >= inst->GetMinBound().z()-0.5*thickness)
                 {
 					//ACTUALLY Generate the Slice.
 					inst->pSliceSet->GenerateSlice(l*thickness + thickness*0.5);
 					paintwidget.SetSlice(inst->pSliceSet->pSliceData);
 					
-					
+
 					pix = paintwidget.renderPixmap(xsize,ysize);
 					img = pix.toImage();
 					
@@ -927,7 +952,6 @@ void B9Layout::SliceWorldToJob(QString filename)
 							}
 						}
 					}
-					
 					
 					QApplication::processEvents();
                     imgfrommaster.fill(Qt::black);
@@ -1067,19 +1091,13 @@ void B9Layout::SliceWorldToSlc(QString filename)
 }
 
 
-
 void B9Layout::CancelSlicing()
 {
 	cancelslicing = true;
 }
-
-
-
-
 //////////////////////////////////////////////////////
 //Private
 //////////////////////////////////////////////////////
-
 
 
 ///////////////////////////////////////////////////
@@ -1100,8 +1118,6 @@ void B9Layout::hideEvent(QHideEvent *event)
     pWorldView->pDrawTimer->stop();
 
 
-
-
     event->accept();
 }
 void B9Layout::showEvent(QShowEvent *event)
@@ -1109,7 +1125,8 @@ void B9Layout::showEvent(QShowEvent *event)
 
     pWorldView->pDrawTimer->start();
 
-    event->accept();}
+    event->accept();
+}
 
 void B9Layout::closeEvent ( QCloseEvent * event )
 {
@@ -1142,6 +1159,8 @@ void B9Layout::closeEvent ( QCloseEvent * event )
         }
     }
 
+    //when we close the window - we want to make a new project.
+    //because we might open the window again and we want a fresh start.
     New();
     event->accept();
 

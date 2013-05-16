@@ -49,6 +49,8 @@ class Triangle3D;
 class SliceSet;
 class ModelInstance
 {
+
+//friend class ModelData;
 public:
 	ModelInstance(ModelData* parent);
 	~ModelInstance();
@@ -68,6 +70,8 @@ public:
 
 	void SetRot(QVector3D r);
 
+    void SetFlipped(int flipped);//x-flipping
+
 	//Incremental
 	void Scale(QVector3D scalar);
 	void Move(QVector3D translation);
@@ -79,6 +83,7 @@ public:
 	QVector3D GetScale();
 	QVector3D GetMaxBound();
 	QVector3D GetMinBound();
+    bool GetFlipped();
 
 	//selection
 	void SetTag(QString tag);
@@ -109,6 +114,8 @@ private:
 	QVector3D scale;
 	QVector3D maxbound;
 	QVector3D minbound;
+
+    bool isFlipped;
 
 	void CorrectRot();//puts rotation in 0-360 form
 	void CorrectScale();//does not allow 0 or negative values

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>979</width>
-    <height>758</height>
+    <height>766</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -88,6 +88,11 @@
             <item>
              <property name="text">
               <string>(WUXGA) 1920x1200</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>(QXGA) 2048x1536</string>
              </property>
             </item>
            </widget>
@@ -545,20 +550,31 @@
            </layout>
           </item>
           <item>
-           <widget class="QCheckBox" name="scalelock">
-            <property name="toolTip">
-             <string>Select to lock the model's x, y &amp; z axis scaling factors</string>
-            </property>
-            <property name="whatsThis">
-             <string>Select to lock the model's x, y &amp; z axis scaling factors</string>
-            </property>
-            <property name="text">
-             <string>Lock Aspect Ratio</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QCheckBox" name="scalelock">
+              <property name="toolTip">
+               <string>Select to lock the model's x, y &amp; z axis scaling factors</string>
+              </property>
+              <property name="whatsThis">
+               <string>Select to lock the model's x, y &amp; z axis scaling factors</string>
+              </property>
+              <property name="text">
+               <string>Lock Aspect Ratio</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="flipx">
+              <property name="text">
+               <string>Mirrored</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
            <widget class="QPushButton" name="ApplyButton">
@@ -611,7 +627,7 @@
      <x>0</x>
      <y>0</y>
      <width>979</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1063,8 +1079,8 @@
    <slot>DeleteSelectedInstances()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>283</x>
-     <y>193</y>
+     <x>297</x>
+     <y>223</y>
     </hint>
     <hint type="destinationlabel">
      <x>6</x>
@@ -1079,8 +1095,8 @@
    <slot>AddModel()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>74</x>
-     <y>193</y>
+     <x>110</x>
+     <y>223</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -1095,8 +1111,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>585</y>
+     <x>297</x>
+     <y>556</y>
     </hint>
     <hint type="destinationlabel">
      <x>317</x>
@@ -1111,8 +1127,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>201</x>
-     <y>585</y>
+     <x>208</x>
+     <y>556</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
@@ -1127,8 +1143,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>109</x>
-     <y>585</y>
+     <x>119</x>
+     <y>556</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
@@ -1143,8 +1159,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>109</x>
-     <y>624</y>
+     <x>119</x>
+     <y>606</y>
     </hint>
     <hint type="destinationlabel">
      <x>315</x>
@@ -1159,8 +1175,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>201</x>
-     <y>624</y>
+     <x>208</x>
+     <y>606</y>
     </hint>
     <hint type="destinationlabel">
      <x>314</x>
@@ -1175,8 +1191,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>624</y>
+     <x>297</x>
+     <y>606</y>
     </hint>
     <hint type="destinationlabel">
      <x>317</x>
@@ -1191,8 +1207,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>109</x>
-     <y>663</y>
+     <x>119</x>
+     <y>656</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
@@ -1207,8 +1223,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>201</x>
-     <y>663</y>
+     <x>208</x>
+     <y>656</y>
     </hint>
     <hint type="destinationlabel">
      <x>320</x>
@@ -1223,12 +1239,12 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>663</y>
+     <x>297</x>
+     <y>656</y>
     </hint>
     <hint type="destinationlabel">
-     <x>315</x>
-     <y>365</y>
+     <x>312</x>
+     <y>362</y>
     </hint>
    </hints>
   </connection>
@@ -1255,8 +1271,8 @@
    <slot>SetProjectorPreset(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>206</x>
-     <y>122</y>
+     <x>294</x>
+     <y>156</y>
     </hint>
     <hint type="destinationlabel">
      <x>312</x>
@@ -1271,8 +1287,8 @@
    <slot>SetXYPixelSizePreset(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>166</x>
-     <y>98</y>
+     <x>294</x>
+     <y>123</y>
     </hint>
     <hint type="destinationlabel">
      <x>314</x>
@@ -1303,12 +1319,28 @@
    <slot>DuplicateSelection()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>143</x>
-     <y>184</y>
+     <x>208</x>
+     <y>223</y>
     </hint>
     <hint type="destinationlabel">
      <x>111</x>
      <y>37</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>flipx</sender>
+   <signal>clicked()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>PushTranslations()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>241</x>
+     <y>671</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>311</x>
+     <y>331</y>
     </hint>
    </hints>
   </connection>
@@ -1337,5 +1369,6 @@
   <slot>OpenDebugWindow()</slot>
   <slot>SetProjectorPreset(int)</slot>
   <slot>SetToolScale()</slot>
+  <slot>SetInstanceFlipping(int)</slot>
  </slots>
 </ui>

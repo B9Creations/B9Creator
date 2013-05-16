@@ -44,6 +44,7 @@
 
 #include <QtOpenGL>
 #include <QFileInfo>
+#include <iostream>
 
 
 
@@ -59,16 +60,33 @@ ModelData::ModelData(B9Layout* main)
 	maxbound = QVector3D(-999999.0,-999999.0,-999999.0);
 	minbound = QVector3D(999999.0,999999.0,999999.0);
 
+    displaylistindx = glGenLists(2);//get an available display index
+    displaylistflippedindx = displaylistindx + 1;
+    qDebug() << "ModelData created with display list: " << displaylistindx;
+    qDebug() << " and a flipped display list of: " << displaylistflippedindx;
+
 }
+
 ModelData::~ModelData()
 {
     unsigned int i;
+
+
+    triList.clear();
+
+
 	for(i=0; i < instList.size();i++)
 	{
 		delete instList[i];
 	}
-	glDeleteLists(displaylistindx,1);
-	triList.clear();
+
+
+    glDeleteLists(displaylistindx,2);
+
+
+
+    qDebug() << "ModelData Deleted with displaylist " << displaylistindx;
+    qDebug() << " and a flipped display list of: " << displaylistflippedindx;
 }
 
 QString ModelData::GetFilePath()
@@ -87,6 +105,9 @@ bool ModelData::LoadIn(QString filepath)
     unsigned int t;
     unsigned int i;
 
+    Triangle3D newtri;
+    const struct aiFace* face;
+
 	
 	this->filepath = filepath;
 	
@@ -99,55 +120,100 @@ bool ModelData::LoadIn(QString filepath)
 	//AI_CONFIG_PP_FD_REMOVE = aiPrimitiveType_POINTS | aiPrimitiveType_LINES;
     pScene = aiImportFile(filepath.toAscii(), aiProcess_Triangulate);// | aiProcess_JoinIdenticalVertices); //trian
 	
-	if(pScene == NULL)
+    if(pScene == NULL)//assimp cant handle the file - lets try our own reader.
 	{
 		//display Assimp Error
 		QMessageBox msgBox;
 		msgBox.setText("Assimp Error:  " + QString().fromAscii(aiGetErrorString()));
 		msgBox.exec();
+
+        aiReleaseImport(pScene);
+
 		return false;
 	}
 
-	qDebug() << pScene->mMeshes[0]->mNumFaces;
+    qDebug() << "Model imported with " << pScene->mMeshes[0]->mNumFaces << " faces.";
 	
-	qDebug() << pScene->mNumMeshes;
+
 	for (m = 0; m < pScene->mNumMeshes; m++) 
 	{
 		const aiMesh* mesh = pScene->mMeshes[m];
 		
 	    for (t = 0; t < mesh->mNumFaces; t++)
 		{
-			const struct aiFace* face = &mesh->mFaces[t];
+            face = &mesh->mFaces[t];
 			
 			if(face->mNumIndices == 3)
 			{
-				Triangle3D newtri;
 				for(i = 0; i < face->mNumIndices; i++) 
 				{
 					int index = face->mIndices[i];
 				
-					newtri.normal.setX(mesh->mNormals[index].x);
-					newtri.normal.setY(mesh->mNormals[index].y);
-					newtri.normal.setZ(mesh->mNormals[index].z);
+                    newtri.normal.setX(mesh->mNormals[index].x);
+                    newtri.normal.setY(mesh->mNormals[index].y);
+                    newtri.normal.setZ(mesh->mNormals[index].z);
 			
-					newtri.vertex[i].setX(mesh->mVertices[index].x);
-					newtri.vertex[i].setY(mesh->mVertices[index].y);
-					newtri.vertex[i].setZ(mesh->mVertices[index].z);
+                    newtri.vertex[i].setX(mesh->mVertices[index].x);
+                    newtri.vertex[i].setY(mesh->mVertices[index].y);
+                    newtri.vertex[i].setZ(mesh->mVertices[index].z);
 				}
-				newtri.UpdateBounds();
-				triList.push_back(newtri);
+                newtri.UpdateBounds();
+                triList.push_back(newtri);
+
 			}
 		}
 	}
 
-	aiReleaseImport(pScene);
+    aiReleaseImport(pScene);
 
-	qDebug() << "Loaded triangles: " << triList.size();
+    qDebug() << "Loaded triangles: " << triList.size();
 	//now center it!
 	CenterModel();
 
 	//generate a displaylist
-	FormDisplayList();
+    int displayerror = FormDisplayList();
+
+    //check for errors in display list creation (if its a large model the card may run out of memory.
+
+    if(displayerror){
+    while(displayerror)//loop and see if there are additional errors as well.
+    {
+        //display Assimp Error
+        qDebug() << "Display List Error: " << displayerror; //write to log as well.
+        QMessageBox msgBox;
+
+        switch(displayerror)
+        {
+        case GL_OUT_OF_MEMORY:
+            msgBox.setText("OpenGL Error:  GL_OUT_OF_MEMORY\nModel is too large to render on your graphics card.");
+            break;
+        case GL_INVALID_ENUM:
+            msgBox.setText("OpenGL Error:  GL_INVALID_ENUM");
+            break;
+        case GL_INVALID_VALUE:
+            msgBox.setText("OpenGL Error:  GL_INVALID_VALUE");
+            break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+            msgBox.setText("OpenGL Error:  GL_INVALID_FRAMEBUFFER_OPERATION");
+            break;
+        case GL_STACK_UNDERFLOW:
+            msgBox.setText("OpenGL Error:  GL_STACK_UNDERFLOW");
+            break;
+        case GL_STACK_OVERFLOW:
+            msgBox.setText("OpenGL Error:  GL_STACK_OVERFLOW");
+            break;
+        default:
+            break;
+        }
+
+        msgBox.exec();
+        displayerror = glGetError();
+    }
+    return false;
+    }
+
+
+
 
 	return true;
 }
@@ -180,67 +246,96 @@ void ModelData::CenterModel()
 		{
 			//update the models bounds.
 			//max
-			if(triList[f].maxBound.x() > maxbound.x())
+            if(triList[f].maxBound.x() > maxbound.x())
 			{
-				maxbound.setX(triList[f].vertex[v].x());
+                maxbound.setX(triList[f].vertex[v].x());
 			}
-			if(triList[f].maxBound.y() > maxbound.y())
+            if(triList[f].maxBound.y() > maxbound.y())
 			{
-				maxbound.setY(triList[f].vertex[v].y());
+                maxbound.setY(triList[f].vertex[v].y());
 			}
-			if(triList[f].maxBound.z() > maxbound.z())
+            if(triList[f].maxBound.z() > maxbound.z())
 			{
-				maxbound.setZ(triList[f].vertex[v].z());
+                maxbound.setZ(triList[f].vertex[v].z());
 			}
 			
 			//mins
-			if(triList[f].minBound.x() < minbound.x())
+            if(triList[f].minBound.x() < minbound.x())
 			{
-				minbound.setX(triList[f].vertex[v].x());
+                minbound.setX(triList[f].vertex[v].x());
 			}
-			if(triList[f].minBound.y() < minbound.y())
-			{
-				minbound.setY(triList[f].vertex[v].y());
+            if(triList[f].minBound.y() < minbound.y())
+            {
+                minbound.setY(triList[f].vertex[v].y());
 			}
-			if(triList[f].minBound.z() < minbound.z())
+            if(triList[f].minBound.z() < minbound.z())
 			{
-				minbound.setZ(triList[f].vertex[v].z());
+                minbound.setZ(triList[f].vertex[v].z());
 			}
 		}
 	}
 
 	center = (maxbound + minbound)*0.5;
 
-	for(f=0;f<triList.size();f++)
+    for(f=0;f<triList.size();f++)
 	{
 		for(v=0;v<3;v++)
 		{
-			triList[f].vertex[v] -= center;
+            triList[f].vertex[v] -= center;
 		}
-		triList[f].UpdateBounds(); // since we are moving every triangle, we need to update their bounds too.
+        triList[f].UpdateBounds(); // since we are moving every triangle, we need to update their bounds too.
 	}
 	maxbound -= center;
 	minbound -= center;
 }
 
 //rendering
-void ModelData::FormDisplayList()
+//generate opengl display list, flipx generates with inverted x normals and vertices
+int ModelData::FormDisplayList() //returns opengl error enunum.
 {
+
     unsigned int t;
-	displaylistindx = glGenLists(1);//get an available display index
 	if (displaylistindx != 0) 
 	{
 		glNewList(displaylistindx,GL_COMPILE);
 		glBegin(GL_TRIANGLES);// Drawing Using Triangles
 		for(t = 0; t < triList.size(); t++)//for each triangle
 		{
-			glNormal3f(triList[t].normal.x(),triList[t].normal.y(),triList[t].normal.z());//normals
+
+                glNormal3f(triList[t].normal.x(),triList[t].normal.y(),triList[t].normal.z());//normals
 			
-				glVertex3f( triList[t].vertex[0].x(), triList[t].vertex[0].y(), triList[t].vertex[0].z());     
-				glVertex3f( triList[t].vertex[1].x(), triList[t].vertex[1].y(), triList[t].vertex[1].z());     
-				glVertex3f( triList[t].vertex[2].x(), triList[t].vertex[2].y(), triList[t].vertex[2].z());     
+                glVertex3f( triList[t].vertex[0].x(), triList[t].vertex[0].y(), triList[t].vertex[0].z());
+                glVertex3f( triList[t].vertex[1].x(), triList[t].vertex[1].y(), triList[t].vertex[1].z());
+                glVertex3f( triList[t].vertex[2].x(), triList[t].vertex[2].y(), triList[t].vertex[2].z());
+
 		}
 		glEnd();
 		glEndList();
 	}
+    else
+        return glGetError();
+
+
+    //form the flipped version as well.
+    if (displaylistflippedindx != 0)
+    {
+        glNewList(displaylistflippedindx,GL_COMPILE);
+        glBegin(GL_TRIANGLES);// Drawing Using Triangles
+        for(t = 0; t < triList.size(); t++)//for each triangle
+        {
+                glNormal3f(-triList[t].normal.x(),triList[t].normal.y(),triList[t].normal.z());//normals
+
+                glVertex3f( -triList[t].vertex[2].x(), triList[t].vertex[2].y(), triList[t].vertex[2].z());
+                glVertex3f( -triList[t].vertex[1].x(), triList[t].vertex[1].y(), triList[t].vertex[1].z());
+                glVertex3f( -triList[t].vertex[0].x(), triList[t].vertex[0].y(), triList[t].vertex[0].z());
+
+        }
+        glEnd();
+        glEndList();
+    }
+    else
+        return glGetError();
+
+
+    return 0;
 }

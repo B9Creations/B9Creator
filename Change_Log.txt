@@ -1,0 +1,18 @@
+v1.4 Summary of Changes
+-Opening B9Edit from the main menu will create an empty job.
+-Fixed "grey image" in B9Edit if job was sliced with object raised (not snapped to floor).
+-Fixed SliceManager window not closing when B9Edit window closes.
+-Fixed SLC file import erroneously filling in voids when they should be black.
+-Fixed Linux SaveAs functions not adding extensions to files.
+-Fixed Projector warning conflicting with splash screen.
+-Windows/Mac SaveAs dialog will now preserve previous file extensions, if they don't match the save extension.
+-Screen Saver is now disabled automatically while printing in Windows, Mac, and Linux.
+-Installing debian package should now add user to the dialout group.
+-Updated splash screen & application icons to new logo.
+-Added document icons for job and layout file types.
+-Added Mirror function in Layout to allow display and slicing of "mirrored" models.
+-Added Mirror funtion in Print to allow printing of "mirrored" job file.
+-Projector's lamp power and aspect ratio is now reset automatically at the start of every print job.
+-Layout screen now centers when creating new project.
+-Shift-right-click now pans layout view.
+-Added zero padding to file names when exporting slice images to folders in B9Edit.

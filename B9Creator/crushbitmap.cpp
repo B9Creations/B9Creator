@@ -163,8 +163,12 @@ void CrushedBitMap::streamInCMB(QDataStream* pIn)
 
 void CrushedBitMap::inflateSlice(QImage* pImage, int xOffset, int yOffset, bool bUseNaturalSize)
 {
-	if(pImage == NULL) return; // No image to draw
-    if(!bUseNaturalSize && (pImage->width()<=0 || pImage->height()<=0)) return; // Not using the slice's natural size, so pImage should have some size greater than zero!
+    if(pImage == NULL) return; // No image to draw
+
+    // Not using the slice's natural size, so pImage should have some size greater than zero!
+    if(!bUseNaturalSize && (pImage->width()<=0 || pImage->height()<=0))
+        return;
+
 
 	mIndex = 0; // Reset to start
 	bool bCurColorIsWhite = false;
@@ -181,8 +185,10 @@ void CrushedBitMap::inflateSlice(QImage* pImage, int xOffset, int yOffset, bool 
 		uImageSize = m_iWidth * m_iHeight;
 	}
 
-	if(bUseNaturalSize){
-        if(m_iWidth<1 || m_iHeight<1){
+    if(bUseNaturalSize)
+    {
+        if(m_iWidth<1 || m_iHeight<1)
+        {
             m_iWidth = pImage->width();
             m_iHeight = pImage->height();
             *pImage = QImage(m_iWidth,m_iHeight,QImage::Format_ARGB32_Premultiplied);

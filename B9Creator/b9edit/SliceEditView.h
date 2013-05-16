@@ -144,8 +144,6 @@ protected:
 	
 private:
 	
-
-	
 	QImage topImg;
 	QImage botImg;
 

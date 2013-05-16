@@ -38,6 +38,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "OS_Wrapper_Functions.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -90,9 +91,7 @@ MainWindow::~MainWindow()
 void MainWindow::showSplash()
 {
     if(m_pSplash!=NULL){
-        m_pSplash->showMessage("Version 1.1.beta\n"
-                               "Visit www.b9creator.com for support.\n"
-                               "Copyright 2012 - B9Creations, LLC",Qt::AlignTop|Qt::AlignRight,Qt::yellow);
+        m_pSplash->showMessage("Version 1.4     Copyright 2013 B9Creations, LLC     www.b9creator.com\n ",Qt::AlignBottom|Qt::AlignCenter,QColor(255,130,36));
         m_pSplash->show();
         QTimer::singleShot(3000,this,SLOT(hideSplash()));
     }
@@ -101,9 +100,7 @@ void MainWindow::showSplash()
 void MainWindow::showAbout()
 {
     if(m_pSplash!=NULL){
-        m_pSplash->showMessage("Version 1.1.beta\n"
-                               "Visit www.b9creator.com for support.\n"
-                               "Copyright 2012 - B9Creations, LLC",Qt::AlignTop|Qt::AlignRight,Qt::yellow);
+        m_pSplash->showMessage("Version 1.4     Copyright 2013 B9Creations, LLC     www.b9creator.com\n ",Qt::AlignBottom|Qt::AlignCenter,QColor(255,130,36));
         m_pSplash->show();
     }
 }
@@ -160,6 +157,8 @@ void MainWindow::handleW4Hide()
     ui->commandPrint->setChecked(false);
     pLogManager->setPrinting(false);
     pTerminal->setIsPrinting(false);
+    CROSS_OS_DisableSleeps(false);// return system screensavers back to normal.
+
 }
 
 void MainWindow::on_commandLayout_clicked(bool checked)
@@ -222,16 +221,21 @@ void MainWindow::on_commandPrint_clicked()
     m_pPrintPrep = new DlgPrintPrep(m_pCPJ, pTerminal, this);
     connect (m_pPrintPrep, SIGNAL(accepted()),this,SLOT(doPrint()));
     m_pPrintPrep->exec();
+
+
+
 }
 
 void MainWindow::doPrint()
 {
+
     // print using variables set by wizard...
     this->hide(); // Comment this out if not hiding mainwindow while showing this window
     pMW4->show();
     pLogManager->setPrinting(false); // set to true to Stop logfile entries when printing
     pTerminal->setIsPrinting(true);
-    pMW4->print3D(m_pCPJ, 0, 0, m_pPrintPrep->m_iTbaseMS, m_pPrintPrep->m_iToverMS, m_pPrintPrep->m_iTattachMS, m_pPrintPrep->m_iNumAttach, m_pPrintPrep->m_iLastLayer, m_pPrintPrep->m_bDryRun, m_pPrintPrep->m_bDryRun);
+    CROSS_OS_DisableSleeps(true);//disable things like screen saver - and power options.
+    pMW4->print3D(m_pCPJ, 0, 0, m_pPrintPrep->m_iTbaseMS, m_pPrintPrep->m_iToverMS, m_pPrintPrep->m_iTattachMS, m_pPrintPrep->m_iNumAttach, m_pPrintPrep->m_iLastLayer, m_pPrintPrep->m_bDryRun, m_pPrintPrep->m_bDryRun, m_pPrintPrep->m_bMirrored);
 
     return;
 }
