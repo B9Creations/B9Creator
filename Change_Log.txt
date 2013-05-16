@@ -1,0 +1,18 @@
+//5-6-2013 - 5-9-2013 Trevor Cash
+-Added zero padding when outputing images to folders in B9Edit.
+-Opening B9Edit from the main menu will open an empty job.
+-Fixed "grey image" in B9Edit if job was sliced with object raised.
+-Fixed SliceManager window not closing when B9Edit window closes.
+-Fixed SLC import erroniously filling in voids when they should be black.
+-Fixed Linux SaveAs functions not adding extensions to files.
+-Fixed Projector warning conflicting with splash screen.
+-Windows/Mac SaveAs dialog will now preserve previous file extensions,
+ if they dont match the save extension.
+-Screen Saver is now disabled automatically while printing in Windows, Mac, and Ubuntu.
+-Update application icon to new logo.
+
+
+
+Installation Notes:
+When using the new update on a Mac for the first time, 
+wait for the "Updating Firmware" message to appear the first time and then restart B9Creator

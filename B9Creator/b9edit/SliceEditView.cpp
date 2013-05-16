@@ -57,6 +57,7 @@ SliceEditView::SliceEditView(QWidget *parent, Qt::WFlags flags) : QMainWindow(pa
 
     setWindowIcon(QIcon(":/B9JobBuilder/icons/edit.png"));
 	setStatusBar(0);
+
 	//green timer connections
 	greenTimer.setSingleShot(true);
 	greenTimer.setInterval(0);
@@ -190,17 +191,27 @@ void SliceEditView::GoToSlice(int slicenumber)
 
 	greenTimer.start();
 }
+//inflates the image from the job file, and also inflates the one below if in support mode.
 void SliceEditView::DeCompressIntoContext()
 {
 	pCPJ->setCurrentSlice(currSlice);
 	if(supportMode)
-	{pCPJ->showSupports(1);}
+        pCPJ->showSupports(1);
 	else
-	{pCPJ->showSupports(0);}
+        pCPJ->showSupports(0);
+
+    //double check if the top image is 0x0, we want to resize it to fix the "grey window"
+    //problem when first opening an image.
+    //because
+    if(topImg.size().width() == 0)
+    {
+        topImg = QImage(1024,768,QImage::Format_ARGB32_Premultiplied) ;
+    }
 
 
-	pCPJ->inflateCurrentSlice(&topImg, m_xOffset, m_yOffset, true);
-	pDrawingContext->SetUpperImg(&topImg);
+
+    pCPJ->inflateCurrentSlice(&topImg, m_xOffset, m_yOffset, true);
+    pDrawingContext->SetUpperImg(&topImg);
 	
 	if(currSlice <= 0)//make "base" image
 	{

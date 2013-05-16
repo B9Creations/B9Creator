@@ -44,6 +44,7 @@
 #include <vector>
 #include "b9layout.h"
 
+#define LAYOUT_FILE_VERSION 14
 
 class B9Layout;
 class ProjectData : public QObject

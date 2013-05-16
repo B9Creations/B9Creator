@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>693</width>
+    <width>755</width>
     <height>551</height>
    </rect>
   </property>
@@ -14,7 +14,7 @@
    <string>B9Creator - Print Parameters</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_5">
-   <item row="0" column="1" colspan="2">
+   <item row="0" column="1" colspan="3">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
       <string>Information</string>
@@ -395,7 +395,7 @@
      </layout>
     </widget>
    </item>
-   <item row="3" column="1" colspan="2">
+   <item row="3" column="1" colspan="3">
     <widget class="QGroupBox" name="groupBoxCheckList">
      <property name="title">
       <string>Checklist</string>
@@ -524,7 +524,7 @@
      </layout>
     </widget>
    </item>
-   <item row="4" column="1" colspan="3">
+   <item row="4" column="1" colspan="4">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="toolTip">
       <string>Print or Cancel the process</string>
@@ -540,7 +540,7 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="2">
+   <item row="1" column="2" colspan="2">
     <widget class="QGroupBox" name="groupBox_4">
      <property name="title">
       <string>Time and Material Required</string>
@@ -1286,8 +1286,14 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="2">
+   <item row="2" column="3">
     <widget class="QPushButton" name="pushButtonReleaseCycle">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="toolTip">
       <string>Open the Release Cycle Dialog</string>
      </property>
@@ -1296,6 +1302,19 @@
      </property>
      <property name="text">
       <string>Printer Cycle Settings...</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QCheckBox" name="checkBoxMirrored">
+     <property name="toolTip">
+      <string>Print a &quot;Mirrored&quot; version.</string>
+     </property>
+     <property name="whatsThis">
+      <string>Print a &quot;Mirrored version, ie a &quot;Left Shoe&quot; will print as a &quot;Right Shoe&quot;</string>
+     </property>
+     <property name="text">
+      <string>Mirrored Print</string>
      </property>
     </widget>
    </item>
@@ -1333,8 +1352,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>257</x>
+     <y>541</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -1349,8 +1368,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>325</x>
+     <y>541</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -1359,4 +1378,7 @@
    </hints>
   </connection>
  </connections>
+ <slots>
+  <slot>on_checkBoxMirrored_clicked(bool)</slot>
+ </slots>
 </ui>

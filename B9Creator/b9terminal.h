@@ -117,6 +117,7 @@ public slots:
     void rcSTOP();
     void rcCloseVat();
     void rcSetWarmUpDelay(int iDelayMS);
+    void rcIsMirrored(bool bIsMirrored);
 
     void rcProjectorPwr(bool bPwrOn);
     void rcSetCPJ(CrushedPrintJob *pCPJ); // Set the pointer to the CMB to be displayed, NULL if blank

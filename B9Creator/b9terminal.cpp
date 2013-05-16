@@ -102,20 +102,20 @@ void PCycleSettings::saveSettings()
 
 void PCycleSettings::setFactorySettings()
 {
-    m_iRSpd1 = m_iLSpd1 = 85;
-    m_iRSpd2 = m_iLSpd2 = 85;
-    m_iOpenSpd1 = 25;
+    m_iRSpd1 = m_iLSpd1 = m_iRSpd2 = m_iLSpd2 = 70;
+    m_iOpenSpd1 = 80;
     m_iCloseSpd1 = 100;
-    m_iOpenSpd2 = m_iCloseSpd2 = 100;
-    m_dBreatheClosed1 = 1.0;
+    m_iOpenSpd2 = 80;
+    m_iCloseSpd2 = 50;
+    m_dBreatheClosed1 = 2.0;
     m_dSettleOpen1 = 3.0;
-    m_dBreatheClosed2 = 0.0;
-    m_dSettleOpen2 = 0.5;
-    m_dOverLift1 = 3.0;
+    m_dBreatheClosed2 = 2.0;
+    m_dSettleOpen2 = 3.0;
+    m_dOverLift1 = 0.0;
     m_dOverLift2 = 0.0;
-    m_dBTClearInMM = 5.0;
-    m_dHardZDownMM = 0.9525;
-    m_dZFlushMM = 0.7620;
+    m_dBTClearInMM = 0.005;
+    m_dHardZDownMM = 0.0;
+    m_dZFlushMM = 0.0;
 }
 
 B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :
@@ -840,6 +840,10 @@ void B9Terminal::rcSetWarmUpDelay(int iDelayMS)
     pPrinterComm->setWarmUpDelay(iDelayMS);
 }
 
+void B9Terminal::rcIsMirrored(bool bIsMirrored)
+{
+    pPrinterComm->setMirrored(bIsMirrored);
+}
 
 void B9Terminal::rcFinishPrint(double dDeltaMM)
 {
@@ -1067,7 +1071,7 @@ void B9Terminal::onScreenCountChanged(int iCount){
         // if the projector is not turned off, we better put up the blank screen now!
         pProjector->showFullScreen();
     }
-    else warnSingleMonitor();
+    //else warnSingleMonitor();
 }
 
 void B9Terminal::createNormalizedMask(double XYPS, double dZ, double dOhMM)

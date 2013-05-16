@@ -67,9 +67,6 @@ signals:
     void eventHiding();
 
 
-
-
-
 public slots:
 
 	//debug interface
@@ -98,6 +95,7 @@ public slots:
 	void PushTranslations();
 	void LockScale(bool lock);
 
+
 	//tools interface
 	void SetToolPointer();
 	void SetToolMove();
@@ -120,6 +118,7 @@ public slots:
 	void SetSelectionPos(double x, double y, double z, int axis = 0);
 	void SetSelectionRot(double x, double y, double z, int axis = 0);
 	void SetSelectionScale(double x, double y, double z, int axis = 0);
+    void SetSelectionFlipped(int flipped);
 	void DropSelectionToFloor();
 	void DuplicateSelection();
 	std::vector<ModelInstance*> GetSelectedInstances();

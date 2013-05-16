@@ -52,6 +52,7 @@ public:
 	QVector3D minBound;
 
 	Triangle3D();
+    ~Triangle3D();
 
 	void UpdateBounds();
 	bool IsBad(); //returns true if the triangle has no "area" or no bounds.

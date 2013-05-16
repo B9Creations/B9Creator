@@ -41,7 +41,7 @@
 #include <QFileInfo>
 #include <QFile>
 #include <QSvgRenderer> // see copyright distribution notice on qt's website!
-
+#include <OS_Wrapper_Functions.h>
 //Public
 B9Edit::B9Edit(QWidget *parent, Qt::WFlags flags, QString infile)
 	: QMainWindow(parent, flags)
@@ -220,8 +220,13 @@ void B9Edit::saveJob()
 void B9Edit::saveJobAs()
 {
     QSettings settings;
-	QFileDialog dialog(this);
-    QString saveFile = dialog.getSaveFileName(this,"Save B9 Job",settings.value("WorkingDir").toString() + "//" + sName,tr("B9 Job Files (*.b9j);;All files (*.*)"));
+    QString saveFile;
+
+    saveFile = CROSS_OS_GetSaveFileName(this,"Save B9 Job",settings.value("WorkingDir").toString() + "//" + sName,
+                                        tr("B9 Job Files (*.b9j);;All files(*.*)"));
+
+
+
 	QFile file(saveFile);
 	SetDir(QFileInfo(file).absolutePath());
 	if(!cPJ.saveCPJ(&file))
@@ -563,7 +568,6 @@ void B9Edit::importSlicesFromSlc(QString file, double pixelsizemicrons)
         cPJ.setName(QFileInfo(file).baseName());
         emit setName(cPJ.getName());
     //////////
-
     QDataStream slcstream(&slcfile);
     QTextStream slctextstream(&slcfile);
     slcstream.setByteOrder(QDataStream::LittleEndian);
@@ -614,8 +618,8 @@ void B9Edit::importSlicesFromSlc(QString file, double pixelsizemicrons)
     }
 
     //3D reserved section:
-    qDebug() << "Skipping " << slcstream.skipRawData(256) << " bytes";
-
+    //skip 256 bytes
+    slcstream.skipRawData((256));
 
     //Sample table section:
     slcstream >> readbyte;
@@ -698,11 +702,6 @@ void B9Edit::importSlicesFromSlc(QString file, double pixelsizemicrons)
         return;
     }
 
-
-
-
-
-
     maxb*=scalefactor;
     minb*=scalefactor;
 
@@ -737,7 +736,7 @@ void B9Edit::importSlicesFromSlc(QString file, double pixelsizemicrons)
             break;
         }
         QPainter painter(&img);
-        painter.setCompositionMode(QPainter::CompositionMode_Plus);
+        painter.setCompositionMode(QPainter::CompositionMode_Difference);
         painter.setRenderHint(QPainter::Antialiasing,false);
 
         QBrush fillbrush(QColor(1,0,0));
@@ -891,9 +890,6 @@ void B9Edit::importSlicesFromSlc(QString file, double pixelsizemicrons)
 }
 
 
-
-
-
 void B9Edit::CancelLoading()
 {
 	continueLoading = false;
@@ -952,7 +948,10 @@ void B9Edit::ExportToFolder()
 
 		cPJ.setCurrentSlice(s);
 		cPJ.inflateCurrentSlice(&buff,0,0,true);
-		buff.save(folder + "\\" + cPJ.getName() + "_" + QString().number(s+1) + "." + format.toLower(),format.toAscii(),100);
+        //save the image with 4 leading zeros so that the images sort well in the OS explorer.
+        buff.save(folder + "\\" + cPJ.getName() + "_" +
+                  QString("%1").arg(s+1,4,10,QChar('0')) + "." +
+                    format.toLower(),format.toAscii(),100);
 		bar.setValue(s);
 		//give the app the ability to proccess events
 		QApplication::processEvents();
@@ -1128,6 +1127,15 @@ void B9Edit::closeEvent(QCloseEvent *event)
 	{
 		event->accept();
 	}
+
+    //close SliceManager as well
+    pEditView->close();
+
+
+    //when we close the window - we want to make a new project.
+    //because we might open the window again and we want a fresh start.
+    newJob();
+    event->accept();
 }
 void B9Edit::dragEnterEvent(QDragEnterEvent *event)
 {

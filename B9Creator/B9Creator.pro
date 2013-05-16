@@ -89,7 +89,9 @@ SOURCES += main.cpp\
     b9layout/loop.cpp \
     b9layout/b9layout.cpp \
     b9slice/b9slice.cpp \
-    dlgprintprep.cpp
+    dlgprintprep.cpp \
+    OS_Wrapper_Functions.cpp \
+    screensaverwaker.cpp
 
 HEADERS  += mainwindow.h \
     logfilemanager.h \
@@ -126,7 +128,9 @@ HEADERS  += mainwindow.h \
     OS_GL_Wrapper.h \
     b9layout/b9layout.h \
     b9slice/b9slice.h \
-    dlgprintprep.h
+    dlgprintprep.h \
+    OS_Wrapper_Functions.h \
+    screensaverwaker.h
 
 FORMS    += mainwindow.ui \
     b9terminal.ui \
@@ -146,11 +150,9 @@ RESOURCES += \
     b9edit/b9edit.qrc \
     b9edit/sliceeditview.qrc
 
- win32 {
-    RC_FILE = b9edit/B9Edit.rc
- }
 
-ICON = b9edit/MacIcon.icns
+
+
 
 include(qextserialport-1.2beta2/src/qextserialport.pri)
 
@@ -178,10 +180,14 @@ OTHER_FILES += \
 
 
 
-#Windows Library Specifics-------------------------------------------------------------
+#Windows Specifics-------------------------------------------------------------
 
 
 win32{
+
+#Application Icon For Windows
+RC_FILE = Application_Icons/Windows/b9c_icon.rc
+
 
 #Windows Assimp Static Library Loading
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/assimp--3.0.1270-sdk/lib/assimp_release-noboost-st_Win32/ -lassimp
@@ -197,11 +203,18 @@ else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/assimp--3.0.127
 }
 
 
-#Mac Library Specifics-------------------------------------------------------------
+#Mac Specifics-------------------------------------------------------------
 
 macx{
 
+#Application Icon For Mac
+ICON = Application_Icons/Mac/b9c_icon.icns
+
+
 CONFIG -= x86_64
+
+#Mac CoreLibrary Functions
+macx: LIBS += -framework CoreServices
 
 #Mac Assimp Static Lbrary Loading
 macx: LIBS += -L$$PWD/assimp--3.0.1270-sdk/bin/assimp_Release_MacOSX/ -lassimp

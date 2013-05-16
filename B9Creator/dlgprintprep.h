@@ -60,6 +60,8 @@ private slots:
 
     void on_pushButtonMatCat_clicked();
 
+    void on_checkBoxMirrored_clicked(bool checked);
+
     void on_checkBoxDryRun_clicked(bool checked);
 
     void on_spinBoxLayersToPrint_valueChanged(int arg1);
@@ -85,6 +87,7 @@ public:
     int m_iNumAttach;
     int m_iTbaseMS;
     int m_iToverMS;
+    bool m_bMirrored;
     bool m_bDryRun;
     int m_iLastLayer;
 

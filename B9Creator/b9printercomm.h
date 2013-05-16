@@ -45,8 +45,9 @@
 // The Firmware version is tied to a specific version
 // These defines determine how we attempt to update Firmware
 // The correctly named current hex file MUST be in the application directory
-#define CURRENTFIRMWARE "v1.0.8"
-#define FIRMWAREHEXFILE "B9Firmware_1_0_8.hex"
+#define CURRENTFIRMWARE "v1.0.9"
+#define FIRMWAREUPDATESPEED 115200
+#define FIRMWAREHEXFILE "B9Firmware_1_0_9.hex"
 #define MSG_SEARCHING "Searching..."
 #define MSG_CONNECTED "Connected"
 #define MSG_FIRMUPDATE "Updating Firmware..."
@@ -231,6 +232,7 @@ public slots:
     void SendCmd(QString sCmd);
     void setProjectorPowerCmd(bool bPwrFlag); // call to send projector power on/off command
     void setWarmUpDelay(int iDelayMS){m_iWarmUpDelayMS = iDelayMS;}
+    void setMirrored(bool bIsMirrored){m_bIsMirrored = bIsMirrored;}
 
 private slots:
     void ReadAvailable();
@@ -256,5 +258,6 @@ private:
     bool handleProjectorBC(int iBC);
     QTime startWarmingTime;
     int m_iWarmUpDelayMS;
+    bool m_bIsMirrored;
 };
 #endif // B9PRINTERCOMM_H

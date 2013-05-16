@@ -57,7 +57,13 @@ Triangle3D::Triangle3D()
 	minBound.setX(99999999.0);
 	minBound.setY(99999999.0);
 	minBound.setZ(99999999.0);
+
 }
+Triangle3D::~Triangle3D()
+{
+
+}
+
 
 void Triangle3D::UpdateBounds()
 {
@@ -102,6 +108,9 @@ void Triangle3D::UpdateBounds()
 			minBound.setZ(vertex[i].z());
 		}	
 	}
+
+    //also recompute normal
+
 }
 
 bool Triangle3D::IsBad()

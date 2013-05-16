@@ -49,6 +49,9 @@
 
 class aiScene;
 class ModelData {
+
+    friend class ModelInstance;
+
 public:
     ModelData(B9Layout* main);
 	~ModelData();
@@ -66,9 +69,10 @@ public:
 
 	//render
 	unsigned int displaylistindx;
+    unsigned int displaylistflippedindx;
 
 	//geometry
-	std::vector<Triangle3D> triList;
+    std::vector<Triangle3D> triList;
 	QVector3D maxbound;
 	QVector3D minbound;
 
@@ -87,7 +91,7 @@ private:
 	const aiScene* pScene;
 
 	//render
-	void FormDisplayList();
+    int FormDisplayList();
 	
 };
 #endif
