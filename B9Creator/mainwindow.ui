@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>190</width>
-    <height>240</height>
+    <height>204</height>
    </rect>
   </property>
   <property name="palette">
@@ -125,22 +125,6 @@
      </widget>
     </item>
     <item row="2" column="0">
-     <widget class="QCommandLinkButton" name="commandEdit">
-      <property name="toolTip">
-       <string>Modifiy supports, correct slicing errors or import data from a 3rd party slicer</string>
-      </property>
-      <property name="statusTip">
-       <string/>
-      </property>
-      <property name="text">
-       <string>Edit</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
      <widget class="QCommandLinkButton" name="commandPrint">
       <property name="toolTip">
        <string>Select your Print Job and begin the printing process.</string>
@@ -249,6 +233,8 @@
     </property>
     <addaction name="actionB9Creator_Terminal_Utility"/>
     <addaction name="actionMaterialsCatalog"/>
+    <addaction name="action_Printer_Cycle_Settings"/>
+    <addaction name="actionEdit_Job_File"/>
     <addaction name="separator"/>
     <addaction name="actionCheck_For_Updates"/>
     <addaction name="separator"/>
@@ -258,8 +244,6 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
-    <addaction name="actionContents"/>
-    <addaction name="separator"/>
     <addaction name="actionAbout_B9Creator"/>
    </widget>
    <addaction name="menuFile"/>
@@ -324,7 +308,17 @@
   </action>
   <action name="actionCheck_For_Updates">
    <property name="text">
-    <string>Check For Updates</string>
+    <string>&amp;Check For Updates</string>
+   </property>
+  </action>
+  <action name="actionEdit_Job_File">
+   <property name="text">
+    <string>Edit &amp;Job File...</string>
+   </property>
+  </action>
+  <action name="action_Printer_Cycle_Settings">
+   <property name="text">
+    <string>&amp;Printer Cycle Settings...</string>
    </property>
   </action>
  </widget>
@@ -443,6 +437,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionEdit_Job_File</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showEdit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>94</x>
+     <y>119</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Printer_Cycle_Settings</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showPrinterCycles()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>94</x>
+     <y>101</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>myOpen()</slot>
@@ -454,5 +480,7 @@
   <slot>showPrintWiz()</slot>
   <slot>showAbout()</slot>
   <slot>CheckForUpdates()</slot>
+  <slot>showEdit()</slot>
+  <slot>showPrinterCycles()</slot>
  </slots>
 </ui>

@@ -5,7 +5,7 @@
 //  BCreator(tm)
 //  Software for the control of the 3D Printer, "B9Creator"(tm)
 //
-//  Copyright 2011-2012 B9Creations, LLC
+//  Copyright 2011-2013 B9Creations, LLC
 //  B9Creations(tm) and B9Creator(tm) are trademarks of B9Creations, LLC
 //
 //  This file is part of B9Creator
@@ -142,6 +142,10 @@ void MainWindow::showAbout()
         m_pSplash->show();
     }
 }
+void MainWindow::showEdit()
+{
+    emit on_commandEdit_clicked(TRUE);
+}
 
 void MainWindow::showLogAndExit()
 {
@@ -157,6 +161,11 @@ void MainWindow::showTerminal()
 void MainWindow::showCatalog()
 {
     pTerminal->dlgEditMatCat();
+}
+
+void MainWindow::showPrinterCycles()
+{
+    pTerminal->dlgEditPrinterCycleSettings();
 }
 
 void MainWindow::showHelp()
@@ -187,7 +196,7 @@ void MainWindow::handleW2Hide()
 void MainWindow::handleW3Hide()
 {
     this->show();
-    ui->commandEdit->setChecked(false);
+    //ui->commandEdit->setChecked(false);
 }
 void MainWindow::handleW4Hide()
 {

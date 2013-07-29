@@ -201,6 +201,12 @@ void B9Terminal::resetLastSentCycleSettings(){
     m_iD=m_iE=m_iJ=m_iK=m_iL=m_iW=m_iX = -1;
 }
 
+void B9Terminal::dlgEditPrinterCycleSettings()
+{
+    DlgCycleSettings dlgPCycles(pSettings,0);
+    dlgPCycles.exec();
+}
+
 void B9Terminal::dlgEditMatCat()
 {
     DlgMaterialsManager dlgMatMan(m_pCatalog,0);

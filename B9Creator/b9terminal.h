@@ -108,6 +108,7 @@ public:
 
 public slots:
     void dlgEditMatCat();
+    void dlgEditPrinterCycleSettings();
 
     void rcResetHomePos();
     void rcResetCurrentPositionPU(int iCurPos);
