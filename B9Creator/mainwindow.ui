@@ -231,12 +231,10 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="actionB9Creator_Terminal_Utility"/>
-    <addaction name="actionMaterialsCatalog"/>
-    <addaction name="action_Printer_Cycle_Settings"/>
-    <addaction name="actionEdit_Job_File"/>
-    <addaction name="separator"/>
-    <addaction name="actionCheck_For_Updates"/>
+    <addaction name="action_Layout"/>
+    <addaction name="action_Slice"/>
+    <addaction name="actionEdit_Job"/>
+    <addaction name="action_Print"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -244,9 +242,29 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="actionB9Creator_Terminal_Utility"/>
     <addaction name="actionAbout_B9Creator"/>
    </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <widget class="QMenu" name="menuCalibrate">
+     <property name="title">
+      <string>Calibrate</string>
+     </property>
+     <addaction name="actionBuild_Table"/>
+     <addaction name="actionProjector"/>
+    </widget>
+    <addaction name="actionCheck_For_Updates"/>
+    <addaction name="separator"/>
+    <addaction name="actionMaterialsCatalog"/>
+    <addaction name="action_Printer_Cycle_Settings"/>
+    <addaction name="separator"/>
+    <addaction name="menuCalibrate"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuSettings"/>
    <addaction name="menuAbout"/>
   </widget>
   <action name="actionSettings">
@@ -305,20 +323,54 @@
    <property name="toolTip">
     <string>Monitor Serial Communications</string>
    </property>
+   <property name="shortcutContext">
+    <enum>Qt::WindowShortcut</enum>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+   <property name="softKeyRole">
+    <enum>QAction::NoSoftKey</enum>
+   </property>
   </action>
   <action name="actionCheck_For_Updates">
    <property name="text">
     <string>&amp;Check For Updates</string>
    </property>
   </action>
-  <action name="actionEdit_Job_File">
+  <action name="actionEdit_Job">
    <property name="text">
-    <string>Edit &amp;Job File...</string>
+    <string>&amp;Edit...</string>
    </property>
   </action>
   <action name="action_Printer_Cycle_Settings">
    <property name="text">
     <string>&amp;Printer Cycle Settings...</string>
+   </property>
+  </action>
+  <action name="action_Layout">
+   <property name="text">
+    <string>&amp;Layout...</string>
+   </property>
+  </action>
+  <action name="action_Slice">
+   <property name="text">
+    <string>&amp;Slice...</string>
+   </property>
+  </action>
+  <action name="action_Print">
+   <property name="text">
+    <string>&amp;Print...</string>
+   </property>
+  </action>
+  <action name="actionBuild_Table">
+   <property name="text">
+    <string>Build Table...</string>
+   </property>
+  </action>
+  <action name="actionProjector">
+   <property name="text">
+    <string>Projector...</string>
    </property>
   </action>
  </widget>
@@ -438,7 +490,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionEdit_Job_File</sender>
+   <sender>actionEdit_Job</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>showEdit()</slot>
@@ -469,6 +521,54 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>action_Layout</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showLayout()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>94</x>
+     <y>101</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Slice</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showSlice()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>94</x>
+     <y>101</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Print</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showPrint()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>94</x>
+     <y>101</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>myOpen()</slot>
@@ -482,5 +582,8 @@
   <slot>CheckForUpdates()</slot>
   <slot>showEdit()</slot>
   <slot>showPrinterCycles()</slot>
+  <slot>showLayout()</slot>
+  <slot>showSlice()</slot>
+  <slot>showPrint()</slot>
  </slots>
 </ui>

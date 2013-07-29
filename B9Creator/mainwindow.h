@@ -82,7 +82,10 @@ public slots:
     void showTerminal();
     void showCatalog();
     void showPrinterCycles();
+    void showLayout();
+    void showSlice();
     void showEdit();
+    void showPrint();
 
     void showAbout();
     void setSplash(QSplashScreen * splash){m_pSplash = splash;}

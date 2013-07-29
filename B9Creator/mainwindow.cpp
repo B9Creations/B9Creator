@@ -145,9 +145,25 @@ void MainWindow::showAbout()
         m_pSplash->show();
     }
 }
+
+void MainWindow::showLayout()
+{
+    emit on_commandLayout_clicked(TRUE);
+}
+
+void MainWindow::showSlice()
+{
+    emit on_commandSlice_clicked(TRUE);
+}
+
 void MainWindow::showEdit()
 {
     emit on_commandEdit_clicked(TRUE);
+}
+
+void MainWindow::showPrint()
+{
+    emit on_commandPrint_clicked();
 }
 
 void MainWindow::showLogAndExit()
