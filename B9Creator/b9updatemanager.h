@@ -21,16 +21,22 @@
 class B9UpdateManager : public QObject
 {
     Q_OBJECT
+
 public:
     explicit B9UpdateManager(QObject *parent = 0);
     ~B9UpdateManager();
     void PromptDoUpdates(bool showCheckingBar = true);
     void TransitionFromPreviousVersions();
+    static int GetLocalFileVersion(QString filename);
+
+
 
 signals:
     void NotifyUpdateFinished();
     
 public slots:
+    void AutoCheckForUpdates(){PromptDoUpdates(false);}
+
 
 private:
     QList<B9UpdateEntry> remoteEntries;

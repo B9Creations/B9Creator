@@ -59,31 +59,34 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Always set up the log manager in the MainWindow constructor
     pLogManager = new LogFileManager(CROSS_OS_GetDirectoryFromLocationTag("DOCUMENTS_DIR") + "/B9Creator_LOG.txt", "B9Creator Log Entries");
-    m_bOpenLogOnExit = false;
-    qDebug() << "Program Start";
-    qDebug() << "Relevent Used Application Directories";
-    qDebug() << "   EXECUTABLE_DIR: " << CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR");
-    qDebug() << "   APPLICATION_DIR: " << CROSS_OS_GetDirectoryFromLocationTag("APPLICATION_DIR");
-    qDebug() << "   TEMP_DIR: " << CROSS_OS_GetDirectoryFromLocationTag("TEMP_DIR");
-    qDebug() << "   DOCUMENTS_DIR: " << CROSS_OS_GetDirectoryFromLocationTag("DOCUMENTS_DIR");
+        m_bOpenLogOnExit = false;
+        qDebug() << "Program Start";
+        qDebug() << "Relevent Used Application Directories";
+        qDebug() << "   EXECUTABLE_DIR: " << CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR");
+        qDebug() << "   APPLICATION_DIR: " << CROSS_OS_GetDirectoryFromLocationTag("APPLICATION_DIR");
+        qDebug() << "   TEMP_DIR: " << CROSS_OS_GetDirectoryFromLocationTag("TEMP_DIR");
+        qDebug() << "   DOCUMENTS_DIR: " << CROSS_OS_GetDirectoryFromLocationTag("DOCUMENTS_DIR");
 
 
     //create update manager.
     m_pUpdateManager = new B9UpdateManager(this);
 
-    //do things like move, delete old files from previous
-    //installations
-    m_pUpdateManager->TransitionFromPreviousVersions();
-    m_pUpdateManager->PromptDoUpdates(false);
+        //do things like move, delete old files from previous
+        //installations
+        m_pUpdateManager->TransitionFromPreviousVersions();
+
+        //Schedule an auto update check
+        QTimer::singleShot(100,m_pUpdateManager,SLOT(AutoCheckForUpdates()));
+
 
     //create Printer Model Manager, withough importing definitions - it will start with a default printer
     pPrinterModelManager = new b9PrinterModelManager(this);
-    //pPrinterModelManager->ImportDefinitions(CROSS_OS_SPOT + "/B9Printer.DEF")
-    //pPrinterModelManager->ImportMaterials();//looks at mat file and user registry.
+        //pPrinterModelManager->ImportDefinitions(CROSS_OS_SPOT + "/B9Printer.DEF")
+        //pPrinterModelManager->ImportMaterials();//looks at mat file and user registry.
 
     //import premade stls for support structures
     B9SupportStructure::ImportAttachmentDataFromStls();
-    B9SupportStructure::FillRegistryDefaults();//if needed
+        B9SupportStructure::FillRegistryDefaults();//if needed
 
     //create terminal
     pTerminal = new B9Terminal(QApplication::desktop());

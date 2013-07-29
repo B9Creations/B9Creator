@@ -47,12 +47,14 @@
 #include <stdio.h>
 #include "loadingbar.h"
 
+//B9Update Manger should be maintained such that an instance
+//can be created without disrupting anything.
+//only when update functions are called on the object should it
+//alter files and such.
 B9UpdateManager::B9UpdateManager(QObject *parent) :
     QObject(parent)
 {
 
-    //check for old executables and delete them
-    QFile(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR") + "/B9Creator.exe.old").remove();
 
     //Setup Network Manager Connections
     netManager = new QNetworkAccessManager(this);
@@ -630,6 +632,32 @@ void B9UpdateManager::TransitionFromPreviousVersions()
     QFile::remove(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR") + "/avrdude");
     QFile::remove(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR") + "/avrdude.conf");
     //OLD Material file sould be salvaged by b9matcat and removed.
+
+    //check for old executables and delete them
+    QFile(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR") + "/B9Creator.exe.old").remove();
+}
+
+
+//looks into the local manifest and returns the local version,
+//this is static beecause it can be accessed anywhere in the program.
+//returns -1 if the file does not exist, but is in the manifest.
+//returns -2 if the file does not exist and is not in the manifest!
+int B9UpdateManager::GetLocalFileVersion(QString filename)
+{
+    unsigned int i;
+
+    B9UpdateManager tempManager;
+
+    tempManager.CopyInLocalEntries();
+
+    for(i = 0; i < tempManager.localEntries.size(); i++)
+    {
+        if(tempManager.localEntries[i].fileName == filename)
+        {
+            return tempManager.localEntries[i].version;
+        }
+    }
+    return -2;
 }
 
 

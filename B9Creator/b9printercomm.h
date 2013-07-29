@@ -42,12 +42,8 @@
 #include <QTime>
 #include <QtDebug>
 
-// The Firmware version is tied to a specific version
-// These defines determine how we attempt to update Firmware
-// The correctly named current hex file MUST be in the application directory
-#define CURRENTFIRMWARE "v1.1.0"
 #define FIRMWAREUPDATESPEED 115200
-#define FIRMWAREHEXFILE "B9Firmware_1_1_0.hex"
+#define FIRMWAREHEXFILE "B9Firmware.hex"
 #define MSG_SEARCHING "Searching..."
 #define MSG_CONNECTED "Connected"
 #define MSG_FIRMUPDATE "Updating Firmware..."
@@ -69,6 +65,7 @@ public:
     void reset();
 
     QString getVersion();
+    int getIntVersion();
     void setVersion(QString s);
     bool isCurrentVersion();
     bool isValidVersion();
@@ -161,7 +158,7 @@ class B9FirmwareUpdate : public QObject
 
     // Uses avrdude to update B9Creator's Arduino Firmware
     // averdude and averdue.config must be present
-    // B9FirmwareVxxx.hex file must be present
+    // B9Firmware.hex file must be present
 public:
     B9FirmwareUpdate()
     {

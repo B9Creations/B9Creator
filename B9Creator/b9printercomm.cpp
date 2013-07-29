@@ -41,6 +41,7 @@
 #include <QProcess>
 #include <QTimer>
 #include "b9printercomm.h"
+#include "b9updatemanager.h"
 #include "qextserialport.h"
 #include "qextserialenumerator.h"
 #include "OS_Wrapper_Functions.h"
@@ -97,7 +98,10 @@ void B9PrinterStatus::setVersion(QString s)
 }
 
 bool B9PrinterStatus::isCurrentVersion(){
-    return getVersion() >= CURRENTFIRMWARE;
+    int iFileVersion = B9UpdateManager::GetLocalFileVersion(FIRMWAREHEXFILE);
+    qDebug()<< "Local Firmware version: " << iFileVersion;
+    qDebug()<< "Printer Firmware version" << getIntVersion();
+    return getIntVersion() >= iFileVersion;
 }
 
 bool B9PrinterStatus::isValidVersion(){
@@ -110,6 +114,12 @@ QString B9PrinterStatus::getVersion(){
     if(iV1<0||iV2<0||iV3<0)
         return "?";
     return "v" + QString::number(iV1)+ "."+ QString::number(iV2)+ "."+ QString::number(iV3);
+}
+
+int B9PrinterStatus::getIntVersion(){
+    if(iV1<0||iV2<0||iV3<0)
+        return -1;
+    return iV1*100 + iV2*10 +iV3;
 }
 
 //upload the firware hex file to the current port - this will freeze the program.
@@ -321,7 +331,7 @@ void B9PrinterComm::RefreshCommPortItems()
         }
         else if (m_serialDevice!=NULL && !m_Status.isCurrentVersion()){
             // We found a B9Creator with the wrong firmware version, update it!
-            qDebug() << "Incorrect Firmware version found on connected B9Creator"<< sPortName << "  Attempting B9Creator Firmware Update to" << CURRENTFIRMWARE;
+            qDebug() << "Incorrect Firmware version found on connected B9Creator"<< sPortName << "  Attempting B9Creator Firmware Update";
             bUpdateFirmware = true;
             if(m_serialDevice!=NULL) {
                 m_serialDevice->flush();
