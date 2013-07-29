@@ -24,7 +24,7 @@
       old user materials will still load in from the old file. the first time.
 -Removed depreciated b9edit about box.
 -Layout file now contains support informtation for models.
--Removed "Dry Run" option from printer prep dialog.
+-Removed "Dry Run" option from printer prep dialog.  No longer needed.
 -Fixed print time estimate bug (breathe and settle times were not calculated correctly)
 
 
