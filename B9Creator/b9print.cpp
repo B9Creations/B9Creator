@@ -198,6 +198,8 @@ void B9Print::print3D(CrushedPrintJob* pCPJ, int iXOff, int iYOff, int iTbase, i
     m_pTerminal->setPrintPreview(bPrintPreview);
     m_pTerminal->onScreenCountChanged();
 
+    ui->lineEditJobName->setText(m_pCPJ->getName());
+    ui->lineEditJobDescription->setText(m_pCPJ->getDescription());
     ui->progressBarPrintProgress->setMinimum(0);
     ui->progressBarPrintProgress->setMaximum(m_iLastLayer);
     ui->progressBarPrintProgress->setValue(0);
