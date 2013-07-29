@@ -1,0 +1,11 @@
+//Notes and instructions for building here
+
+-When Developing Switch B9UpdateManager update locations to a custom URL - not the public one
+	otherwise the executable and other files with revert to the public version if you choose to upgrade
+	this can be found in the B9UpdateManager.h file
+	
+-Make Sure To Change version numbers in relevant places (mainwindow about-box)
+
+-Its recomended to use QtCreator to build.
+
+-Use Qt 4.8.1
