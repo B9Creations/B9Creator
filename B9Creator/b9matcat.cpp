@@ -39,6 +39,8 @@
 #include <QApplication>
 #include <QFile>
 #include "b9matcat.h"
+#include "OS_Wrapper_Functions.h"
+#include <QSettings>
 
 B9MatCatItem::B9MatCatItem()
 {
@@ -88,41 +90,93 @@ B9MatCat::B9MatCat(QObject *parent) :
 
 bool B9MatCat::load(QString sModelName)
 {
-    clear();
+    clear();//clear out all material int the class first!
     m_Materials.clear();
     m_sModelName = sModelName;
-    QString sPath = QCoreApplication::applicationDirPath()+"/"+m_sModelName+".b9m";
+    QString sPath;
+
+    //See if there is an old matfile with user defined materials in
+    //it and stuff them in the register. THIS IF STATEMENT SHOULD HAPPEN ONLY ONCE EVER
+    if(QFile::exists(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR")+"/"+m_sModelName+".b9m"))
+    {
+        sPath = CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR")+"/"+m_sModelName+".b9m";
+        QFile inFile(sPath);
+        inFile.open(QIODevice::ReadOnly);
+        if(!inFile.isOpen()) return false;
+        QDataStream inStream(&inFile);
+        streamIn(&inStream);
+
+        //write the user ones to registry
+        SaveUserMaterialsToRegister();
+
+        inFile.close();
+        inFile.remove();
+
+        load(sModelName);//Now do the standard load. (clears out any old official stuff)
+    }
+
+
+    sPath = CROSS_OS_GetDirectoryFromLocationTag("APPLICATION_DIR")+"/"+m_sModelName+".b9m";
+
+
 
     QFile inFile(sPath);
     inFile.open(QIODevice::ReadOnly);
     if(!inFile.isOpen()) return false;
     QDataStream inStream(&inFile);
     streamIn(&inStream);
+    inFile.close();
+
+    LoadUserMaterialsFromRegister();
+
     return true;
 }
 
 bool B9MatCat::save()
 {
-    QString sPath = QCoreApplication::applicationDirPath()+"/"+m_sModelName+".b9m";
+    QString sPath = CROSS_OS_GetDirectoryFromLocationTag("APPLICATION_DIR")+"/"+m_sModelName+".b9m";
     QFile outFile(sPath);
     outFile.open(QIODevice::WriteOnly);
     if(!outFile.isOpen()) return false;
     QDataStream outStream(&outFile);
     streamOut(&outStream);
+    //at this point ffactory mats have been saved to bin file
+
+
+    //write the user ones to registry
+    SaveUserMaterialsToRegister();
+
     return true;
 }
 
+//stream out to the binary mat catalog file,
+//only stream out NON user created mats
+//Added in v15
 void B9MatCat::streamOut(QDataStream* pOut)
 {
+    unsigned int numFactoryMats = 0;
     qSort(m_Materials.begin(), m_Materials.end(), MatLessThan());
-    *pOut << (quint32)m_Materials.count();
+
     for(int i=0; i<m_Materials.count(); i++){
-        *pOut << m_Materials[i]->getFactoryMaterialLabel() << m_Materials[i]->getMaterialDescription();
-        for(int xy = 0; xy < XYCOUNT; xy++){
-            *pOut << m_Materials[i]->getTattach(xy);
-            *pOut << m_Materials[i]->getNumberAttach(xy);
-            for(int z = 0; z < ZCOUNT; z++)
-                *pOut << m_Materials[i]->getTbase(xy,z) << m_Materials[i]->getTover(xy,z);
+        if(m_Materials[i]->isFactoryEntry())
+            numFactoryMats++;
+    }
+
+    //header
+    *pOut << (quint32)numFactoryMats;
+    //body
+    for(int i=0; i<m_Materials.count(); i++)
+    {
+        if(m_Materials[i]->isFactoryEntry())
+        {
+            *pOut << m_Materials[i]->getFactoryMaterialLabel() << m_Materials[i]->getMaterialDescription();
+            for(int xy = 0; xy < XYCOUNT; xy++)
+            {
+                *pOut << m_Materials[i]->getTattach(xy);
+                *pOut << m_Materials[i]->getNumberAttach(xy);
+                for(int z = 0; z < ZCOUNT; z++)
+                    *pOut << m_Materials[i]->getTbase(xy,z) << m_Materials[i]->getTover(xy,z);
+            }
         }
     }
 }
@@ -271,4 +325,137 @@ int B9MatCat::getCurToverAtZinMS(double zMM){
     }
     if(dHighTime==dLowTime)return dHighTime*1000.0;
     return 1000.0*((((zMM-lowMatch)/(highMatch-lowMatch))*(dHighTime - dLowTime))+ dLowTime);
+}
+
+
+
+void B9MatCat::SaveUserMaterialsToRegister()
+{
+    QSettings appSettings;
+
+    int m;
+    int xy;
+    int l;
+    int validMatCount = 0;
+    appSettings.beginGroup("USERMATS");
+
+        //first sort the materials list.
+        qSort(m_Materials.begin(), m_Materials.end(), MatLessThan());
+
+
+        for(m = 0; m < m_Materials.size(); m++)
+        {
+            //we dont want to save factory entrees
+            if(!m_Materials[m]->isFactoryEntry())
+                validMatCount++;
+            else
+            {
+                continue;
+            }
+
+
+
+            //write label.
+            appSettings.setValue("M_" + QString::number(validMatCount-1) + "_LABEL",m_Materials[m]->getMaterialLabel());
+            //write description
+            appSettings.setValue("M_" + QString::number(validMatCount-1) + "_DESC",m_Materials[m]->getMaterialDescription());
+
+            //write xy sizes count
+            appSettings.setValue("M_" + QString::number(validMatCount-1) + "_XYCOUNT",XYCOUNT);
+            //for flexibility.
+
+            for(xy = 0; xy < XYCOUNT; xy++)
+            {
+                //write time Attach
+                appSettings.setValue("M_" + QString::number(validMatCount-1) + "_" + QString::number(xy) + "_TATTACH",m_Materials[m]->getTattach(xy));
+                //write number of attach
+                appSettings.setValue("M_" + QString::number(validMatCount-1) + "_" + QString::number(xy) + "_NUMATTACH",m_Materials[m]->getNumberAttach(xy));
+
+                appSettings.setValue("M_" + QString::number(validMatCount-1) + "_" + QString::number(xy) + "_LAYCOUNT",ZCOUNT);//TODO
+                //ZCOUNT should be member of m_Materials[m]
+                //for flexibility.
+                for(l = 0; l < ZCOUNT; l++)
+                {
+                    //write time base
+                    appSettings.setValue("M_" + QString::number(validMatCount-1) + "_" + QString::number(xy) + "_" +
+                                         QString::number(l) + "_TBASE",m_Materials[m]->getTbase(xy,l));
+
+                    //write time overcure
+                    appSettings.setValue("M_" + QString::number(validMatCount-1) + "_" + QString::number(xy) + "_" +
+                                         QString::number(l) + "_TOVER",m_Materials[m]->getTover(xy,l));
+                }
+            }
+        }
+
+        appSettings.setValue("NUMMAT",validMatCount);
+
+    appSettings.endGroup();
+}
+
+
+
+
+int B9MatCat::LoadUserMaterialsFromRegister()
+{
+    QSettings appSettings;
+    int MaterialCount;
+    int XYCount;
+    int LAYCount;
+    int m;
+    int xy;
+    int l;
+    double TBase;
+    double TOver;
+    double AttachTime;
+    int AttachNum;
+    QString MatLabel;
+    QString MatDesc;
+
+
+    const int invalidKey = -1;
+
+    appSettings.beginGroup("USERMATS");
+
+    MaterialCount = appSettings.value("NUMMAT",invalidKey).toInt();
+    if(MaterialCount <= 0)
+        return MaterialCount;//nothing to read in from registery
+
+
+    for(m = 0; m < MaterialCount; m++)
+    {
+        MatLabel = appSettings.value("M_" + QString::number(m) + "_LABEL",invalidKey).toString();
+        MatDesc = appSettings.value("M_" + QString::number(m) + "_DESC",invalidKey).toString();
+
+        m_Materials.append(new B9MatCatItem);
+        m_Materials.back()->setMaterialDescription(MatDesc);
+        m_Materials.back()->setMaterialLabel(MatLabel);
+
+
+        XYCount = appSettings.value("M_" + QString::number(m) + "_XYCOUNT",invalidKey).toInt();
+
+        for(xy = 0; xy < XYCount; xy++)
+        {
+            AttachTime = appSettings.value("M_" + QString::number(m) + "_" + QString::number(xy) +
+                                           "_TATTACH",invalidKey).toDouble();
+            AttachNum = appSettings.value("M_" + QString::number(m) + "_" + QString::number(xy) +
+                                          "_NUMATTACH",invalidKey).toInt();
+            m_Materials.back()->setTattach(xy,AttachTime);
+            m_Materials.back()->setNumberAttach(xy,AttachNum);
+
+            LAYCount = appSettings.value("M_" + QString::number(m) + "_" + QString::number(xy) + "_LAYCOUNT",invalidKey).toInt();
+            for(l = 0; l < LAYCount; l++)
+            {
+
+                TBase = appSettings.value("M_" + QString::number(m) + "_" + QString::number(xy) + "_" +
+                                          QString::number(l) + "_TBASE",invalidKey).toDouble();
+                TOver = appSettings.value("M_" + QString::number(m) + "_" + QString::number(xy) + "_" +
+                                          QString::number(l) + "_TOVER",invalidKey).toDouble();
+                m_Materials.back()->setTbase(xy,l,TBase);
+                m_Materials.back()->setTover(xy,l,TOver);
+            }
+        }
+    }
+    appSettings.endGroup();
+
+    return MaterialCount;
 }

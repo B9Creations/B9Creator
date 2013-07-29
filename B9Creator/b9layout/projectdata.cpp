@@ -201,7 +201,7 @@
 	}
 	bool ProjectData::Save(QString filepath) //returns success
 	{
-		//output file operations here.TODO
+
 		QFile file(filepath);
 
 		if(!file.open(QIODevice::Truncate | QIODevice::WriteOnly))

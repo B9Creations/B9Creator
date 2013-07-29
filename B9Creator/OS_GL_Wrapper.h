@@ -45,15 +45,15 @@
 
 
 
-    #ifdef Q_WS_X11
+    #ifdef Q_OS_LINUX
         #include <GL/gl.h>
         #include <GL/glu.h>
     #endif
-    #ifdef Q_WS_MACX
+    #ifdef Q_OS_MACX
         #include <OpenGL/gl.h>
         #include <OpenGL/glu.h>
     #endif
-    #ifdef Q_WS_WIN
+    #ifdef Q_OS_WIN
         #include <GL/gl.h>
         #include <GL/glu.h>
     #endif

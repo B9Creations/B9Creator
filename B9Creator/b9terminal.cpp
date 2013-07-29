@@ -53,26 +53,26 @@ void PCycleSettings::updateValues()
 void PCycleSettings::loadSettings()
 {
     QSettings settings;
-    m_iRSpd1 = settings.value("RSpd1",85).toInt();
-    m_iLSpd1 = settings.value("LSpd1",85).toInt();
+    m_iRSpd1 = settings.value("RSpd1",70).toInt();
+    m_iLSpd1 = settings.value("LSpd1",70).toInt();
     m_iCloseSpd1 = settings.value("CloseSpd1",100).toInt();
-    m_iOpenSpd1 = settings.value("OpenSpd1",25).toInt();
-    m_dBreatheClosed1 = settings.value("BreatheClosed1",1).toDouble();
-    m_dSettleOpen1 = settings.value("SettleOpen1",1).toDouble();
-    m_dOverLift1 = settings.value("OverLift1",3).toDouble();
+    m_iOpenSpd1 = settings.value("OpenSpd1",80).toInt();
+    m_dBreatheClosed1 = settings.value("BreatheClosed1",2.0).toDouble();
+    m_dSettleOpen1 = settings.value("SettleOpen1",3.0).toDouble();
+    m_dOverLift1 = settings.value("OverLift1",0.0).toDouble();
 
-    m_iRSpd2 = settings.value("RSpd2",85).toInt();
-    m_iLSpd2 = settings.value("LSpd2",85).toInt();
-    m_iCloseSpd2 = settings.value("CloseSpd2",100).toInt();
-    m_iOpenSpd2 = settings.value("OpenSpd2",100).toInt();
-    m_dBreatheClosed2 = settings.value("BreatheClosed2",0).toDouble();
-    m_dSettleOpen2 = settings.value("SettleOpen2",0).toDouble();
-    m_dOverLift2 = settings.value("OverLift2",0).toDouble();
+    m_iRSpd2 = settings.value("RSpd2",70).toInt();
+    m_iLSpd2 = settings.value("LSpd2",70).toInt();
+    m_iCloseSpd2 = settings.value("CloseSpd2",50).toInt();
+    m_iOpenSpd2 = settings.value("OpenSpd2",80).toInt();
+    m_dBreatheClosed2 = settings.value("BreatheClosed2",2.0).toDouble();
+    m_dSettleOpen2 = settings.value("SettleOpen2",3.0).toDouble();
+    m_dOverLift2 = settings.value("OverLift2",0.0).toDouble();
 
-    m_dBTClearInMM = settings.value("BTClearInMM",5.0).toDouble();
+    m_dBTClearInMM = settings.value("BTClearInMM",0.005).toDouble();
 
-    m_dHardZDownMM = settings.value("HardDownZMM",0.9525).toDouble();
-    m_dZFlushMM    = settings.value("ZFlushMM",   0.7620).toDouble();
+    m_dHardZDownMM = settings.value("HardDownZMM",0.0).toDouble();
+    m_dZFlushMM    = settings.value("ZFlushMM",   0.0).toDouble();
 }
 
 void PCycleSettings::saveSettings()
@@ -444,7 +444,7 @@ void B9Terminal::on_pushButtonCmdReset_clicked()
 }
 
 void B9Terminal::onMotionResetComplete()
-{    
+{
     ui->groupBoxMain->setEnabled(true);
     if(pPrinterComm->getHomeStatus()==B9PrinterStatus::HS_FOUND) ui->lineEditNeedsInit->setText("No");
     else if(pPrinterComm->getHomeStatus()==B9PrinterStatus::HS_UNKNOWN) ui->lineEditNeedsInit->setText("Yes");

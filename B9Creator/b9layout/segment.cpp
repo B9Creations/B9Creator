@@ -39,7 +39,7 @@
 #include "segment.h"
 #include "math.h"
 #include "qmath.h"
-#include "utlilityfunctions.h"
+#include "geometricfunctions.h"
 
 #include <QVector2D>
 

@@ -39,7 +39,7 @@
 #ifndef SLICE_H
 #define SLICE_H
 
-#include "modelinstance.h"
+#include "b9modelinstance.h"
 #include "segment.h"
 #include "loop.h"
 #include "SlcExporter.h"
@@ -59,8 +59,10 @@ public:
 
 	void AddSegment(Segment* pSeg);
 	
-	int GenerateSegments(ModelInstance* inputInstance);//returns number of initial segments
-		
+	int GenerateSegments(B9ModelInstance* inputInstance);//returns number of initial segments
+
+    void SortSegmentsByX();
+
 	void ConnectSegmentNeighbors(); //returns the number of nudges
 	
 	int GenerateLoops();
@@ -75,8 +77,6 @@ public:
 
 
 
-
-
 	std::vector<Segment*> segmentList;//list of segments
 	
 	std::vector<Loop> loopList;
@@ -86,6 +86,9 @@ public:
 
 private:
 	bool TestIntersection(QVector2D &vec,Segment* seg1, Segment* seg2);
+    void GetTrianglesAroundZ(std::vector<Triangle3D*> &outList, double z);
+    void GetSegmentsAroundX(std::vector<Segment*> &outList, double x);
+
 };
 
 

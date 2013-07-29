@@ -38,6 +38,7 @@
 
 #include "b9slice.h"
 #include "ui_b9slice.h"
+#include "b9layout/b9layoutprojectdata.h"
 #include <QSettings>
 
 B9Slice::B9Slice(QWidget *parent, B9Layout* Main) :
@@ -65,21 +66,20 @@ void B9Slice::LoadLayout()
    pMain->New();
 
 
+   //open without visuall - we dont want to allocate memory for display lists
+   //TODO if we get rid of the slice window this functionality shouldnt be needed
 
-   currentLayout = pMain->Open();
+   currentLayout = pMain->Open(true);
    ui->CurrentLayout->setText(currentLayout);
 
-   ui->xypixelsize->setText(QString().number(pMain->project->GetPixelSize()));
-   ui->imgsize->setText(QString().number(pMain->project->GetResolution().x()) + "," + QString().number(pMain->project->GetResolution().y()));
+   ui->xypixelsize->setText(QString().number(pMain->ProjectData()->GetPixelSize()));
+   ui->imgsize->setText(QString().number(pMain->ProjectData()->GetResolution().x()) + ","
+                        + QString().number(pMain->ProjectData()->GetResolution().y()));
 
    ui->jobname->setText(QFileInfo(currentLayout).baseName());
 
 
-
-
-
 }
-
 
 
 void B9Slice::Slice(){
@@ -95,18 +95,13 @@ void B9Slice::Slice(){
     }
 
 
+    pMain->ProjectData()->SetJobName(ui->jobname->text());
 
-    pMain->project->SetJobName(ui->jobname->text());
+    pMain->ProjectData()->SetJobDescription(ui->jobdesc->text());
 
-    pMain->project->SetJobDescription(ui->jobdesc->text());
-
-    pMain->project->SetPixelThickness(ui->thicknesscombo->currentText().toDouble());
+    pMain->ProjectData()->SetPixelThickness(ui->thicknesscombo->currentText().toDouble());
 
     pMain->SliceWorld();
-
-    hide();
-
-    QMessageBox::information(0,"Finished","SLICING COMPLETED\n\nAll layers sliced and job file saved.");
 
 }
 

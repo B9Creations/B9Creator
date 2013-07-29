@@ -43,7 +43,7 @@
 #include <QtDebug>
 
 
-SliceSet::SliceSet(ModelInstance* pParentInstance)
+SliceSet::SliceSet(B9ModelInstance* pParentInstance)
 {
 	if(!pParentInstance)
 	{
@@ -80,6 +80,8 @@ bool SliceSet::GenerateSlice(double realAltitude)
 	pSliceData = new Slice(realAltitude);
 
 	segments = pSliceData->GenerateSegments(pInstance);//actually generate the segments inside the slice
+
+    pSliceData->SortSegmentsByX();//sort segments in x direction
 
 	pSliceData->ConnectSegmentNeighbors();//connect adjacent segments
 

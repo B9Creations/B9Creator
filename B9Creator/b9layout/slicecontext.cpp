@@ -37,11 +37,11 @@
 *************************************************************************************/
 
 #include "slicecontext.h"
-#include <QtOpenGL>
 #include "OS_GL_Wrapper.h"
-#include "projectdata.h"
+#include "b9layoutprojectdata.h"
 #include <QPoint>
 #include <QVector2D>
+#include <QtOpenGL>
 
 SliceContext::SliceContext(QWidget *parent, B9Layout* pmain) : QGLWidget(parent)
 {
@@ -77,9 +77,12 @@ void SliceContext::initializeGL()
 	qglClearColor(QColor(0,0,0));
 	glEnable(GL_BLEND);
 
-	glViewport(0, 0, pMain->project->GetResolution().x(), pMain->project->GetResolution().y());
+    glViewport(0, 0, pMain->ProjectData()->GetResolution().x(), pMain->ProjectData()->GetResolution().y());
     glMatrixMode(GL_PROJECTION);
-	gluOrtho2D(-pMain->project->GetBuildSpace().x()/2.0,pMain->project->GetBuildSpace().x()/2.0,-pMain->project->GetBuildSpace().y()/2.0,pMain->project->GetBuildSpace().y()/2.0);
+    gluOrtho2D(-pMain->ProjectData()->GetBuildSpace().x()/2.0,
+               pMain->ProjectData()->GetBuildSpace().x()/2.0,
+               -pMain->ProjectData()->GetBuildSpace().y()/2.0,
+               pMain->ProjectData()->GetBuildSpace().y()/2.0);
 	glMatrixMode(GL_MODELVIEW);
 }
 

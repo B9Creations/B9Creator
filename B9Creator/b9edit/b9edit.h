@@ -93,8 +93,6 @@ public slots:
 	void PatchJobData(QImage* pNewImg, int slicenumber); //called by the edit view, indicating an image has been modified and needs to be recompressed into the data structure
 	void SetDirty();
 
-    //aboutbox
-    void ShowAboutBox();
 signals:
     void eventHiding();
     void selectedDirChanged(QString s);

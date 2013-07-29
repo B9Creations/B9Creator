@@ -39,7 +39,7 @@
 #include "loop.h"
 #include "segment.h"
 #include "slice.h"
-#include "utlilityfunctions.h"
+#include "geometricfunctions.h"
 #include "math.h"
 
 

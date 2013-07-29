@@ -50,8 +50,8 @@ class LoadingBar : public QDialog
 	Q_OBJECT
 
 public:
-	LoadingBar(QWidget *parent = 0);
-	LoadingBar(int min, int max, QWidget *parent = 0);
+    LoadingBar();
+    LoadingBar(int min, int max, bool autoshow = true);
 	~LoadingBar();
 
 public slots:
@@ -59,10 +59,12 @@ public slots:
 	void setMin(int min);
 	void setValue(int val);
 	void setDescription(QString str);
+    void setProgress(qint64 fraction, qint64 total);
+    void useCancelButton(bool use);
 	int GetValue();
 
 private:
-	void SetupUI();
+    void SetupUI(bool autoshow);
 	void SetupConnections();
 	QHBoxLayout* horizontalLayout;
 	QProgressBar* progressBar;

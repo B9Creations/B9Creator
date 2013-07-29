@@ -40,12 +40,14 @@
 #include <QSplashScreen>
 #include "b9nativeapp.h"
 #include "mainwindow.h"
+#include "OS_Wrapper_Functions.h"
+#include <QDir>
 
 int main(int argc, char *argv[])
 {
     B9NativeApp a(argc, argv);
     MainWindow w;
-    QPixmap pixmap(QCoreApplication::applicationDirPath()+"/"+"splash.png");
+    QPixmap pixmap(CROSS_OS_GetDirectoryFromLocationTag("APPLICATION_DIR")+"/"+"splash.png");
     QSplashScreen splash(pixmap,Qt::WindowStaysOnTopHint);
     a.processEvents();
     w.setSplash(&splash);

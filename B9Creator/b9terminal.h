@@ -75,7 +75,7 @@ class B9Terminal;
 class B9Terminal : public QWidget
 {
     Q_OBJECT
-    
+
 public:
     explicit B9Terminal(QWidget *parent = 0, Qt::WFlags flags = Qt::Widget);
     ~B9Terminal();

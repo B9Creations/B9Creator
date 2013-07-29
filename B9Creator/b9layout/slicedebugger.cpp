@@ -38,6 +38,7 @@
 
 #include "slicedebugger.h"
 #include "slicecontext.h"
+#include "b9layoutprojectdata.h"
 SliceDebugger::SliceDebugger(B9Layout* pmain, QWidget *parent, Qt::WFlags flags) : QWidget(parent, flags)
 {
 	ui.setupUi(this);
@@ -102,11 +103,11 @@ void SliceDebugger::BakeTests()
 void SliceDebugger::ShowSlice(int slice)
 {
     unsigned int i;
-	double thickness = pMain->project->GetPixelThickness()*0.001;
+    double thickness = pMain->ProjectData()->GetPixelThickness()*0.001;
 	ui.slicepick->setText(QString().number(currslice));
 	for(i = 0; i < pMain->GetSelectedInstances().size(); i++)
 	{
-		ModelInstance* inst = pMain->GetSelectedInstances()[i];
+		B9ModelInstance* inst = pMain->GetSelectedInstances()[i];
 			
 		inst->pSliceSet->GenerateSlice(slice*thickness + thickness*0.5);
 		ppaintwidget->SetSlice(inst->pSliceSet->pSliceData);

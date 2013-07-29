@@ -41,17 +41,16 @@
 
 #include <QtGui>
 #include "ui_b93dmain.h"
-#include "projectdata.h"
 #include "worldview.h"
-#include "modeldata.h"
-#include "modelinstance.h"
 
 
+class B9LayoutProjectData;
 class WorldView;
-class ProjectData;
 class ModelData;
-class ModelInstance;
+class B9ModelInstance;
 class SliceDebugger;
+class B9SupportStructure;
+
 class B9Layout : public QMainWindow
 {
 	Q_OBJECT
@@ -59,9 +58,10 @@ class B9Layout : public QMainWindow
 public:
     B9Layout(QWidget *parent = 0, Qt::WFlags flags = 0);
     ~B9Layout();
-
-	ProjectData* project;
-	std::vector<ModelData*> ModelDataList;
+    std::vector<B9ModelInstance*> GetAllInstances();
+    std::vector<B9ModelInstance*> GetSelectedInstances();
+    std::vector<ModelData*> GetAllModelData(){return ModelDataList;}
+    B9LayoutProjectData* ProjectData(){return project;}
 
 signals:
     void eventHiding();
@@ -72,77 +72,138 @@ public slots:
 	//debug interface
 	void OpenDebugWindow();
 
-
 	//file
 	void New();
-    QString Open();
+    QString Open(bool withoutVisuals = false);
 	void Save();
 	void SaveAs();
 
-
 	//interface
+    void OnChangeTab(int idx);
     void SetXYPixelSizePreset(QString size);
 	void SetZLayerThickness(QString thick);
 	void SetProjectorX(QString);
 	void SetProjectorY(QString);
     void SetProjectorPreset(int index);
     void SetZHeight(QString z);
+    void SetAttachmentSurfaceThickness(QString num);
     void UpdateBuildSpaceUI();
 
 
-	//modeltranslation interface;
-	void UpdateTranslationInterface();//sets the translation interface fields acourding to what instance/instances are selected.
+    void BuildInterface();
+    void UpdateInterface();//sets the translation interface fields acourding to what instance/instances are selected.
 	void PushTranslations();
+    void OnModelSpinSliderChanged(int val);//when the spin slider changes value by the user.
+    void OnModelSpinSliderReleased();
 	void LockScale(bool lock);
 
+    //TOOLS
+    void SetTool(QString toolname);//calls the functions below
 
-	//tools interface
-	void SetToolPointer();
-	void SetToolMove();
-	void SetToolRotate();
-    void SetToolScale();
+    //ModelTools interface
+    void SetToolModelSelect();
+    void SetToolModelMove();
+    void SetToolModelSpin();
+    void SetToolModelOrientate();
+    void SetToolModelScale();
+
+    //SupportTools interface
+    void SetToolSupportModify();
+    void SetToolSupportAdd();
+    void SetToolSupportDelete();
+
+
+    void ExitToolAction();//use to panic out of a mouse down tool action.
 	
 	//model
-	ModelInstance* AddModel(QString filepath = "");
+    B9ModelInstance* AddModel(QString filepath = "", bool bypassVisuals = false);
 	void RemoveAllInstances();
 	void CleanModelData();//cleans andy modeldata that does not have a instance!
 	void AddTagToModelList(QListWidgetItem* item);
-	ModelInstance* FindInstance(QListWidgetItem* item);//given a item you can find the connected instance
+
+    B9ModelInstance* FindInstance(QListWidgetItem* item);//given a item you can find the connected instance
 	
 	//selection
 	void RefreshSelectionsFromList();//searches through all active listitems and selects their corresponding instance;
-	void Select(ModelInstance* inst);//selects the given instance
-	void DeSelect(ModelInstance* inst);//de-selects the given instance
-	void SelectOnly(ModelInstance* inst);//deselects eveything and selects only the instance
+    void Select(B9ModelInstance* inst);//selects the given instance
+    void DeSelect(B9ModelInstance* inst);//de-selects the given instance
+    void SelectOnly(B9ModelInstance* inst);//deselects eveything and selects only the instance
 	void DeSelectAll();//de-selects all instances
 	void SetSelectionPos(double x, double y, double z, int axis = 0);
-	void SetSelectionRot(double x, double y, double z, int axis = 0);
-	void SetSelectionScale(double x, double y, double z, int axis = 0);
-    void SetSelectionFlipped(int flipped);
+    void SetSelectionRot(QVector3D newRot);
+    void SetSelectionScale(double x, double y, double z, int axis = 0);
+    void SetSelectionFlipped(bool flipped);
 	void DropSelectionToFloor();
-	void DuplicateSelection();
-	std::vector<ModelInstance*> GetSelectedInstances();
+    void ResetSelectionRotation();
+    void DuplicateSelection();
+    void DeleteSelection();//delete whatever is selected - support or instance..
 	void DeleteSelectedInstances();
 
+    //Support Mode
+    void SetSupportMode(bool tog);//Sets everything up for editing supports for the selected instance.
+                            //when either the tab is clicked or the menu item - a selected instance
+                            //can be assumed
+    void FillSupportList();
+    B9SupportStructure* FindSupportByName(QString name);
+    void RefreshSupportSelectionsFromList();//Called when the user selects stuff in the support list
+
+    void SelectSupport(B9SupportStructure* sup);
+    std::vector<B9SupportStructure*>* GetSelectedSupports();
+    bool IsSupportSelected(B9SupportStructure* sup);
+    void DeSelectSupport(B9SupportStructure* sup);
+    void DeSelectAllSupports();
+    void DeleteSelectedSupports();//called from remove button.
+    void DeleteSupport(B9SupportStructure* pSup);
+    void MakeSelectedSupportsVertical();
+
+    //Support Interface
+    void OnSupportPropertiesChanged();//triggered when anything changes in the support properties.
+    void OnBasePlatePropertiesChanged();
+    void PushSupportProperties();//fills the support properties with relevent data.
+    void PushBasePlateProperties();
+    void WriteSupportPropertiesToRegistry(B9SupportStructure *sup);
+    void ResetSupportDefaults();//connected to push button
+
+    //returns a valid instance if we are editing it in support mode.
+    B9ModelInstance* SupportModeInst();
 
 	//slicing
-	void SliceWorld();//prompts the user to slice to world to different formats.
-	void SliceWorldToJob(QString filename);//slices to whole world to a job file
-	void SliceWorldToSlc(QString filename);//slices to whole world to a slc file
+    bool SliceWorld();//prompts the user to slice to world to different formats.
+    bool SliceWorldToJob(QString filename);//slices to whole world to a job file
+    bool SliceWorldToSlc(QString filename);//slices to whole world to a slc file
 	void CancelSlicing(); //connected to the progress bar to stop slicing.
 
+    //exporting
+    void PromptExportToSTL();//export the whole layout to a stl file.
+        bool ExportToSTL(QString filename);
 
 
-	//events
+
+    //events
 	void keyPressEvent(QKeyEvent * event );
 	void keyReleaseEvent(QKeyEvent * event );
-	
+    void mouseReleaseEvent(QMouseEvent * event);
+    void mousePressEvent(QMouseEvent * event);
+
 private:
     Ui::B9Layout ui;
 	WorldView* pWorldView;
 	SliceDebugger* pslicedebugger;
+    B9LayoutProjectData* project;
 
-	bool cancelslicing;
+
+    std::vector<ModelData*> ModelDataList;
+
+    bool cancelslicing;
+
+    //support mode
+    B9ModelInstance* currInstanceInSupportMode;
+    QVector3D oldPan;
+    QVector3D oldRot;
+    float oldZoom;
+    QString oldTool;
+    std::vector<B9SupportStructure*> currSelectedSupports;//what supports are currently in selection.
+
 
 
     void hideEvent(QHideEvent *event);

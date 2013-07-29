@@ -37,6 +37,7 @@
 *************************************************************************************/
 
 #include "b9layout.h"
+#include "b9layoutprojectdata.h"
 #include "crushbitmap.h"
 #include "slicecontext.h"
 #include "sliceset.h"
@@ -49,9 +50,11 @@
 #include <QDebug>
 #include "slicedebugger.h"
 #include "SlcExporter.h"
-
+#include "modeldata.h"
+#include "b9modelinstance.h"
+#include "b9supportstructure.h"
 #include "OS_Wrapper_Functions.h"
-
+#include "b9modelwriter.h"
 
 //////////////////////////////////////////////////////
 //Public
@@ -60,8 +63,9 @@ B9Layout::B9Layout(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flag
 {
 	ui.setupUi(this);
 
+
 	//Initialize project data
-    project = new ProjectData();
+    project = new B9LayoutProjectData();
     project->pMain = this;
 	
 
@@ -70,37 +74,26 @@ B9Layout::B9Layout(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flag
 
     ui.WorldViewContext->addWidget(pWorldView);
     pWorldView->show();
-    SetToolPointer();//start off with pointer tool
+    SetToolModelSelect();//start off with pointer tool
 
 	
     pslicedebugger = new SliceDebugger(this,this,Qt::Window);
 
+
+    //support editing
+    currInstanceInSupportMode = NULL;
+
 	//slicing
 	cancelslicing = false;
 
+    //build the interface initially - different than update interface..
+    BuildInterface();
 
-	//toolbar items
-	ui.mainToolBar->addAction(ui.actionNew_Project);
-	ui.mainToolBar->addAction(ui.actionOpen_Project);
-	ui.mainToolBar->addAction(ui.actionSave);
-	ui.mainToolBar->addSeparator();
-
-	ui.mainToolBar->addAction(ui.actionSelection);
-	ui.mainToolBar->addAction(ui.actionMove);
-	ui.mainToolBar->addAction(ui.actionRotate);
-    ui.mainToolBar->addAction(ui.actionScale);
-    ui.mainToolBar->addSeparator();
-    ui.mainToolBar->addAction(ui.actionDrop_To_Floor);
-
-	//connections:
-    QObject::connect(project,SIGNAL(DirtChanged(bool)),this,SLOT(UpdateInterface()));
-    QObject::connect(ui.actionCenter_View,SIGNAL(activated()),pWorldView,SLOT(CenterView()));
-    QObject::connect(ui.ModelList,SIGNAL(itemSelectionChanged()),this,SLOT(RefreshSelectionsFromList()));
-	
     New();
 
-    UpdateTranslationInterface();
+    UpdateInterface();
 }
+
 B9Layout::~B9Layout()
 {
 	
@@ -113,6 +106,44 @@ B9Layout::~B9Layout()
 	delete pWorldView;
 	delete pslicedebugger;
 }
+
+//returns a list of the currently selected instances
+std::vector<B9ModelInstance*> B9Layout::GetSelectedInstances()
+{
+    std::vector<B9ModelInstance*> insts;
+    int i;
+    for(i=0;i<ui.ModelList->selectedItems().size();i++)
+    {
+        insts.push_back(FindInstance(ui.ModelList->selectedItems()[i]));
+    }
+    return insts;
+}
+std::vector<B9ModelInstance*> B9Layout::GetAllInstances()
+{
+    unsigned int d, i;
+    std::vector<B9ModelInstance*> allInsts;
+
+    for(d = 0; d < ModelDataList.size(); d++)
+    {
+        for(i = 0; i < ModelDataList[d]->instList.size(); i++)
+        {
+            allInsts.push_back(ModelDataList[d]->instList[i]);
+        }
+    }
+
+    return allInsts;
+
+
+}
+
+
+
+
+
+
+
+
+
 
 
 //////////////////////////////////////////////////////
@@ -129,13 +160,15 @@ void B9Layout::OpenDebugWindow()
 //file
 void B9Layout::New()
 {
+    SetSupportMode(false);
     RemoveAllInstances(); //remove instances.
 	project->New();
     UpdateBuildSpaceUI();
     project->SetDirtied(false);//because UpdatingBuildSpaceUI dirties things in a round about way.
     pWorldView->CenterView();
+    UpdateInterface();
 }
-QString B9Layout::Open()
+QString B9Layout::Open(bool withoutVisuals)
 {
 	bool success;
 
@@ -178,13 +211,13 @@ QString B9Layout::Open()
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
-
+    SetSupportMode(false);
     RemoveAllInstances(); //remove instances.
-	success = project->Open(filename);
+    success = project->Open(filename,withoutVisuals);
 
     //lets update some of the UI stuff to match what we just loaded.
     UpdateBuildSpaceUI();
-
+    pWorldView->UpdatePlasmaFence();
 
     QApplication::restoreOverrideCursor();
 	if(!success)
@@ -221,10 +254,10 @@ void B9Layout::SaveAs()
 
     QString filename = CROSS_OS_GetSaveFileName(this, tr("Save Layout"),
                     settings.value("WorkingDir").toString(),
-                            tr("B9 Layout (*.b9l)"));
+                                                tr("B9 Layout (*.b9l)"),QStringList("b9l"));
 	if(filename.isEmpty())
 	{
-		return;
+        return;
 	}
 
 	success = project->Save(filename);
@@ -238,16 +271,36 @@ void B9Layout::SaveAs()
 }
 
 //interface
+void B9Layout::OnChangeTab(int idx)
+{
+    if(idx == 1)
+    {
+        SetSupportMode(true);
+        ui.actionSupportMode->blockSignals(true);
+        ui.actionSupportMode->setChecked(true);
+        ui.actionSupportMode->blockSignals(false);
+    }
+    if(idx == 0)
+    {
+        ui.actionSupportMode->blockSignals(true);
+        ui.actionSupportMode->setChecked(false);
+        ui.actionSupportMode->blockSignals(false);
+        SetSupportMode(false);
+    }
+}
+
 void B9Layout::SetXYPixelSizePreset(QString size)
 {
 	project->SetPixelSize(size.toDouble());
 	project->CalculateBuildArea();
 }
+
 void B9Layout::SetZLayerThickness(QString thick)
 {
 	project->SetPixelThickness(thick.toDouble());
 	project->CalculateBuildArea();
 }
+
 void B9Layout::SetProjectorX(QString x)
 {
 	project->SetResolution(QVector2D(x.toInt(),project->GetResolution().y()));
@@ -300,6 +353,11 @@ void B9Layout::SetZHeight(QString z)
 
 }
 
+void B9Layout::SetAttachmentSurfaceThickness(QString num)
+{
+    project->SetAttachmentSurfaceThickness(num.toDouble());
+}
+
 void B9Layout::UpdateBuildSpaceUI()
 {
     int pixi;
@@ -330,59 +388,139 @@ void B9Layout::UpdateBuildSpaceUI()
     ui.pixelsizecombo->setCurrentIndex(pixi);
     ui.projectorcombo->setCurrentIndex(proi);
 
+}
 
 
+void B9Layout::BuildInterface()
+{
+    unsigned int i, indx;
+
+    //toolbar items
+    ui.fileToolBar->addAction(ui.actionNew_Project);
+    ui.fileToolBar->addAction(ui.actionOpen_Project);
+    ui.fileToolBar->addAction(ui.actionSave);
+
+    ui.modelToolBar->addAction(ui.actionSelection);
+    ui.modelToolBar->addAction(ui.actionMove);
+    ui.modelToolBar->addAction(ui.actionSpin);
+    ui.modelToolBar->addAction(ui.actionOrientate);
+    ui.modelToolBar->addAction(ui.actionScale);
+
+    //support tool bar goes here.
+    ui.supportToolBar->addAction(ui.Support_Add_Supports_action);
+    ui.supportToolBar->addAction(ui.Support_Delete_Supports_action);
+    ui.supportToolBar->addAction(ui.Support_Modify_Support_action);
+    ui.supportToolBar->hide();
+
+
+
+    ui.modelModifierToolBar->addAction(ui.actionDrop_To_Floor);
+    ui.modelModifierToolBar->addAction(ui.actionDuplicate);
+    ui.modelModifierToolBar->addAction(ui.actionReset_Rotation);
+
+
+    ui.viewToolBar->addAction(ui.actionPerspective);
+    ui.viewToolBar->addAction(ui.actionTop_View);
+    ui.viewToolBar->addAction(ui.actionFront_View);
+    ui.viewToolBar->addAction(ui.actionRight_View);
+
+    //edit Support tab
+    //fill the top, mid and lower combos with the valid names of attachement data.
+    for(i = 0; i < B9SupportStructure::AttachmentDataList.size(); i++)
+    {
+        ui.Support_Top_AttachType_comboBox->addItem(B9SupportStructure::AttachmentDataList[i].GetName());
+        ui.Support_Mid_AttachType_comboBox->addItem(B9SupportStructure::AttachmentDataList[i].GetName());
+        ui.Support_Bottom_AttachType_comboBox->addItem(B9SupportStructure::AttachmentDataList[i].GetName());
+        ui.Support_Base_AttachType_comboBox->addItem(B9SupportStructure::AttachmentDataList[i].GetName());
+    }
+
+    ui.Support_Top_AngleFactor_horizontalSlider->setMaximum(100);
+    ui.Support_Top_AngleFactor_horizontalSlider->setMinimum(0);
+    ui.Support_Bottom_AngleFactor_horizontalSlider->setMaximum(100);
+    ui.Support_Bottom_AngleFactor_horizontalSlider->setMinimum(0);
+
+
+    //base plate defaults are really held in the gui
+    indx = ui.Support_Base_AttachType_comboBox->findText("Cylinder");
+    ui.Support_Base_AttachType_comboBox->blockSignals(true);
+        ui.Support_Base_AttachType_comboBox->setCurrentIndex(indx);
+    ui.Support_Base_AttachType_comboBox->blockSignals(false);
+    ui.Support_Base_Coverage_horizontalSlider->blockSignals(true);
+        ui.Support_Base_Coverage_horizontalSlider->setValue(100);//percent
+    ui.Support_Base_Coverage_horizontalSlider->blockSignals(false);
+    ui.Support_Base_Coverage_label->setText("100%");
+    ui.Support_Base_Length_lineEdit->setText("0.5");
+
+
+    //connections:
+    QObject::connect(project,SIGNAL(DirtChanged(bool)),this,SLOT(UpdateInterface()));
+    QObject::connect(ui.actionCenter_View,SIGNAL(activated()),pWorldView,SLOT(CenterView()));
+    QObject::connect(ui.actionTop_View,SIGNAL(activated()),pWorldView,SLOT(TopView()));
+    QObject::connect(ui.actionRight_View,SIGNAL(activated()),pWorldView,SLOT(RightView()));
+    QObject::connect(ui.actionFront_View,SIGNAL(activated()),pWorldView,SLOT(FrontView()));
+    QObject::connect(ui.TabWidget,SIGNAL(currentChanged(int)),this,SLOT(OnChangeTab(int)));
+    QObject::connect(ui.actionSupportMode,SIGNAL(triggered(bool)),this,SLOT(SetSupportMode(bool)));
+
+    QObject::connect(ui.actionPerspective,SIGNAL(toggled(bool)),pWorldView,SLOT(SetPerpective(bool)));
+    QObject::connect(ui.ModelList,SIGNAL(itemSelectionChanged()),this,SLOT(RefreshSelectionsFromList()));
+    QObject::connect(ui.SupportList,SIGNAL(itemSelectionChanged()),this,SLOT(RefreshSupportSelectionsFromList()));
 
 }
 
 
-
-//modeltranslation interface;
-void B9Layout::UpdateTranslationInterface()
+void B9Layout::UpdateInterface()
 {
     if(ui.ModelList->selectedItems().size() <= 0 )//no items selected.
     {
-        ui.actionDelete->setEnabled(false);
-        ui.actionDrop_To_Floor->setEnabled(false);
-        ui.actionDuplicate->setEnabled(false);
+        ui.menuModelModifiers->setEnabled(false);
+        ui.modelModifierToolBar->hide();
         ui.duplicateButton->setEnabled(false);
+        ui.RemoveButton->setEnabled(false);
     }
-    else
+    else//1 or more items selected
     {
-        ui.actionDelete->setEnabled(true);
-        ui.actionDrop_To_Floor->setEnabled(true);
-        ui.actionDuplicate->setEnabled(true);
+        if(!SupportModeInst())
+        {
+            ui.menuModelModifiers->setEnabled(true);
+            ui.modelModifierToolBar->show();
+
+        }
         ui.duplicateButton->setEnabled(true);
+        ui.RemoveButton->setEnabled(true);
     }
-
-
-	if(ui.ModelList->selectedItems().size() <= 0 || ui.ModelList->selectedItems().size() > 1)//no items selected.
+    if(ui.ModelList->selectedItems().size() <= 0 || ui.ModelList->selectedItems().size() > 1)
+        //no or multiple items selected.
 	{
-		ui.ModelTranslationBox->setEnabled(false);
-		ui.posx->clear();
-		ui.posy->clear();
-		ui.posz->clear();
-		ui.rotx->clear();
-		ui.roty->clear();
-		ui.rotz->clear();
-		ui.scalex->clear();
-		ui.scaley->clear();
-		ui.scalez->clear();
-		ui.modelsizex->clear();
-		ui.modelsizey->clear();
-		ui.modelsizez->clear();
+
+        ui.TabWidget->blockSignals(true);
+            ui.TabWidget->setTabEnabled(1,false);
+        ui.TabWidget->blockSignals(false);
+        ui.actionSupportMode->setEnabled(false);
+
+        ui.ModelTranslationBox->hide();
+
 	}
-	else
+    else //exactly ONE object selected
 	{
-		ui.ModelTranslationBox->setEnabled(true);
-		ModelInstance* inst = FindInstance(ui.ModelList->selectedItems()[0]);
-		ui.posx->setText(QString().number(inst->GetPos().x()));
+        ui.ModelTranslationBox->show();
+
+        ui.actionSupportMode->setEnabled(true);
+        ui.TabWidget->blockSignals(true);
+        ui.TabWidget->setTabEnabled(1,true);
+        ui.TabWidget->blockSignals(false);
+
+        B9ModelInstance* inst = FindInstance(ui.ModelList->selectedItems()[0]);
+        ui.posx->setText(QString().number(inst->GetPos().x()));
 		ui.posy->setText(QString().number(inst->GetPos().y()));
 		ui.posz->setText(QString().number(inst->GetPos().z()));
 		
-		ui.rotx->setText(QString().number(inst->GetRot().x()));
-		ui.roty->setText(QString().number(inst->GetRot().y()));
-		ui.rotz->setText(QString().number(inst->GetRot().z()));
+        ui.rotz->setText(QString().number(inst->GetRot().z()));
+        ui.rotx->setText(QString().number(inst->GetRot().x()));
+        ui.roty->setText(QString().number(inst->GetRot().y()));
+
+        ui.Model_Spin_horizontalSlider->blockSignals(true);
+            ui.Model_Spin_horizontalSlider->setValue(inst->GetRot().z());
+        ui.Model_Spin_horizontalSlider->blockSignals(false);
 
 		ui.scalex->setText(QString().number(inst->GetScale().x()));
 		ui.scaley->setText(QString().number(inst->GetScale().y()));
@@ -393,48 +531,102 @@ void B9Layout::UpdateTranslationInterface()
 		ui.modelsizex->setText(QString().number(inst->GetMaxBound().x() - inst->GetMinBound().x()));
 		ui.modelsizey->setText(QString().number(inst->GetMaxBound().y() - inst->GetMinBound().y()));
 		ui.modelsizez->setText(QString().number(inst->GetMaxBound().z() - inst->GetMinBound().z()));
-
-
 	}
+
+    //refresh support structure tab as well.
+    if(SupportModeInst() != NULL)//in support mode
+    {
+        ui.menuSupport_Tools->setEnabled(true);
+        ui.menuModelModifiers->setEnabled(false);
+        ui.menuModelTools->setEnabled(false);
+        ui.modelModifierToolBar->hide();
+        ui.modelToolBar->hide();
+        ui.supportToolBar->show();
+        ui.supportModifierToolBar->show();
+
+        if(currSelectedSupports.size() <= 0)//no items selected.
+        {
+           ui.supportInformationBox->hide();
+        }
+        else
+        {
+           ui.supportInformationBox->show();
+
+           PushSupportProperties();
+        }
+
+        //fill the base plate gui region
+        PushBasePlateProperties();
+    }
+    else//out of support mode
+    {
+        ui.menuSupport_Tools->setEnabled(false);
+        ui.menuModelTools->setEnabled(true);
+        ui.modelToolBar->show();
+        ui.supportToolBar->hide();
+    }
 }
 void B9Layout::PushTranslations()
 {
-	QString scalex;
-	QString scaley;
-	QString scalez;
-	if(ui.scalelock->isChecked())
-	{
-		scalex = ui.scalex->text();
-		scaley = ui.scalex->text();
-		scalez = ui.scalex->text();
+    QString scalex;
+        QString scaley;
+        QString scalez;
+        if(ui.scalelock->isChecked())
+        {
+            scalex = ui.scalex->text();
+            scaley = ui.scalex->text();
+            scalez = ui.scalex->text();
+            ui.scaley->blockSignals(true);
+                ui.scaley->setText(scalex);
+            ui.scaley->blockSignals(false);
+            ui.scalez->blockSignals(true);
+                ui.scalez->setText(scalex);
+            ui.scalez->blockSignals(true);
+        }
+        else
+        {
+            scalex = ui.scalex->text();
+            scaley = ui.scaley->text();
+            scalez = ui.scalez->text();
+        }
 
-		ui.scaley->setText(scalex);
-		ui.scalez->setText(scalex);
-	}
-	else
-	{
-		scalex = ui.scalex->text();
-		scaley = ui.scaley->text();
-		scalez = ui.scalez->text();
-	}
+        SetSelectionPos(ui.posx->text().toDouble(),0,0,1);
+        SetSelectionPos(0,ui.posy->text().toDouble(),0,2);
+        SetSelectionPos(0,0,ui.posz->text().toDouble(),3);
 
-	SetSelectionPos(ui.posx->text().toDouble(),0,0,1);
-	SetSelectionPos(0,ui.posy->text().toDouble(),0,2);
-	SetSelectionPos(0,0,ui.posz->text().toDouble(),3);
-	SetSelectionRot(ui.rotx->text().toDouble(),0,0,1);
-	SetSelectionRot(0,ui.roty->text().toDouble(),0,2);
-	SetSelectionRot(0,0,ui.rotz->text().toDouble(),3);
-	SetSelectionScale(scalex.toDouble(),0,0,1);
-	SetSelectionScale(0,scaley.toDouble(),0,2);
-	SetSelectionScale(0,0,scalez.toDouble(),3);
-    SetSelectionFlipped(ui.flipx->isChecked());
+        SetSelectionRot(QVector3D(ui.rotx->text().toDouble(),
+                                  ui.roty->text().toDouble(),
+                                  ui.rotz->text().toDouble()));
 
-    for(unsigned int i = 0; i < GetSelectedInstances().size(); i++)
-	{
-		GetSelectedInstances()[i]->UpdateBounds();
-	}
-	UpdateTranslationInterface();
+        SetSelectionScale(scalex.toDouble(),0,0,1);
+        SetSelectionScale(0,scaley.toDouble(),0,2);
+        SetSelectionScale(0,0,scalez.toDouble(),3);
+
+        for(unsigned int i = 0; i < GetSelectedInstances().size(); i++)
+        {
+            GetSelectedInstances()[i]->UpdateBounds();
+        }
+        UpdateInterface();
 }
+
+//when the spin slider changes value by the user.
+void B9Layout::OnModelSpinSliderChanged(int val)
+{
+    SetSelectionRot(QVector3D(ui.rotx->text().toDouble(),
+                              ui.roty->text().toDouble(),
+                              val));
+
+    ui.rotz->setText(QString::number(val));
+}
+void B9Layout::OnModelSpinSliderReleased()
+{
+    for(unsigned int i = 0; i < GetSelectedInstances().size(); i++)
+    {
+        GetSelectedInstances()[i]->UpdateBounds();
+    }
+    UpdateInterface();
+}
+
 void B9Layout::LockScale(bool lock)
 {
 	if(lock)
@@ -442,55 +634,146 @@ void B9Layout::LockScale(bool lock)
 		SetSelectionScale(ui.scalex->text().toDouble(),0,0,1);
 		SetSelectionScale(0,ui.scalex->text().toDouble(),0,2);
 		SetSelectionScale(0,0,ui.scalex->text().toDouble(),3);
-		UpdateTranslationInterface();
+        UpdateInterface();
 	}
 }
 
 
 //tools interface
-void B9Layout::SetToolPointer()
+void B9Layout::SetTool(QString toolname)
 {
-	pWorldView->SetTool("pointer");
+    if(toolname == "MODELSELECT")
+        SetToolModelSelect();
+    else if(toolname == "MODELMOVE")
+        SetToolModelMove();
+    else if(toolname == "MODELSPIN")
+        SetToolModelSpin();
+    else if(toolname == "MODELORIENTATE")
+        SetToolModelOrientate();
+    else if(toolname == "MODELSCALE")
+        SetToolModelScale();
+    else if(toolname == "SUPPORTMODIFY")
+        SetToolSupportModify();
+    else if(toolname == "SUPPORTADD")
+        SetToolSupportAdd();
+    else if(toolname == "SUPPORTDELETE")
+        SetToolSupportDelete();
+}
+
+void B9Layout::SetToolModelSelect()
+{
+    pWorldView->SetTool("MODELSELECT");
     ui.actionSelection->setChecked(true);
 	ui.actionMove->setChecked(false);
-	ui.actionRotate->setChecked(false);
+    ui.actionOrientate->setChecked(false);
+    ui.actionSpin->setChecked(false);
     ui.actionScale->setChecked(false);
 }
-void B9Layout::SetToolMove()
+void B9Layout::SetToolModelMove()
 {
-	pWorldView->SetTool("move");
+    pWorldView->SetTool("MODELMOVE");
     ui.actionMove->setChecked(true);
 	ui.actionSelection->setChecked(false);
-	ui.actionRotate->setChecked(false);
+    ui.actionOrientate->setChecked(false);
+    ui.actionSpin->setChecked(false);
     ui.actionScale->setChecked(false);
 }
-void B9Layout::SetToolRotate()
+void B9Layout::SetToolModelSpin()
 {
-	pWorldView->SetTool("rotate");
-    ui.actionRotate->setChecked(true);
+    pWorldView->SetTool("MODELSPIN");
+    ui.actionOrientate->setChecked(false);
+    ui.actionSpin->setChecked(true);
 	ui.actionMove->setChecked(false);
 	ui.actionSelection->setChecked(false);
     ui.actionScale->setChecked(false);
 }
-void B9Layout::SetToolScale()
+void B9Layout::SetToolModelOrientate()
 {
-    pWorldView->SetTool("scale");
+    pWorldView->SetTool("MODELORIENTATE");
+    ui.actionOrientate->setChecked(true);
+    ui.actionSpin->setChecked(false);
+    ui.actionMove->setChecked(false);
+    ui.actionSelection->setChecked(false);
+    ui.actionScale->setChecked(false);
+}
+
+void B9Layout::SetToolModelScale()
+{
+    pWorldView->SetTool("MODELSCALE");
     ui.actionScale->setChecked(true);
     ui.actionMove->setChecked(false);
     ui.actionSelection->setChecked(false);
-    ui.actionRotate->setChecked(false);
+    ui.actionOrientate->setChecked(false);
+    ui.actionSpin->setChecked(false);
+}
+
+//SupportTools interface
+void B9Layout::SetToolSupportModify()
+{
+    pWorldView->SetTool("SUPPORTMODIFY");
+    ui.Support_Modify_Support_action->blockSignals(true);
+        ui.Support_Modify_Support_action->setChecked(true);
+    ui.Support_Modify_Support_action->blockSignals(false);
+
+    ui.Support_Add_Supports_action->blockSignals(true);
+        ui.Support_Add_Supports_action->setChecked(false);
+    ui.Support_Add_Supports_action->blockSignals(false);
+
+    ui.Support_Delete_Supports_action->blockSignals(true);
+        ui.Support_Delete_Supports_action->setChecked(false);
+    ui.Support_Delete_Supports_action->blockSignals(false);
+}
+
+void B9Layout::SetToolSupportAdd()
+{
+    pWorldView->SetTool("SUPPORTADD");
+    ui.Support_Add_Supports_action->blockSignals(true);
+        ui.Support_Add_Supports_action->setChecked(true);
+    ui.Support_Add_Supports_action->blockSignals(false);
+
+    ui.Support_Modify_Support_action->blockSignals(true);
+        ui.Support_Modify_Support_action->setChecked(false);
+    ui.Support_Modify_Support_action->blockSignals(false);
+
+    ui.Support_Delete_Supports_action->blockSignals(true);
+        ui.Support_Delete_Supports_action->setChecked(false);
+    ui.Support_Delete_Supports_action->blockSignals(false);
+}
+
+void B9Layout::SetToolSupportDelete()
+{
+    pWorldView->SetTool("SUPPORTDELETE");
+    ui.Support_Add_Supports_action->blockSignals(true);
+        ui.Support_Add_Supports_action->setChecked(false);
+    ui.Support_Add_Supports_action->blockSignals(false);
+
+    ui.Support_Modify_Support_action->blockSignals(true);
+        ui.Support_Modify_Support_action->setChecked(false);
+    ui.Support_Modify_Support_action->blockSignals(false);
+
+    ui.Support_Delete_Supports_action->blockSignals(true);
+        ui.Support_Delete_Supports_action->setChecked(true);
+    ui.Support_Delete_Supports_action->blockSignals(false);
+
+
+}
+
+
+void B9Layout::ExitToolAction()
+{
+    pWorldView->ExitToolAction();
 }
 
 
 //model
-ModelInstance* B9Layout::AddModel(QString filepath)
+B9ModelInstance* B9Layout::AddModel(QString filepath, bool bypassVisuals)
 {
     QSettings settings;
 
 	if(filepath.isEmpty())
 	{
 		filepath = QFileDialog::getOpenFileName(this,
-            tr("Open Model"), settings.value("WorkingDir").toString(), tr("Models (*.stl *.obj)"));
+            tr("Open Model"), settings.value("WorkingDir").toString(), tr("Models (*.stl)"));
 
 		//cancel button
 		if(filepath.isEmpty())
@@ -511,7 +794,7 @@ ModelInstance* B9Layout::AddModel(QString filepath)
 		}
 	}
 
-	ModelData* pNewModel = new ModelData(this);
+    ModelData* pNewModel = new ModelData(this,bypassVisuals);
 	
 	bool success = pNewModel->LoadIn(filepath);
 	if(!success)
@@ -527,8 +810,12 @@ ModelInstance* B9Layout::AddModel(QString filepath)
 	ModelDataList.push_back(pNewModel);
 
 	//make an Instance of the model!
-	ModelInstance* pNewInst = pNewModel->AddInstance();
+    B9ModelInstance* pNewInst = pNewModel->AddInstance();
 	project->UpdateZSpace();
+
+    //select it too
+    SelectOnly(pNewInst);
+
 	return pNewInst;
 }
 void B9Layout::RemoveAllInstances()
@@ -536,7 +823,7 @@ void B9Layout::RemoveAllInstances()
     unsigned int m;
     unsigned int i;
 
-    std::vector<ModelInstance*> allinstlist;
+    std::vector<B9ModelInstance*> allinstlist;
 	for(m=0;m<this->ModelDataList.size();m++)
 	{
 		ModelDataList[m]->loadedcount = 0;//also reset the index counter for instances!
@@ -575,7 +862,8 @@ void B9Layout::AddTagToModelList(QListWidgetItem* item)
 {
 	ui.ModelList->addItem(item);
 }
-ModelInstance* B9Layout::FindInstance(QListWidgetItem* item)
+
+B9ModelInstance* B9Layout::FindInstance(QListWidgetItem* item)
 {
     unsigned int d;
     unsigned int i;
@@ -599,7 +887,7 @@ void B9Layout::RefreshSelectionsFromList()
 	int i;
 	for(i=0;i<ui.ModelList->count();i++)
 	{
-		ModelInstance* inst = FindInstance(ui.ModelList->item(i));
+        B9ModelInstance* inst = FindInstance(ui.ModelList->item(i));
 		if(inst == NULL)
 			return;
 		
@@ -613,19 +901,19 @@ void B9Layout::RefreshSelectionsFromList()
 		}
 	}
 }
-void B9Layout::Select(ModelInstance* inst)
+void B9Layout::Select(B9ModelInstance* inst)
 {
-	qDebug() << inst << "added to selection";
+    //qDebug() << inst << "added to selection";
 	inst->SetSelected(true);
-	UpdateTranslationInterface();
+    UpdateInterface();
 }
-void B9Layout::DeSelect(ModelInstance* inst)
+void B9Layout::DeSelect(B9ModelInstance* inst)
 {
-	qDebug() << inst << "removed from selection";
+    //qDebug() << inst << "removed from selection";
 	inst->SetSelected(false);
-	UpdateTranslationInterface();
+    UpdateInterface();
 }
-void B9Layout::SelectOnly(ModelInstance* inst)
+void B9Layout::SelectOnly(B9ModelInstance* inst)
 {
 	DeSelectAll();
 	Select(inst);
@@ -644,80 +932,86 @@ void B9Layout::DeSelectAll()
 }
 void B9Layout::SetSelectionPos(double x, double y, double z, int axis)
 {
-	int i;
-	for(i=0;i<ui.ModelList->selectedItems().size();i++)
-	{
-		ModelInstance* inst = FindInstance(ui.ModelList->selectedItems()[i]);
-		if(axis==0)
-		{
-			inst->SetPos(QVector3D(x,y,z));
-		}
-		else if(axis==1)
-		{
-			inst->SetPos(QVector3D(x,inst->GetPos().y(),inst->GetPos().z()));
-		}
-		else if(axis==2)
-		{
-			inst->SetPos(QVector3D(inst->GetPos().x(),y,inst->GetPos().z()));
-		}
-		else if(axis==3)
-		{
-			inst->SetPos(QVector3D(inst->GetPos().x(),inst->GetPos().y(),z));
-		}
-	}
+    int i;
+    for(i=0;i<ui.ModelList->selectedItems().size();i++)
+    {
+        B9ModelInstance* inst = FindInstance(ui.ModelList->selectedItems()[i]);
+        if(axis==0)
+        {
+            inst->SetPos(QVector3D(x,y,z));
+        }
+        else if(axis==1)
+        {
+            inst->SetPos(QVector3D(x,inst->GetPos().y(),inst->GetPos().z()));
+        }
+        else if(axis==2)
+        {
+            inst->SetPos(QVector3D(inst->GetPos().x(),y,inst->GetPos().z()));
+        }
+        else if(axis==3)
+        {
+            inst->SetPos(QVector3D(inst->GetPos().x(),inst->GetPos().y(),z));
+        }
+    }
 }
-void B9Layout::SetSelectionRot(double x, double y, double z, int axis)
+void B9Layout::SetSelectionRot(QVector3D newRot)
 {
-	int i;
-	for(i=0;i<ui.ModelList->selectedItems().size();i++)
-	{
-		ModelInstance* inst = FindInstance(ui.ModelList->selectedItems()[i]);
-		if(axis==0)
-		{
-			inst->SetRot(QVector3D(x,y,z));
-		}
-		else if(axis==1)
-		{
-			inst->SetRot(QVector3D(x,inst->GetRot().y(),inst->GetRot().z()));
-		}
-		else if(axis==2)
-		{
-			inst->SetRot(QVector3D(inst->GetRot().x(),y,inst->GetRot().z()));
-		}
-		else if(axis==3)
-		{
-			inst->SetRot(QVector3D(inst->GetRot().x(),inst->GetRot().y(),z));
-		}
-	}
+    int i;
+    for(i=0;i<ui.ModelList->selectedItems().size();i++)
+    { 
+        B9ModelInstance* inst = FindInstance(ui.ModelList->selectedItems()[i]);
+
+        inst->SetRot(newRot);
+
+
+        /*
+        if(axis==0)
+        {
+            inst->SetRot(QVector3D(x,y,z));
+        }
+        else if(axis==1)
+        {
+            inst->SetRot(QVector3D(x,inst->GetRot().y(),inst->GetRot().z()));
+        }
+        else if(axis==2)
+        {
+            inst->SetRot(QVector3D(inst->GetRot().x(),y,inst->GetRot().z()));
+        }
+        else if(axis==3)
+        {
+            inst->SetRot(QVector3D(inst->GetRot().x(),inst->GetRot().y(),z));
+        }
+        */
+    }
 }
 void B9Layout::SetSelectionScale(double x, double y, double z, int axis)
 {
-	int i;
-	for(i=0;i<ui.ModelList->selectedItems().size();i++)
-	{
-		ModelInstance* inst = FindInstance(ui.ModelList->selectedItems()[i]);
-		if(axis==0)
-		{
-			inst->SetScale(QVector3D(x,y,z));
-		}
-		else if(axis==1)
-		{
-			inst->SetScale(QVector3D(x,inst->GetScale().y(),inst->GetScale().z()));
-		}
-		else if(axis==2)
-		{
-			inst->SetScale(QVector3D(inst->GetScale().x(),y,inst->GetScale().z()));
-		}
-		else if(axis==3)
-		{
-			inst->SetScale(QVector3D(inst->GetScale().x(),inst->GetScale().y(),z));
-		}
-	}
-}
-void B9Layout::SetSelectionFlipped(int flipped)
-{
     int i;
-    std::vector<ModelInstance*> instList = GetSelectedInstances();
+    for(i=0;i<ui.ModelList->selectedItems().size();i++)
+    {
+        B9ModelInstance* inst = FindInstance(ui.ModelList->selectedItems()[i]);
+        if(axis==0)
+        {
+            inst->SetScale(QVector3D(x,y,z));
+        }
+        else if(axis==1)
+        {
+            inst->SetScale(QVector3D(x,inst->GetScale().y(),inst->GetScale().z()));
+        }
+        else if(axis==2)
+        {
+            inst->SetScale(QVector3D(inst->GetScale().x(),y,inst->GetScale().z()));
+        }
+        else if(axis==3)
+        {
+            inst->SetScale(QVector3D(inst->GetScale().x(),inst->GetScale().y(),z));
+        }
+    }
+}
+void B9Layout::SetSelectionFlipped(bool flipped)
+{
+    unsigned int i;
+    std::vector<B9ModelInstance*> instList = GetSelectedInstances();
 
     for(i=0; i < instList.size(); i++)
     {
@@ -734,22 +1028,33 @@ void B9Layout::DropSelectionToFloor()
 	{
 		GetSelectedInstances()[i]->RestOnBuildSpace();
 	}
-    UpdateTranslationInterface();
+    UpdateInterface();
+}
+void B9Layout::ResetSelectionRotation()
+{
+    unsigned int i;
+    for(i = 0; i < GetSelectedInstances().size(); i++)
+    {
+        GetSelectedInstances()[i]->SetRot(QVector3D(0,0,0));
+        GetSelectedInstances()[i]->UpdateBounds();
+    }
+    UpdateInterface();
 }
 
 
 void B9Layout::DuplicateSelection()
 {
     unsigned int i;
-	ModelInstance* inst;
-	ModelInstance* newinst;
-	ModelInstance* compareinst;
+    B9ModelInstance* inst;
+    B9ModelInstance* newinst;
+    B9ModelInstance* compareinst;
+    B9SupportStructure* newSup;
 	bool good = true;
 	double x;
 	double y;
 	double xkeep;
 	double ykeep;
-	std::vector<ModelInstance*> sellist = GetSelectedInstances();
+    std::vector<B9ModelInstance*> sellist = GetSelectedInstances();
 	for(i=0;i<sellist.size();i++)
 	{
 		inst = sellist[i];
@@ -790,77 +1095,617 @@ void B9Layout::DuplicateSelection()
 		newinst->SetRot(inst->GetRot());
 		newinst->SetScale(inst->GetScale());
         newinst->SetFlipped(inst->GetFlipped());
-		newinst->UpdateBounds();
+        newinst->SetBounds(inst->GetMaxBound() + (newinst->GetPos() - inst->GetPos()),
+                           inst->GetMinBound() + (newinst->GetPos() - inst->GetPos()));
+        //dup supports
+        for(i = 0; i < inst->GetSupports().size(); i++)
+        {
+            newSup = newinst->AddSupport();
+            newSup->CopyFrom(inst->GetSupports()[i]);
+            newSup->SetInstanceParent(newinst);
+
+        }//and base plate
+        if(inst->GetBasePlate())
+        {
+            newinst->EnableBasePlate();
+            newinst->GetBasePlate()->CopyFrom(inst->GetBasePlate());
+            newinst->GetBasePlate()->SetInstanceParent(newinst);
+        }
+
 		SelectOnly(newinst);
-		
-		
-		
 	}
 }
-std::vector<ModelInstance*> B9Layout::GetSelectedInstances()
+
+//Upper level del action branching
+void B9Layout::DeleteSelection()//delete whatever is selected - support or instance..
 {
-	std::vector<ModelInstance*> insts;
-	int i;
-	for(i=0;i<ui.ModelList->selectedItems().size();i++)
-	{
-		insts.push_back(FindInstance(ui.ModelList->selectedItems()[i]));
-	}
-	return insts;
+    if(SupportModeInst())
+    {
+        DeleteSelectedSupports();
+    }
+    else
+    {
+        DeleteSelectedInstances();
+    }
 }
 
 void B9Layout::DeleteSelectedInstances()
 {
     unsigned int i;
-	std::vector<ModelInstance*> list = GetSelectedInstances();
+    std::vector<B9ModelInstance*> list = GetSelectedInstances();
+
+    if(SupportModeInst())
+        return;
+
 	for(i=0;i < list.size();i++)
 	{
 		delete list[i];	
 	}
 	//cleanup any unnessecary modeldata
 	CleanModelData();
-	UpdateTranslationInterface();
+    UpdateInterface();
 	project->UpdateZSpace();
 }
 
 
-//overall slicing routine
-void B9Layout::SliceWorld()
+
+//Support Mode/////////////////////////////////
+void B9Layout::SetSupportMode(bool tog)
 {
-    QSettings settings;
+    if(tog && (currInstanceInSupportMode == NULL))//go into support mode
+    {
+        qDebug() << "Entering Support Mode";
+        //make sure weve selected somthing
+        if(!GetSelectedInstances().size())
+            return;
 
-    QString filename = CROSS_OS_GetSaveFileName(this, tr("Export Slices"), settings.value("WorkingDir").toString()+ "/" + project->GetJobName(), tr("B9 Job (*.b9j);;SLC (*.slc)"));
-    if(filename.isEmpty())
-	{
-		return;
-	}
-	QString Format = QFileInfo(filename).completeSuffix();
-    if(Format.toLower() == "b9j")
-	{
-		SliceWorldToJob(filename);
-	}
-    else if(Format.toLower() == "slc")
-	{
-		SliceWorldToSlc(filename);
-	}
-	else
-	{
-		return;
-	}
 
-    settings.setValue("WorkingDir",QFileInfo(filename).absolutePath());
+        ui.TabWidget->blockSignals(true);
+            ui.TabWidget->setCurrentIndex(1);
+        ui.TabWidget->blockSignals(false);
+
+
+
+        //we can assume weve selected something...
+
+
+        currInstanceInSupportMode = GetSelectedInstances()[0];
+        currInstanceInSupportMode->SetInSupportMode(true);
+        currInstanceInSupportMode->BakeGeometry();
+        currInstanceInSupportMode->FormTriPickDispLists();
+
+        oldZoom = pWorldView->GetZoom();
+        oldPan = pWorldView->GetPan();
+        oldRot = pWorldView->GetRotation();
+        oldTool = pWorldView->GetTool();
+
+        pWorldView->SetRevolvePoint(currInstanceInSupportMode->GetPos());
+        pWorldView->SetPan(QVector3D(0,0,0));
+        pWorldView->SetZoom(100.0);
+
+
+        //set tool to support addition
+        SetToolSupportAdd();
+
+        FillSupportList();//refresh the list gui.
+    }
+    else if(!tog && (currInstanceInSupportMode != NULL))
+    {
+        qDebug() << "Exiting Support Mode";
+
+        ui.TabWidget->blockSignals(true);
+            ui.TabWidget->setCurrentIndex(0);
+        ui.TabWidget->blockSignals(false);
+
+        if(currInstanceInSupportMode != NULL)
+        {
+            currInstanceInSupportMode->SetInSupportMode(false);
+            currInstanceInSupportMode->FreeTriPickDispLists();
+            currInstanceInSupportMode->UnBakeGeometry();
+            currInstanceInSupportMode->SetPos(currInstanceInSupportMode->GetPos());//nudge to fix supports
+            currInstanceInSupportMode = NULL;
+        }
+        pWorldView->SetRevolvePoint(QVector3D(0,0,0));
+        pWorldView->SetPan(oldPan);
+        pWorldView->SetZoom(oldZoom);
+        SetTool(oldTool);
+
+        //pWorldView->setXRotation(oldRot.x());
+        //pWorldView->setYRotation(oldRot.y());
+        //pWorldView->setZRotation(oldRot.z());
+
+    }
+    //if entering or leaving we always deselect all supports
+    DeSelectAllSupports();
+
+    UpdateInterface();
+}
+
+void B9Layout::FillSupportList()
+{
+    unsigned int s;
+    ui.SupportList->clear();
+    std::vector<B9SupportStructure*> supList;
+
+    if(!SupportModeInst())
+        return;
+
+    supList = SupportModeInst()->GetSupports();
+
+
+    ui.SupportList->blockSignals(true);
+    for(s = 0; s < supList.size(); s++)
+    {
+        ui.SupportList->addItem("Support " + QString::number(supList[s]->SupportNumber));
+    }
+    ui.SupportList->blockSignals(false);
+}
+
+B9SupportStructure* B9Layout::FindSupportByName(QString name)
+{
+    unsigned int s;
+    unsigned int searchNum = name.remove("Support ").toInt();
+    std::vector<B9SupportStructure*> supList;
+
+    if(!currInstanceInSupportMode)
+    {
+        qDebug() << "WARNING: finding support out of support mode";
+         return NULL;
+    }
+
+    supList = currInstanceInSupportMode->GetSupports();
+
+    for(s = 0; s < supList.size(); s++)
+    {
+        if(searchNum == supList[s]->SupportNumber)
+        {
+            return supList[s];
+        }
+    }
+    return NULL;
+}
+
+
+void B9Layout::RefreshSupportSelectionsFromList()
+{
+    int l;
+
+
+    for(l = 0; l < ui.SupportList->count(); l++)
+    {
+        B9SupportStructure* sup = FindSupportByName(ui.SupportList->item(l)->text());
+        if(sup == NULL)
+        {
+            qDebug() << "Warning - RefreshSupportSelectionsFromList couldnt match with real support";
+            return;
+        }
+
+        if(!ui.SupportList->item(l)->isSelected())
+        {
+            DeSelectSupport(sup);
+        }
+        else if(ui.SupportList->item(l)->isSelected())
+        {
+            SelectSupport(sup);
+        }
+    }
+}
+
+
+
+B9ModelInstance* B9Layout::SupportModeInst()
+{
+    return currInstanceInSupportMode;
+}
+
+void B9Layout::SelectSupport(B9SupportStructure* sup)
+{
+    //first see if the support is already selected, we dont want duplicates.
+    int i;
+    for(i = 0; i < currSelectedSupports.size(); i++)
+    {
+        if(sup == currSelectedSupports[i])
+            return;
+    }
+
+    //qDebug() << "Support: "<< sup << " added to selection";
+    sup->SetSelected(true);
+    currSelectedSupports.push_back(sup);
+
+    UpdateInterface();
+}
+
+std::vector<B9SupportStructure*>* B9Layout::GetSelectedSupports()
+{
+    return &currSelectedSupports;
+}
+
+bool B9Layout::IsSupportSelected(B9SupportStructure* sup)
+{
+    unsigned int i;
+    for(i = 0; i < currSelectedSupports.size(); i++)
+    {
+        if(currSelectedSupports[i] == sup)
+            return true;
+    }
+
+    return false;
+}
+
+void B9Layout::DeSelectSupport(B9SupportStructure* sup)
+{
+    unsigned int s;
+    std::vector<B9SupportStructure*> keepers;
+
+    for(s = 0; s < currSelectedSupports.size(); s++)
+    {
+        if(currSelectedSupports[s] == sup)
+        {
+            //qDebug() << "Support: " << sup << " removed from selection";
+            sup->SetSelected(false);
+        }
+        else
+            keepers.push_back(currSelectedSupports[s]);
+    }
+    currSelectedSupports.clear();
+    currSelectedSupports = keepers;
+
+    UpdateInterface();
+}
+
+void B9Layout::DeSelectAllSupports()
+{
+    //qDebug() << "De-Selecting All Supports, selection list size: " << currSelectedSupports.size();
+    while(currSelectedSupports.size())
+    {
+        DeSelectSupport(currSelectedSupports[0]);
+    }
+
+}
+
+
+void B9Layout::DeleteSelectedSupports()//called from remove button.
+{
+    unsigned int s;
+    if(!SupportModeInst())
+        return;
+
+    for(s = 0; s < currSelectedSupports.size(); s++)
+    {
+        SupportModeInst()->RemoveSupport(currSelectedSupports[s]);
+    }
+    currSelectedSupports.clear();
+
+    FillSupportList();
+
+    UpdateInterface();
+}
+
+void B9Layout::DeleteSupport(B9SupportStructure* pSup)
+{
+    if(SupportModeInst() != NULL)
+    {
+        if(IsSupportSelected(pSup))
+            DeSelectSupport(pSup);
+
+        SupportModeInst()->RemoveSupport(pSup);
+    }
+
+    FillSupportList();
+
+    UpdateInterface();
+}
+
+void B9Layout::MakeSelectedSupportsVertical()
+{
+    unsigned int i;
+    B9SupportStructure* pSup;
+
+    if(SupportModeInst() == NULL)
+        return;
+
+    for(i = 0; i < currSelectedSupports.size(); i++)
+    {
+        pSup = currSelectedSupports[i];
+        pSup->SetBottomPoint(QVector3D(pSup->GetTopPivot().x(),
+                                       pSup->GetTopPivot().y(),
+                                       pSup->GetBottomPoint().z()));
+
+    }
+
+}
+
+void B9Layout::OnSupportPropertiesChanged()//called when something changes in support properties.
+{
+    unsigned int i;
+    B9SupportStructure* selSup = NULL;
+
+    for(i = 0; i < currSelectedSupports.size(); i++)
+    {
+        selSup = currSelectedSupports[i];
+
+        selSup->SetTopAttachShape(ui.Support_Top_AttachType_comboBox->currentText());
+        selSup->SetMidAttachShape(ui.Support_Mid_AttachType_comboBox->currentText());
+        selSup->SetBottomAttachShape(ui.Support_Bottom_AttachType_comboBox->currentText());
+
+        selSup->SetTopRadius(ui.Support_Top_Radius_lineEdit->text().toDouble());
+        selSup->SetMidRadius(ui.Support_Mid_Radius_lineEdit->text().toDouble());
+        selSup->SetBottomRadius(ui.Support_Bottom_Radius_lineEdit->text().toDouble());
+
+        selSup->SetTopLength(ui.Support_Top_Length_lineEdit->text().toDouble());
+        selSup->SetBottomLength(ui.Support_Bottom_Length_lineEdit->text().toDouble());
+
+        selSup->SetTopAngleFactor(ui.Support_Top_AngleFactor_horizontalSlider->value()*0.01);
+        selSup->SetBottomAngleFactor(ui.Support_Bottom_AngleFactor_horizontalSlider->value()*0.01);
+
+        selSup->SetTopPenetration(ui.Support_Top_Penetration_horizontalSlider->value()*0.01);
+        selSup->SetBottomPenetration(ui.Support_Bottom_Penetration_horizontalSlider->value()*0.01);
+
+
+
+    }
+
+    //the user has changed what the default support properties should be lets
+    //write them to the registry.
+    if(selSup)
+        WriteSupportPropertiesToRegistry(selSup);
+
+
+
+
+    UpdateInterface();
+}
+
+//Base Plate creation and destruction is handled here in addition to other base plate properties.
+void B9Layout::OnBasePlatePropertiesChanged()
+{
+    B9SupportStructure* basePlate;
+    int sliderPercent;
+    double instRad;
+    double actualRad;
+
+    if(SupportModeInst() == NULL)
+        return;
+
+
+    basePlate = SupportModeInst()->GetBasePlate();
+
+    //Creation/Destruction
+    if(ui.Support_Base_Enabled_checkBox->isChecked() && (basePlate == NULL))
+    {
+        SupportModeInst()->EnableBasePlate();
+    }
+
+    if(!ui.Support_Base_Enabled_checkBox->isChecked() && (basePlate != NULL))
+    {
+        SupportModeInst()->DisableBasePlate();
+    }
+
+    //check again
+    basePlate = SupportModeInst()->GetBasePlate();
+
+    if(basePlate != NULL)
+    {
+        basePlate->SetBottomAttachShape(ui.Support_Base_AttachType_comboBox->currentText());
+        sliderPercent = ui.Support_Base_Coverage_horizontalSlider->value();
+        instRad = QVector2D(SupportModeInst()->GetMaxBound() - SupportModeInst()->GetMinBound()).length();
+
+        instRad = instRad*0.5;
+        actualRad = instRad*sliderPercent*0.01;
+        basePlate->SetBottomRadius(actualRad);
+
+        basePlate->SetBottomLength(ui.Support_Base_Length_lineEdit->text().toDouble());
+    }
+
+    UpdateInterface();
+}
+
+
+
+
+//called when selection changes primarily
+void B9Layout::PushSupportProperties()
+{
+   B9SupportStructure* selSup;
+   int indx;
+
+   if(!currSelectedSupports.size())
+    return;
+
+   selSup = currSelectedSupports[0];//TODO determine common properties and use those to fill
+                                    //gui, instead of just the first support
+
+   ui.Support_Top_Radius_lineEdit->setText(QString::number(selSup->GetTopRadius()));
+   ui.Support_Mid_Radius_lineEdit->setText(QString::number(selSup->GetMidRadius()));
+   ui.Support_Bottom_Radius_lineEdit->setText(QString::number(selSup->GetBottomRadius()));
+
+   ui.Support_Top_Length_lineEdit->setText(QString::number(selSup->GetTopLength()));
+   ui.Support_Mid_Length_lineEdit->setText(QString::number(selSup->GetMidLength()));
+   ui.Support_Bottom_Length_lineEdit->setText(QString::number(selSup->GetBottomLength()));
+
+   ui.Support_Top_AngleFactor_label->setText(QString::number(selSup->GetTopAngleFactor()*100.0).append("%"));
+   ui.Support_Bottom_AngleFactor_label->setText(QString::number(selSup->GetBottomAngleFactor()*100.0).append("%"));
+
+   ui.Support_Top_Penetration_label->setText(QString::number(selSup->GetTopPenetration()*100.0).append("um"));
+   ui.Support_Bottom_Penetration_label->setText(QString::number(selSup->GetBottomPenetration()*100.0).append("um"));
+
+   indx = ui.Support_Top_AttachType_comboBox->findText(selSup->GetTopAttachShape());
+   ui.Support_Top_AttachType_comboBox->blockSignals(true);
+    ui.Support_Top_AttachType_comboBox->setCurrentIndex(indx);
+   ui.Support_Top_AttachType_comboBox->blockSignals(false);
+
+   indx = ui.Support_Mid_AttachType_comboBox->findText(selSup->GetMidAttachShape());
+   ui.Support_Mid_AttachType_comboBox->blockSignals(true);
+    ui.Support_Mid_AttachType_comboBox->setCurrentIndex(indx);
+   ui.Support_Mid_AttachType_comboBox->blockSignals(false);
+
+   indx = ui.Support_Bottom_AttachType_comboBox->findText(selSup->GetBottomAttachShape());
+   ui.Support_Bottom_AttachType_comboBox->blockSignals(true);
+    ui.Support_Bottom_AttachType_comboBox->setCurrentIndex(indx);
+   ui.Support_Bottom_AttachType_comboBox->blockSignals(false);
+
+   //Angle Factor GUIs
+   ui.Support_Top_AngleFactor_horizontalSlider->blockSignals(true);
+    ui.Support_Top_AngleFactor_horizontalSlider->setValue(selSup->GetTopAngleFactor()*100.0);
+   ui.Support_Top_AngleFactor_horizontalSlider->blockSignals(false);
+   ui.Support_Bottom_AngleFactor_horizontalSlider->blockSignals(true);
+    ui.Support_Bottom_AngleFactor_horizontalSlider->setValue(selSup->GetBottomAngleFactor()*100.0);
+   ui.Support_Bottom_AngleFactor_horizontalSlider->blockSignals(false);
+
+   //Penetration GUIs
+   ui.Support_Top_Penetration_horizontalSlider->blockSignals(true);
+    ui.Support_Top_Penetration_horizontalSlider->setValue(selSup->GetTopPenetration()*100.0);
+   ui.Support_Top_Penetration_horizontalSlider->blockSignals(false);
+   ui.Support_Bottom_Penetration_horizontalSlider->blockSignals(true);
+    ui.Support_Bottom_Penetration_horizontalSlider->setValue(selSup->GetBottomPenetration()*100.0);
+   ui.Support_Bottom_Penetration_horizontalSlider->blockSignals(false);
+
 
 
 }
 
-//slicing to a job file!
-void B9Layout::SliceWorldToJob(QString filename)
+void B9Layout::PushBasePlateProperties()
 {
+    B9SupportStructure* basePlate = SupportModeInst()->GetBasePlate();
+    int indx;
 
+    if(basePlate == NULL)
+    {
+        ui.Support_Base_AttachType_comboBox->setEnabled(false);
+        ui.Support_Base_Coverage_horizontalSlider->setEnabled(false);
+        ui.Support_Base_Length_lineEdit->setEnabled(false);
+        ui.Support_Base_Enabled_checkBox->blockSignals(true);
+            ui.Support_Base_Enabled_checkBox->setChecked(false);
+        ui.Support_Base_Enabled_checkBox->blockSignals(false);
+    }
+    else
+    {
+        ui.Support_Base_AttachType_comboBox->setEnabled(true);
+        ui.Support_Base_Coverage_horizontalSlider->setEnabled(true);
+        ui.Support_Base_Length_lineEdit->setEnabled(true);
+        ui.Support_Base_Enabled_checkBox->blockSignals(true);
+            ui.Support_Base_Enabled_checkBox->setChecked(true);
+        ui.Support_Base_Enabled_checkBox->blockSignals(false);
+
+        indx = ui.Support_Base_AttachType_comboBox->findText(basePlate->GetBottomAttachShape());
+        ui.Support_Base_Coverage_label->setText(QString::number(ui.Support_Base_Coverage_horizontalSlider->value()) + QString("%"));
+        ui.Support_Base_AttachType_comboBox->setCurrentIndex(indx);
+        ui.Support_Base_Length_lineEdit->setText(QString::number(basePlate->GetBottomLength()));
+    }
+}
+
+//write relevent support parameters (based on the given support)
+//to the registry.
+void B9Layout::WriteSupportPropertiesToRegistry(B9SupportStructure* sup)
+{
+    QSettings appSettings;
+    appSettings.beginGroup("USERSUPPORTPARAMS");
+        appSettings.beginGroup("SUPPORT_TOP");
+            appSettings.setValue("ATTACHSHAPE",sup->GetTopAttachShape());
+            appSettings.setValue("ANGLEFACTOR",sup->GetTopAngleFactor());
+            appSettings.setValue("LENGTH",sup->GetTopLength());
+            appSettings.setValue("PENETRATION",sup->GetTopPenetration());
+            appSettings.setValue("RADIUS",sup->GetTopRadius());
+
+        appSettings.endGroup();
+        appSettings.beginGroup("SUPPORT_MID");
+            appSettings.setValue("ATTACHSHAPE",sup->GetMidAttachShape());
+            appSettings.setValue("RADIUS",sup->GetMidRadius());
+
+        appSettings.endGroup();
+        appSettings.beginGroup("SUPPORT_BOTTOM_GROUNDED");
+        if(sup->GetIsGrounded())
+        {
+            appSettings.setValue("ATTACHSHAPE",sup->GetBottomAttachShape());
+            appSettings.setValue("ANGLEFACTOR",sup->GetBottomAngleFactor());
+            appSettings.setValue("LENGTH",sup->GetBottomLength());
+            appSettings.setValue("PENETRATION",sup->GetBottomPenetration());
+            appSettings.setValue("RADIUS",sup->GetBottomRadius());
+        }
+        appSettings.endGroup();
+        appSettings.beginGroup("SUPPORT_BOTTOM_NONGROUNDED");
+        if(!sup->GetIsGrounded())
+        {
+            appSettings.setValue("ATTACHSHAPE",sup->GetBottomAttachShape());
+            appSettings.setValue("ANGLEFACTOR",sup->GetBottomAngleFactor());
+            appSettings.setValue("LENGTH",sup->GetBottomLength());
+            appSettings.setValue("PENETRATION",sup->GetBottomPenetration());
+            appSettings.setValue("RADIUS",sup->GetBottomRadius());
+        }
+        appSettings.endGroup();
+    appSettings.endGroup();
+}
+
+
+void B9Layout::ResetSupportDefaults()//connected to push button
+{
+    B9SupportStructure::FillRegistryDefaults(true);
+
+}
+
+
+
+
+
+
+
+//overall slicing routine, returns success.
+bool B9Layout::SliceWorld()
+{
+    QSettings settings;
+
+    QString filename = CROSS_OS_GetSaveFileName(this, tr("Export Slices"),
+                                                settings.value("WorkingDir").toString() + "/" + ProjectData()->GetJobName(),
+                                                tr("B9 Job (*.b9j);;SLC (*.slc)"));
+
+    if(filename.isEmpty())//cancell button
+	{
+        return false;
+	}
+
+    QString Format = QFileInfo(filename).completeSuffix();
+    settings.setValue("WorkingDir",QFileInfo(filename).absolutePath());
+
+    if(Format.toLower() == "b9j")
+	{
+        if(SliceWorldToJob(filename))
+        {
+             QMessageBox::information(0,"Finished","Slicing Completed\n\nAll layers sliced and job file saved.");
+             return true;
+        }
+        else
+        {
+            QMessageBox::information(0,"Canceled","Slicing Canceled\n\nnothing was saved.");
+            return false;
+        }
+	}
+    else if(Format.toLower() == "slc")
+	{
+        if(SliceWorldToSlc(filename))
+        {
+            QMessageBox::information(0,"Finished","Slicing Completed\n\nAll layers sliced and slc file saved.");
+            return true;
+
+        }
+        else
+        {
+            QMessageBox::information(0,"Cancelled","Slicing Cancelled\n\nnothing was saved.");
+            return false;
+        }
+	}
+
+    return false;
+}
+
+//slicing to a job file!
+bool B9Layout::SliceWorldToJob(QString filename)
+{
     unsigned int m;
     unsigned int i;
     unsigned int l;
     unsigned int numlayers;
-	int nummodels = 0;
+    int nummodels = 0;
+    B9ModelInstance* pInst;
 	double zhieght = project->GetBuildSpace().z();
 	double thickness = project->GetPixelThickness()*0.001;
 	int xsize = project->GetResolution().x();
@@ -870,28 +1715,28 @@ void B9Layout::SliceWorldToJob(QString filename)
 	int x;
 	int y;
 	QRgb pickedcolor;
-	QRgb mastercolor;
 	QPixmap pix;
     QImage img(xsize,ysize, QImage::Format_ARGB32_Premultiplied);
     QImage imgfrommaster(xsize,ysize, QImage::Format_ARGB32_Premultiplied);
 	CrushedPrintJob* pMasterJob = NULL;
+    QPainter painter;
 
-
-	
 	//calculate how many layers we need
 	numlayers = qCeil(zhieght/thickness);
+
 	//calculate how many models there are
 	for(m=0;m<ModelDataList.size();m++)
 	{
 		for(i=0;i<ModelDataList[m]->instList.size();i++)
 		{
+            pInst = ModelDataList[m]->instList[i];
 			nummodels++;
 		}
-	}
+    }
 	//make a loading bar
-	LoadingBar progressbar(0, numlayers, this);
+    LoadingBar progressbar(0, numlayers);
 	QObject::connect(&progressbar,SIGNAL(rejected()),this,SLOT(CancelSlicing()));
-    progressbar.setDescription("Processing Layout..");
+    progressbar.setDescription("Processing Layout...");
 	progressbar.setValue(0);
 	QApplication::processEvents();
 
@@ -907,23 +1752,23 @@ void B9Layout::SliceWorldToJob(QString filename)
 	pMasterJob->setZLayer(QString().number(project->GetPixelThickness()/1000));
 	
 
-
     pMasterJob->clearAll(numlayers);//fills the master job with the needed layers
 
     progressbar.setDescription("Slicing Layout..");
-	progressbar.setMax(numlayers*nummodels);
+    progressbar.setMax(numlayers*nummodels);
 	progressbar.setValue(0);
     //FOR Each Model Instance
 	for(m=0;m<ModelDataList.size();m++)
     {
 		for(i=0;i<ModelDataList[m]->instList.size();i++)
 		{
-			ModelInstance* inst = ModelDataList[m]->instList[i];
-			inst->BakeGeometry();
-			
+            B9ModelInstance* inst = ModelDataList[m]->instList[i];
+            inst->PrepareForSlicing(thickness);
+
 			//slice all layers and add to instance's job file
 			for(l = 0; l < numlayers; l++)
-			{
+            {
+
                 //if we are in the model's z - bounds
                 if((double)l*thickness <= inst->GetMaxBound().z() && (double)l*thickness >= inst->GetMinBound().z()-0.5*thickness)
                 {
@@ -935,7 +1780,7 @@ void B9Layout::SliceWorldToJob(QString filename)
 					pix = paintwidget.renderPixmap(xsize,ysize);
 					img = pix.toImage();
 					
-				
+
 					for(x = 0; x < xsize; x++)
 					{
 						for(y = 0; y < ysize; y++)
@@ -947,50 +1792,46 @@ void B9Layout::SliceWorldToJob(QString filename)
 								if(result > 0)
 								{
 									result = 255;
-								}
+                                }else result = 0;
                                 img.setPixel(x,y,QColor(result,0,0,result).rgba());
 							}
 						}
 					}
-					
 					QApplication::processEvents();
                     imgfrommaster.fill(Qt::black);
-					pMasterJob->setCurrentSlice(l);
-					pMasterJob->inflateCurrentSlice(&imgfrommaster);
+                    pMasterJob->setCurrentSlice(l);
+
+                    pMasterJob->inflateCurrentSlice(&imgfrommaster);
                     if(imgfrommaster.size() == QSize(0,0))
                     {
                         imgfrommaster = QImage(xsize,ysize,QImage::Format_ARGB32_Premultiplied);
                         imgfrommaster.fill(Qt::black);
                     }
-					for(x = 0; x < xsize; x++)
-					{
-						for(y = 0; y < ysize; y++)
-						{
-							pickedcolor = img.pixel(x,y);
-							mastercolor = imgfrommaster.pixel(x,y); 
-							if(qRed(pickedcolor) || qRed(mastercolor))
-							{
-                                imgfrommaster.setPixel(x,y,QColor(255,255,255).rgb());
-							}
-						}
-                    }
-                    pMasterJob->crushCurrentSlice(&imgfrommaster);
-					QApplication::processEvents();
+                    //combine img with masterimage;
+                    painter.begin(&imgfrommaster);
+                    painter.setCompositionMode(QPainter::CompositionMode_Plus);
+                    painter.setRenderHint(QPainter::Antialiasing,false);
+                    painter.drawImage(0,0,img);
+                    painter.end();
 
-					//update progress bar
-					progressbar.setValue(progressbar.GetValue() + 1);
-				
-					if(cancelslicing)
-					{
-						cancelslicing = false;
-						delete pMasterJob;
-						pWorldView->makeCurrent();
-						inst->UnBakeGeometry();
-						return;
-					}
-				}
+                    pMasterJob->crushCurrentSlice(&imgfrommaster);
+
+                }
+                //update progress bar
+                progressbar.setValue(progressbar.GetValue() + 1);
+                QApplication::processEvents();//except user input
+                if(cancelslicing)
+                {
+                    cancelslicing = false;
+                    delete pMasterJob;
+                    pMasterJob = NULL;
+                    pWorldView->makeCurrent();
+                    inst->FreeFromSlicing();
+                    return false;
+                }
+
 			}
-			inst->UnBakeGeometry();
+            inst->FreeFromSlicing();
 		}
 	}
 	
@@ -1004,10 +1845,12 @@ void B9Layout::SliceWorldToJob(QString filename)
 	pWorldView->makeCurrent();
 
 	cancelslicing = false;
+
+    return true;
 }
 
 //slicing to a slc file!
-void B9Layout::SliceWorldToSlc(QString filename)
+bool B9Layout::SliceWorldToSlc(QString filename)
 {
     unsigned int m;
     unsigned int i;
@@ -1030,7 +1873,7 @@ void B9Layout::SliceWorldToSlc(QString filename)
 	}
 	
 	//make a loading bar
-	LoadingBar progressbar(0, numlayers*nummodels, this);
+    LoadingBar progressbar(0, numlayers*nummodels);
 	QObject::connect(&progressbar,SIGNAL(rejected()),this,SLOT(CancelSlicing()));
 	progressbar.setDescription("Exporting SLC..");
 	progressbar.setValue(0);
@@ -1057,8 +1900,9 @@ void B9Layout::SliceWorldToSlc(QString filename)
 	{
 		for(i=0;i<ModelDataList[m]->instList.size();i++)
 		{
-			ModelInstance* inst = ModelDataList[m]->instList[i];
-			inst->BakeGeometry();
+            B9ModelInstance* inst = ModelDataList[m]->instList[i];
+            inst->PrepareForSlicing(thickness);
+
 			//slice all layers and add to instance's job file
 			for(l = 0; l < numlayers; l++)
 			{
@@ -1077,17 +1921,18 @@ void B9Layout::SliceWorldToSlc(QString filename)
 				if(cancelslicing)
 				{
 						cancelslicing = false;
-						inst->UnBakeGeometry();
-						return;
+                        inst->FreeFromSlicing();
+                        return false;
 				}
 
 			}
-			inst->UnBakeGeometry();
+            inst->FreeFromSlicing();
 		}
 	}
 
 	slc.WriteNewSlice(0.0,0xFFFFFFFF);
 	//slc falls out of scope (automatically closes the file.)
+    return true;
 }
 
 
@@ -1095,6 +1940,79 @@ void B9Layout::CancelSlicing()
 {
 	cancelslicing = true;
 }
+
+
+//exporting
+void B9Layout::PromptExportToSTL()
+{
+    QString filename;
+    QSettings settings;
+    filename = CROSS_OS_GetSaveFileName(this, tr("Export To STL"),
+                                        settings.value("WorkingDir").toString() + "/" + ProjectData()->GetFileName(),
+                                        tr("stl (*.stl)"));
+
+    if(filename.isEmpty())
+        return;
+
+    if(ExportToSTL(filename))
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Stl Export Complete");
+        msgBox.exec();
+    }
+    else
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("Unable To Export stl File");
+        msgBox.exec();
+    }
+}
+
+ bool B9Layout::ExportToSTL(QString filename)
+ {
+     unsigned int i;
+     unsigned long int t;
+     B9ModelInstance* pInst = NULL;
+     Triangle3D* pTri = NULL;
+     bool fileOpened;
+
+     B9ModelWriter exporter(filename, fileOpened);
+
+
+     if(!fileOpened)
+         return false;
+
+     SetSupportMode(false);
+
+     for(i = 0; i < GetAllInstances().size(); i++)
+     {
+         pInst = GetAllInstances().at(i);
+         pInst->BakeGeometry(true);
+
+         for(t = 0; t < pInst->triList.size(); t++)
+         {
+             pTri = pInst->triList[t];
+             exporter.WriteNextTri(pTri);
+         }
+
+         pInst->UnBakeGeometry();
+     }
+
+     exporter.Finalize();
+
+
+
+     return true;
+ }
+
+
+
+
+
+
+
+
 //////////////////////////////////////////////////////
 //Private
 //////////////////////////////////////////////////////
@@ -1105,12 +2023,30 @@ void B9Layout::CancelSlicing()
 ///////////////////////////////////////////////////
 void B9Layout::keyPressEvent(QKeyEvent * event )
 {
+    if(event->key() == Qt::Key_Escape)
+    {
+        SetSupportMode(false);
+    }
+
+    pWorldView->keyPressEvent(event);
 
 }
 void B9Layout::keyReleaseEvent(QKeyEvent * event )
 {
+    pWorldView->keyReleaseEvent(event);
 
 }
+void B9Layout::mousePressEvent(QMouseEvent *event)
+{
+    //pWorldView->mousePressEvent(event);
+    event->accept();
+}
+void B9Layout::mouseReleaseEvent(QMouseEvent *event)
+{
+    //pWorldView->mouseReleaseEvent(event);
+    event->accept();
+}
+
 void B9Layout::hideEvent(QHideEvent *event)
 {
     emit eventHiding();
@@ -1124,7 +2060,7 @@ void B9Layout::showEvent(QShowEvent *event)
 {
 
     pWorldView->pDrawTimer->start();
-
+    showMaximized();
     event->accept();
 }
 
@@ -1168,14 +2104,13 @@ void B9Layout::closeEvent ( QCloseEvent * event )
 void B9Layout::contextMenuEvent(QContextMenuEvent *event)
 {
     /*
-    QMenu menu(this);
-    menu.addAction(ui.actionDelete);
-    menu.addAction(ui.actionDrop_To_Floor);
-    menu.addSeparator();
-    menu.addAction(ui.actionMove);
-    menu.addAction(ui.actionRotate);
-    menu.addAction(ui.actionScale);
+        QMenu menu(this);
+        menu.addAction(ui.actionDelete);
+        menu.addAction(ui.actionDrop_To_Floor);
+        menu.addSeparator();
+        menu.addAction(ui.actionMove);
+        menu.addAction(ui.actionScale);
 
-    menu.exec(event->globalPos());
+        menu.exec(event->globalPos());
     */
 }

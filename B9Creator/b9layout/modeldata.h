@@ -42,18 +42,18 @@
 #include "b9layout.h"
 #include "triangle3d.h"
 
-#include "modelinstance.h"
+#include "b9modelinstance.h"
 
 
 #include <vector>
-
+class B9Layout;
 class aiScene;
 class ModelData {
 
-    friend class ModelInstance;
+    friend class B9ModelInstance;
 
 public:
-    ModelData(B9Layout* main);
+    ModelData(B9Layout* main, bool bypassDisplayLists = false);
 	~ModelData();
 	
 	QString GetFilePath();
@@ -63,20 +63,29 @@ public:
 	bool LoadIn(QString filepath); //returns success
 	
 	//instance
-	ModelInstance* AddInstance();
+	B9ModelInstance* AddInstance();
 	int loadedcount;
 
 
 	//render
-	unsigned int displaylistindx;
-    unsigned int displaylistflippedindx;
+    // the model can potentially own
+    // multiply display lists, allowing
+    // the graphics driver to better allocate
+    // the memory needed for very large models.
+    // these flipped  lists are generated when needed.
+    // -Form functions are recursive
+    std::vector<unsigned int> normDispLists;
+    std::vector<unsigned int> flippedDispLists;
 
-	//geometry
+    bool FormFlippedDisplayLists();
+    bool FormNormalDisplayLists();
+
+    //geometry
     std::vector<Triangle3D> triList;
 	QVector3D maxbound;
 	QVector3D minbound;
 
-	std::vector<ModelInstance*> instList;
+	std::vector<B9ModelInstance*> instList;
     B9Layout* pMain;
 private:
 	
@@ -91,7 +100,11 @@ private:
 	const aiScene* pScene;
 
 	//render
-    int FormDisplayList();
+
+    int displaySkipping; //how many triangles to skip when rendering huge objects.
+    bool bypassDispLists;
 	
+    int GetGLError();
+
 };
 #endif

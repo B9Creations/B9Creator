@@ -53,6 +53,10 @@
 #include "dlgprintprep.h"
 
 
+class b9PrinterModelManager;
+class B9UpdateManager;
+
+
 namespace Ui {
 class MainWindow;
 }
@@ -70,6 +74,9 @@ public slots:
     void handleW2Hide();
     void handleW3Hide();
     void handleW4Hide();
+
+
+    void CheckForUpdates();
 
     void showLogAndExit();
     void showTerminal();
@@ -89,12 +96,13 @@ private slots:
     void doPrint();
 
 private:
+
     void closeEvent ( QCloseEvent * event );
     Ui::MainWindow *ui;
     LogFileManager *pLogManager;
     bool m_bOpenLogOnExit;
     HelpSystem m_HelpSystem;
-
+    B9UpdateManager *m_pUpdateManager;
     QSplashScreen * m_pSplash;
     B9Layout *pMW1;
     B9Slice *pMW2;
@@ -103,6 +111,7 @@ private:
     CrushedPrintJob *m_pCPJ;
     B9Terminal *pTerminal;
     DlgPrintPrep* m_pPrintPrep;
+    b9PrinterModelManager* pPrinterModelManager;
 };
 
 #endif // MAINWINDOW_H

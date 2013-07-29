@@ -62,13 +62,20 @@ public:
 
 	bool CorrectPointOrder();//swaps endpoints to match the normal vector convention
 
-
-
 	Segment();
 	Segment(QVector2D point1, QVector2D point2);
 
 	void FormNormal();
 	bool chucked;
+
+    //for sorting
+    static bool lessthanX(Segment* i,Segment* j)
+    {
+        return (i->p1.x() < j->p1.x());
+    }
+
+
+
 private:
 
 

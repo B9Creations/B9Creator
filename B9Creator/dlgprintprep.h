@@ -50,11 +50,11 @@ class DlgPrintPrep;
 class DlgPrintPrep : public QDialog
 {
     Q_OBJECT
-    
+
 public:
     explicit DlgPrintPrep(CrushedPrintJob* pCPJ, B9Terminal* pTerminal, QWidget *parent = 0);
     ~DlgPrintPrep();
-    
+
 private slots:
     void on_comboBoxMaterial_currentIndexChanged(const QString &arg1);
 

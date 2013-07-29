@@ -223,7 +223,7 @@ void B9Edit::saveJobAs()
     QString saveFile;
 
     saveFile = CROSS_OS_GetSaveFileName(this,"Save B9 Job",settings.value("WorkingDir").toString() + "//" + sName,
-                                        tr("B9 Job Files (*.b9j);;All files(*.*)"));
+                                        tr("B9 Job Files (*.b9j);;All files(*.*)"),QStringList() << "b9j");
 
 
 
@@ -307,7 +307,7 @@ void B9Edit::importSlicesFromFirstFile(QString firstfile)
 	}
 
 	//make a new instance of the loadingbar.
-	LoadingBar load(0,endingnumber,this);
+    LoadingBar load(0,endingnumber);
 	load.setDescription("Importing Images...");
 	QObject::connect(&load,SIGNAL(rejected()),this,SLOT(CancelLoading()));
 	
@@ -474,7 +474,7 @@ void B9Edit::importSlicesFromSvg(QString file, double pixelsizemicrons)
     emit setName(cPJ.getName());
 
 	//make a new instance of the loadingbar.
-	LoadingBar load(0,layers,this);
+    LoadingBar load(0,layers);
 	load.setDescription("Importing SVG...");
 	QObject::connect(&load,SIGNAL(rejected()),this,SLOT(CancelLoading()));
 
@@ -709,7 +709,7 @@ void B9Edit::importSlicesFromSlc(QString file, double pixelsizemicrons)
     numboundries = 0;
 
     //make a new instance of the loadingbar.
-    LoadingBar load(0,numslices,this);
+    LoadingBar load(0,numslices);
     load.setDescription("Importing SLC..");
     QObject::connect(&load,SIGNAL(rejected()),this,SLOT(CancelLoading()));
 
@@ -932,7 +932,7 @@ void B9Edit::ExportToFolder()
 
 
 	//progress bar
-	LoadingBar bar(0,cPJ.getTotalLayers() - 1,NULL);
+    LoadingBar bar(0,cPJ.getTotalLayers() - 1);
 	QObject::connect(&bar,SIGNAL(rejected()),this,SLOT(CancelLoading()));
 
 
@@ -972,7 +972,7 @@ QString B9Edit::GetDir()
     if(settings.value("WorkingDir").toString() == "")
     {
         QDir currdir = QCoreApplication::applicationDirPath();
-        #ifdef Q_WS_MAC
+        #ifdef Q_OS_MAC
              if(currdir.dirName() == "MacOS")
              {
                  currdir.cdUp();
@@ -980,7 +980,7 @@ QString B9Edit::GetDir()
                  currdir.cdUp();
              }
         #endif
-        #ifdef Q_WS_WIN
+        #ifdef Q_OS_WIN
              currdir = QDir::home();
         #endif
         settings.setValue("WorkingDir", currdir.absolutePath());
@@ -1069,71 +1069,16 @@ void B9Edit::SetDirty()
 	 updateWindowTitle();
 }
 
-//aboutbox
-void B9Edit::ShowAboutBox()
-{
-    // load in the readme.rtf from the app directory
-    QString exedir = QCoreApplication::applicationDirPath();
-    QDir::setCurrent(exedir);
-
-    #ifdef Q_WS_MAC
-        exedir.remove("MacOS");
-        exedir.append("Resources");
-        QDir::setCurrent(exedir);
-        qDebug() << exedir;
-    #endif
-
-    QFile file("readme.htm");
-
-    if(!file.open(QIODevice::ReadOnly))
-    {
-        QMessageBox msgBox;
-        msgBox.setText("Unable To Locate readme file\nVisit B9Creator.com for more information.");
-        msgBox.exec();
-        return;
-    }
-
-    QTextStream stream(&file);
-    QString content = stream.readAll();
-
-    pAboutBox->setText(content);
-    pAboutBox->setWindowTitle("About B9Edit v0.9.0");
-    pAboutBox->show();
-}
-
 //Protected
 //events
 void B9Edit::closeEvent(QCloseEvent *event)
 {
-	int quit;
-	if(dirtied) 
-	{
-		quit = PromptSaveOnQuit();
-		if(quit == 0)//cancel
-		{
-			event->ignore();
-		}
-		else if(quit == 1)//we want to save
-		{
-			saveJob();
-			event->accept();
-		}
-		else if(quit == 2)//discard
-		{
-			event->accept();
-		}
-	} 
-	else 
-	{
-		event->accept();
-	}
-
     //close SliceManager as well
     pEditView->close();
 
-
     //when we close the window - we want to make a new project.
     //because we might open the window again and we want a fresh start.
+    //this will prompt the user to save as well.
     newJob();
     event->accept();
 }

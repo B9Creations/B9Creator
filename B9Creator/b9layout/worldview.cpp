@@ -38,9 +38,15 @@
 
 #include <QtGui>
 #include <QtOpenGL>
+#include <QTime>
+#include <QMessageBox>
+
 #include "OS_GL_Wrapper.h"
 #include "math.h"
 #include "worldview.h"
+#include "b9layoutprojectdata.h"
+#include "b9modelinstance.h"
+#include "b9supportstructure.h"
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
@@ -51,30 +57,58 @@ WorldView::WorldView(QWidget *parent, B9Layout* main) : QGLWidget(parent)
 {
 	pMain = main;
 
-	xRot = 0.0;
+    xRot = 315.0;
 	yRot = 0.0;
-    zRot = 0.0;
-	pan = QVector3D(0,0,0);//set pan to center of build area.
-	
-	camdist = 350;
+    zRot = 45.0;
+
+    xRotTarget = 315.0;
+    yRotTarget = 0.0;
+    zRotTarget = 45.0;
+
+    currViewAngle = "FREE";
+
+    camdist = 350;
+    camdistTarget = 350;
+
+    deltaTime = 0.0;//milliseconds per frame.
+    lastFrameTime = QTime::currentTime().msec();
+
+    pan = QVector3D(0,0,0);//set pan to center of build area.
+    panTarget = QVector3D(0,0,0);
+
+    revolvePoint = QVector3D(0,0,0);
+
+    cursorPos3D = QVector3D(0,0,0);
+    cursorNormal3D = QVector3D(0,0,0);
+    cursorPreDragPos3D = QVector3D(0,0,0);
+    cursorPostDragPos3D = QVector3D(0,0,0);
+
+    perspective = true;
 
 	//tools/keys
-	currtool = "pointer";
+    currtool = "move";
 	shiftdown = false;
     controldown = false;
 	dragdown = false;
 	pandown = 0;
-	selectedinst = NULL;
 
-	buildsizex = pMain->project->GetBuildSpace().x();
-	buildsizey = pMain->project->GetBuildSpace().y();
-	buildsizez = pMain->project->GetBuildSpace().z();
+    buildsizex = pMain->ProjectData()->GetBuildSpace().x();
+    buildsizey = pMain->ProjectData()->GetBuildSpace().y();
+    buildsizez = pMain->ProjectData()->GetBuildSpace().z();
+
+    //visual fence
+    fencesOn[0] = false;
+    fencesOn[1] = false;
+    fencesOn[2] = false;
+    fencesOn[3] = false;
+
 
 	pDrawTimer = new QTimer();
 	connect(pDrawTimer, SIGNAL(timeout()), this, SLOT(UpdateTick()));
-    pDrawTimer->start(16.66);
+    pDrawTimer->start(16.66);//aim for 60fps.
 
 	setFocusPolicy(Qt::ClickFocus);
+    setMouseTracking(true);
 }
 
 WorldView::~WorldView()
@@ -82,11 +116,11 @@ WorldView::~WorldView()
 	delete pDrawTimer;
 }
 
-static void qNormalizeAngle(int &angle)
+static void qNormalizeAngle(float &angle)
 {
     while (angle < 0)
         angle += 360;
-    while (angle > 360 )
+    while (angle >= 360 )
         angle -= 360;
 }
 
@@ -94,7 +128,7 @@ static void qNormalizeAngle(int &angle)
 ///////////////////////////////////////
 //Public Slots
 ///////////////////////////////////////
-void WorldView::setXRotation(int angle)
+void WorldView::setXRotation(float angle)
 {
     qNormalizeAngle(angle);
 
@@ -103,85 +137,270 @@ void WorldView::setXRotation(int angle)
 		return;
 	}
 
-    if (angle != xRot)
+    if (angle != xRotTarget)
 	{
 		
-        xRot = angle;
+        xRotTarget = angle;
         emit xRotationChanged(angle);
     }
 }
-void WorldView::setYRotation(int angle)
+void WorldView::setYRotation(float angle)
 {
-    qNormalizeAngle(angle);
-    if (angle != yRot) {
-        yRot = angle;
+    //qNormalizeAngle(angle);
+    if (angle != yRotTarget) {
+        yRotTarget = angle;
         emit yRotationChanged(angle);
         
     }
 }
-void WorldView::setZRotation(int angle)
+void WorldView::setZRotation(float angle)
 {
-    qNormalizeAngle(angle);
-    if (angle != zRot) {
-        zRot = angle;
+    //qNormalizeAngle(angle);
+    if (angle != zRotTarget) {
+        zRotTarget = angle;
         emit zRotationChanged(angle);
     }
 }
 void WorldView::CenterView()
 {
-	pan = QVector3D(0,0,0);//set pan to center of build area.
-	camdist = 350;
+    panTarget = QVector3D(0,pMain->ProjectData()->GetBuildSpace().z()/2.0,0);//set pan to center of build area.
+    camdistTarget = 250;
+
 }
+
+void WorldView::TopView()
+{
+    qNormalizeAngle(xRotTarget);
+    qNormalizeAngle(xRot);
+    qNormalizeAngle(zRot);
+    xRotTarget = 360;
+    zRotTarget = 0.1;
+    currViewAngle = "TOP";
+}
+void WorldView::RightView()
+{
+    qNormalizeAngle(xRotTarget);
+    qNormalizeAngle(xRot);
+    qNormalizeAngle(zRot);
+    xRotTarget = 180.0 + 90;
+    zRotTarget = 180 + 90.0;
+    currViewAngle = "RIGHT";
+}
+void WorldView::FrontView()
+{
+    qNormalizeAngle(xRotTarget);
+    qNormalizeAngle(xRot);
+    qNormalizeAngle(zRot);
+    xRotTarget = 180+90;
+    zRotTarget = 180.0;
+    currViewAngle = "FRONT";
+}
+void WorldView::SetRevolvePoint(QVector3D point)
+{
+    revolvePointTarget = point;
+}
+void WorldView::SetPan(QVector3D pan)
+{
+    panTarget = pan;
+}
+void WorldView::SetZoom(double zoom)
+{
+    camdistTarget = zoom;
+}
+
+//called by timer - draws the world and updates cool visual transitions
+//no serious updating should happen here
 void WorldView::UpdateTick()
 {
-	buildsizex += (pMain->project->GetBuildSpace().x() - buildsizex)/2;
-	buildsizey += (pMain->project->GetBuildSpace().y() - buildsizey)/2;
-	buildsizez += (pMain->project->GetBuildSpace().z() - buildsizez)/2;
+    float dt = QTime::currentTime().msec() - lastFrameTime;
+    bool anyFenceOn;
 
-	glDraw();
+    if(dt > 0) deltaTime = dt;
+
+    lastFrameTime = QTime::currentTime().msec();
+    //float timeScaleFactor = deltaTime/33.333;
+
+
+    buildsizex += ((pMain->ProjectData()->GetBuildSpace().x() - buildsizex)/2);
+    buildsizey += ((pMain->ProjectData()->GetBuildSpace().y() - buildsizey)/2);
+    buildsizez += ((pMain->ProjectData()->GetBuildSpace().z() - buildsizez)/2);
+
+    anyFenceOn = (fencesOn[0] || fencesOn[1] || fencesOn[2] || fencesOn[3]);
+    if(anyFenceOn)
+        fenceAlpha += 0.01;
+    else
+        fenceAlpha = 0;
+
+    if(fenceAlpha >= 0.3)
+        fenceAlpha = 0.3;
+
+    UpdatePlasmaFence();
+
+
+    //always normalize all angles to 0-360
+    //qNormalizeAngle(xRotTarget);
+    qNormalizeAngle(yRotTarget);
+    qNormalizeAngle(zRotTarget);
+    qNormalizeAngle(xRot);
+    qNormalizeAngle(yRot);
+    qNormalizeAngle(zRot);
+
+
+    if((zRotTarget - zRot) < -180)
+        zRotTarget = zRotTarget + 360;
+
+    if((zRot - zRotTarget) < -180)
+        zRot = zRot + 360;
+
+    xRot = xRot + ((xRotTarget - xRot)/5.0);
+    yRot = yRot + ((yRotTarget - yRot)/5.0);
+    zRot = zRot + ((zRotTarget - zRot)/5.0);
+
+
+    camdist = camdist + (camdistTarget - camdist)/5.0;
+
+    pan = pan + (panTarget - pan)/2.0;
+
+    revolvePoint = revolvePoint + (revolvePointTarget - revolvePoint)/2.0;
+
+    glDraw();//actual draw (and flip buffers internally)
 }
 void WorldView::SetTool(QString tool)
 {
 	currtool = tool;
 }
+QString WorldView::GetTool()
+{
+     return currtool;
+}
+
+void WorldView::ExitToolAction()
+{
+    dragdown = false;
+    shiftdown = false;
+    controldown = false;
+}
+
+
+////////////////////////////////////////////////////////
+//Public Gets
+//////////////////////////////////////////////////////////////
+
+
+QVector3D WorldView::GetPan()
+{
+    return panTarget;
+}
+
+float WorldView::GetZoom()
+{
+    return camdistTarget;
+}
+QVector3D WorldView::GetRotation()
+{
+    return QVector3D(xRotTarget,yRotTarget,zRotTarget);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //Private
 void WorldView::initializeGL()
 {
 
-    qglClearColor(QColor(0,75,75));
+    qglClearColor(QColor(0,100,100));
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_NORMALIZE);
     glLineWidth(0.5);
     glEnable(GL_LINE_SMOOTH);
-    glColorMaterial ( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+
     glEnable ( GL_COLOR_MATERIAL );
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
-    glEnable(GL_MULTISAMPLE);
+    glDisable(GL_MULTISAMPLE);
     glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    static GLfloat lightPosition[4] = { 0.0, 0.0, 100, 1.0 };
+   // glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+    static GLfloat lightPosition[4] = { 0.0, 0.0, 100.0, 1.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+
 
 }
 
 void WorldView::paintGL()
 {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glLoadIdentity();//restores default matrix.
-	
-	glTranslatef(0.0, 0.0, -camdist);//step back amount
-	glTranslatef(pan.x(),-pan.y(),0);
-	
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();//restores default matrix.
+
+    if(perspective)
+    {
+        gluPerspective(30,double(width())/height(),1,5500);
+    }
+    else
+    {
+        float aspRatio = float(this->width())/this->height();
+
+
+        glOrtho(-(camdist/120.0)*aspRatio*102.4/2,
+                (camdist/120.0)*aspRatio*102.4/2,
+                -(camdist/120.0)*102.4/2,
+                (camdist/120.0)*102.4/2,
+                0.1,
+                5500);
+
+
+    }
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+
+    if(perspective)
+        glTranslatef(0.0, 0.0, -camdist);//step back amount
+    else
+        glTranslatef(0.0, 0.0, -200.0);//step back amount
+
+    glTranslatef(pan.x(),-pan.y(),0);
+
 	glRotatef(xRot, 1.0, 0.0, 0.0);
 	glRotatef(yRot, 0.0, 1.0, 0.0);
 	glRotatef(zRot, 0.0, 0.0, 1.0);
-	
-	
+
+    glTranslatef(-revolvePoint.x(),-revolvePoint.y(),-revolvePoint.z());
+
+
+
+    //show the cursor position
+    if(currtool == "SUPPORTADD")
+    {
+        glDisable(GL_LIGHTING);
+        glPushMatrix();
+        if(cursorNormal3D.z() <= 0)
+        glColor3f(0.0f,1.0f,0.0f);
+        else
+        glColor3f(1.0f,0.0f,0.0f);
+            glBegin(GL_LINES);
+                glVertex3f( cursorPos3D.x(), cursorPos3D.y(), cursorPos3D.z());
+                glVertex3f( cursorPos3D.x() + cursorNormal3D.x(), cursorPos3D.y() + cursorNormal3D.y(), cursorPos3D.z() + cursorNormal3D.z());
+            glEnd();
+        glPopMatrix();
+        glEnable(GL_LIGHTING);
+    }
+
     DrawInstances();
-	
+
 	//draw the BuildArea
     DrawBuildArea();
 
@@ -189,35 +408,35 @@ void WorldView::paintGL()
 
 void WorldView::resizeGL(int width, int height)
  {
-
-	 glViewport(0,0,width,height);
-     
-	 glMatrixMode(GL_PROJECTION);
-     glLoadIdentity();
-
-     gluPerspective(30,double(width)/height,1,5500);
-     glMatrixMode(GL_MODELVIEW);
-
+	 glViewport(0,0,width,height); 
  }
 void WorldView::DrawInstances()
 {
-    unsigned int m;
     unsigned int i;
 
 	glEnable(GL_DEPTH_TEST);
 
-	for(m=0;m<pMain->ModelDataList.size();m++)
-	{
-		for(i=0;i<pMain->ModelDataList[m]->instList.size();i++)
-		{
-			pMain->ModelDataList[m]->instList[i]->RenderGL();
-		}
-	}
+    //if were in support mode wee want to only render
+    //the support mode instance
+    if(pMain->SupportModeInst() != NULL)
+    {
+        glColor3f(0.3f,0.3f,0.3f);
+        //pMain->SupportModeInst()->RenderSlopeGL();
+        pMain->SupportModeInst()->RenderGL(true);
+    }
+    else
+    {
+        for(i = 0; i < pMain->GetAllInstances().size();i++)
+        {
+            pMain->GetAllInstances()[i]->RenderGL();
+        }
+    }
+
 }
 void WorldView::DrawBuildArea()
- {
+{
 	glPushMatrix();
-	glColor3f(1,1,1);
+    glColor3f(0.5f,0.5f,0.5f);
 	glTranslatef(-buildsizex/2, -buildsizey/2, 0);
 
     glDisable(GL_LIGHTING);
@@ -275,8 +494,7 @@ void WorldView::DrawBuildArea()
 		glEnd();
 		
 		
-		//draw cordinate hints
-		
+        //draw red cordinate hints
         glColor3f(1.0f,0.0f,0.0f);
 		glBegin(GL_LINES); 
                 glVertex3d( 0, 0, buildsizez);
@@ -292,17 +510,13 @@ void WorldView::DrawBuildArea()
 		glEnd();
         glColor3f(1.0f,1.0f,1.0f);
 
-        //TODO _RESULTS IN CRASH ON SOME INTEL DRIVERS....
-        //renderText( buildsizex + 10,0,0, "+X");
-        //renderText( 0,buildsizey + 10,0, "+Y");
-        //renderText( 0,0,buildsizez + 10, "+Z");
 
         glEnable(GL_LIGHTING);
 		//top rectangle
-        glColor4f(0.0f,0.0f,1.0f,1.0f);
+        glColor4f(0.0f,0.0f,0.7f,0.3);
 		glNormal3f(0,0,1);
 			glBegin(GL_TRIANGLES);                    
-				glVertex3f( buildsizex, 0, 0);     
+                glVertex3f( buildsizex, 0, 0);
 				glVertex3f( buildsizex, buildsizey, 0);     
 				glVertex3f( 0, buildsizey, 0);     
 			glEnd();
@@ -314,72 +528,88 @@ void WorldView::DrawBuildArea()
 			glEnd();
 
 		
-		//bottom rectangle
-		glNormal3f(0,0,-1);
-        glColor3f(1.0f,0.7f,0.3f);
-			glBegin(GL_TRIANGLES);
-				glVertex3f( 0, buildsizey, 0);      
-				glVertex3f( buildsizex, buildsizey, 0);                     
-				glVertex3f( buildsizex, 0, 0);        
-			glEnd();
-		
-			glBegin(GL_TRIANGLES);                    
-				glVertex3f( 0, 0, 0);
-				glVertex3f( 0, buildsizey, 0); 
-				glVertex3f( buildsizex, 0, 0);          
-			glEnd();
-        glColor4f(1.0f,1.0f,1.0f,1.0f);
+        //bottom rectangle
+        glEnable(GL_BLEND);
+        if(!pMain->SupportModeInst())
+        {
 
+            glNormal3f(0,0,-1);
+            glColor4f(0.0f,0.0f,1.0f,0.3);
+                glBegin(GL_TRIANGLES);//-0.1 is to hide z-fighting
+                    glVertex3f( 0, buildsizey, -0.1);
+                    glVertex3f( buildsizex, buildsizey, -0.1);
+                    glVertex3f( buildsizex, 0, -0.1);
+                glEnd();
 
+                glBegin(GL_TRIANGLES);
+                    glVertex3f( 0, 0, -0.1);
+                    glVertex3f( 0, buildsizey, -0.1);
+                    glVertex3f( buildsizex, 0, -0.1);
+                glEnd();
+            glColor4f(1.0f,1.0f,1.0f,1.0f);
+
+        }
+
+        //draw plasma fences!
+        if(!pMain->SupportModeInst())
+        {
+            glColor4f(fenceAlpha*2,0.0f,0.0f,fenceAlpha);
+            glDisable(GL_CULL_FACE);
+            glDisable(GL_LIGHTING);
+
+            //X+ fence
+            if(fencesOn[0])
+            {
+                glNormal3f(1,0,0);
+                glBegin(GL_QUADS);
+                    glVertex3f( buildsizex, 0, 0);
+                    glVertex3f( buildsizex, buildsizey, 0);
+                    glVertex3f( buildsizex, buildsizey, buildsizez);
+                    glVertex3f( buildsizex, 0, buildsizez);
+                glEnd();
+            }
+            //X- fence
+            if(fencesOn[1])
+            {
+                glNormal3f(1,0,0);
+                glBegin(GL_QUADS);
+                    glVertex3f( 0, 0, 0);
+                    glVertex3f( 0, buildsizey, 0);
+                    glVertex3f( 0, buildsizey, buildsizez);
+                    glVertex3f( 0, 0, buildsizez);
+                glEnd();
+            }
+            //Y+
+            if(fencesOn[2])
+            {
+                glNormal3f(1,0,0);
+                glBegin(GL_QUADS);
+                    glVertex3f( 0, buildsizey, 0);
+                    glVertex3f( buildsizex, buildsizey, 0);
+                    glVertex3f( buildsizex, buildsizey, buildsizez);
+                    glVertex3f( 0, buildsizey, buildsizez);
+                glEnd();
+            }
+            //Y-
+            if(fencesOn[3])
+            {
+                glNormal3f(1,0,0);
+                glBegin(GL_QUADS);
+                    glVertex3f( 0, 0, 0);
+                    glVertex3f( buildsizex, 0, 0);
+                    glVertex3f( buildsizex, 0, buildsizez);
+                    glVertex3f( 0, 0, buildsizez);
+                glEnd();
+            }
+
+            glEnable(GL_LIGHTING);
+            glEnable(GL_CULL_FACE);
+        }
+        glDisable(GL_BLEND);
 	glPopMatrix();
  }
 
- ModelInstance* WorldView::SelectByScreen(QPoint pos, bool singleselect)
- {
-    unsigned int m;
-    unsigned int i;
-	unsigned char pixel[3];
-	//clear the screen
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDisable(GL_LIGHTING);
-	for(m=0;m<pMain->ModelDataList.size();m++)
-	{
-		for(i=0;i<pMain->ModelDataList[m]->instList.size();i++)
-		{
-			pMain->ModelDataList[m]->instList[i]->RenderPickGL();
-		}
-	}
-    glReadPixels(pos.x(), this->height() - pos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-	glEnable(GL_LIGHTING);
-	paintGL();
-	
-
-	qDebug() << pixel[0] << pixel[1] << pixel[2];
-	//now that we have the color, compare it against every instance
-	
-	for(m=0;m<pMain->ModelDataList.size();m++)
-	{
-		for(i=0;i<pMain->ModelDataList[m]->instList.size();i++)
-		{
-			ModelInstance* inst = pMain->ModelDataList[m]->instList[i];
-			qDebug() << inst->pickcolor[0] << inst->pickcolor[1] << inst->pickcolor[2];
-
-
-			if((pixel[0] == inst->pickcolor[0]) && (pixel[1] == inst->pickcolor[1]) && (pixel[2] == inst->pickcolor[2]))
-			{
-				
-				pMain->Select(inst);
-				return inst;
-			}
-		}
-	}
-	
-	return NULL;
- }
  void WorldView::UpdateSelectedBounds()
  {
      unsigned int i;
@@ -392,13 +622,39 @@ void WorldView::DrawBuildArea()
      pMain->setCursor(Qt::ArrowCursor);
  }
 
+ //checks all instances against fences.
+ void WorldView::UpdatePlasmaFence()
+ {
+     unsigned int i;
+     B9ModelInstance* inst;
+
+     fencesOn[0] = false;
+     fencesOn[1] = false;
+     fencesOn[2] = false;
+     fencesOn[3] = false;
+
+     for(i = 0; i < pMain->GetAllInstances().size(); i++)
+     {
+         inst = pMain->GetAllInstances()[i];
+         if(inst->GetMaxBound().x() > pMain->ProjectData()->GetBuildSpace().x()*0.5)
+             fencesOn[0] = true;
+         if(inst->GetMinBound().x() < -pMain->ProjectData()->GetBuildSpace().x()*0.5)
+             fencesOn[1] = true;
+         if(inst->GetMaxBound().y() > pMain->ProjectData()->GetBuildSpace().y()*0.5)
+             fencesOn[2] = true;
+         if(inst->GetMinBound().y() < -pMain->ProjectData()->GetBuildSpace().y()*0.5)
+             fencesOn[3] = true;
+     }
+ }
+
+
+
  //Mouse Interaction
 void WorldView::mousePressEvent(QMouseEvent *event)
 {
-     lastPos = event->pos();
-     mousedownPos = event->pos();
-     initialsnap = true;
-     std::vector<ModelInstance*> currentselection = pMain->GetSelectedInstances();
+     mouseLastPos = event->pos();
+     mouseDownInitialPos = event->pos();
+
 	 if(event->button() == Qt::MiddleButton)
 	 {
 		pandown = true;
@@ -406,128 +662,78 @@ void WorldView::mousePressEvent(QMouseEvent *event)
 	 if(event->button() == Qt::LeftButton)
 	 {
 		 dragdown = true;
-
-         if(!controldown)
-         pMain->DeSelectAll();
-
-         SelectByScreen(event->pos(),!shiftdown);
-	 }
+         OnToolInitialAction(currtool, event);
+     }
 }
 
+void WorldView::mouseMoveEvent(QMouseEvent *event)
+{
+    mouseDeltaPos.setX(event->x() - mouseLastPos.x());
+    mouseDeltaPos.setY(event->y() - mouseLastPos.y());
+    mouseLastPos = event->pos();
+
+    if((event->buttons() & Qt::RightButton) && !shiftdown) {
+        setXRotation(xRotTarget + 0.5 * mouseDeltaPos.y());
+        setZRotation(zRotTarget + 0.5 * mouseDeltaPos.x());
+        //were rotating the view so switch view mode!
+        currViewAngle = "FREE";
+    }
+
+    if(pandown || (event->buttons() & Qt::RightButton && shiftdown))
+    {
+        panTarget += QVector3D(mouseDeltaPos.x()/20.0,mouseDeltaPos.y()/20.0,0);
+    }
+
+    if(dragdown && (event->buttons() & Qt::LeftButton))
+    {
+        OnToolDragAction(currtool,event);
+    }
+
+    if(!dragdown && !pandown && !shiftdown
+            && !(event->buttons() & Qt::LeftButton) && !(event->buttons() & Qt::RightButton))
+        OnToolHoverMove(currtool,event);
+
+
+}
 void WorldView::mouseReleaseEvent(QMouseEvent *event)
 {
+
 	if(event->button() == Qt::MiddleButton)
 	{
 		pandown = false;
 	}
 	if(event->button() == Qt::LeftButton)
 	{
-		dragdown = false;
-        if(currtool == "rotate" || currtool == "scale")
-		{
-			UpdateSelectedBounds();
-		}
+        dragdown = false;
+        OnToolReleaseAction(currtool, event);
 	}
 }
 
-void WorldView::mouseMoveEvent(QMouseEvent *event)
- {
-    int dx = event->x() - lastPos.x();
-    int dy = event->y() - lastPos.y();
-    int dstartx = event->x() - mousedownPos.x();
-    int dstarty = event->y() - mousedownPos.y();
-	double x;
-	double y;
-
-    //make it so the mouse has to move slightly more to start the action
-    if(powf((dstartx*dstartx + dstarty*dstarty),0.5) < 5.0 && initialsnap)
-    {
-        dx = 0; dy = 0;
-    }
-    else
-    {
-        initialsnap = true;
-
-    }
-
-
-
-    if ((event->buttons() & Qt::RightButton) && !shiftdown) {
-		setXRotation(xRot + 0.5 * dy);
-		setZRotation(zRot + 0.5 * dx);
-	}
-
-    lastPos = event->pos();
-	
-    if(pandown || (event->buttons() & Qt::RightButton && shiftdown))
-	{
-		pan += QVector3D(dx/5.0,dy/5.0,0);
-	}
-	 
-	if(currtool == "move")
-	{
-		if(dragdown)
-		{
-            for(unsigned int i = 0; i<pMain->GetSelectedInstances().size(); i++)
-			{
-				x = qSin(zRot*0.017453)*-dy + qSin((zRot+90)*0.017453)*dx;
-				y = qCos(zRot*0.017453)*-dy + qCos((zRot+90)*0.017453)*dx;
-
-				if(shiftdown)
-				{		
-					pMain->GetSelectedInstances()[i]->Move(QVector3D(0,0,-dy*0.1));
-				}
-				else
-				{
-					pMain->GetSelectedInstances()[i]->Move(QVector3D(x*0.2,y*0.1,0));
-				}
-			}
-        }
-	}
-    if(currtool == "rotate")
-    {
-        if(dragdown)
-        {
-            //if(pMain->GetSelectedInstances().size() == 1)
-            {
-                for(unsigned int i = 0; i<pMain->GetSelectedInstances().size(); i++)
-                {
-                    if(shiftdown)
-                    {
-                        pMain->GetSelectedInstances()[i]->Rotate(QVector3D(dy*0.2,dx*0.2,0));
-                    }
-                    else
-                    {
-                        pMain->GetSelectedInstances()[i]->Rotate(QVector3D(0,0,-dx*0.2));
-                    }
-                }
-            }
-        }
-    }
-    if(currtool == "scale")
-    {
-        if(dragdown)
-        {
-
-             for(unsigned int i = 0; i<pMain->GetSelectedInstances().size(); i++)
-             {
-                  pMain->GetSelectedInstances()[i]->Scale(QVector3D(dx*0.01,dx*0.01,dx*0.01));
-             }
-
-        }
-
-    }
-    //show the results of the movement in real time
-    pMain->UpdateTranslationInterface();
- }
 
 void WorldView::wheelEvent(QWheelEvent *event)
 {
-	camdist -= event->delta()/4.0;
-	if(camdist <= 50.0)
-	{
-		camdist = 50.0;
-	}
+    camdistTarget -= event->delta()/8.0;
+    //zooming limits
+    if(perspective)
+    {
+        if(camdistTarget <= 10.0)
+        {
+            camdistTarget = 10.0;
+        }
+        if(camdistTarget >= 350.00)
+            camdistTarget = 350.00;
+    }
+    else
+    {
+        if(camdistTarget <= 5.0)
+        {
+            camdistTarget = 5.0;
+        }
+        if(camdistTarget >= 350.00)
+            camdistTarget = 350.00;
+
+
+    }
 }
 
  //Keyboard interaction
@@ -542,14 +748,6 @@ void WorldView::keyPressEvent( QKeyEvent * event )
     {
         controldown = true;
     }
-	if(event->key() == Qt::Key_J)
-	{
-        for(unsigned int i = 0; i<pMain->GetSelectedInstances().size(); i++)
-		{
-			pMain->GetSelectedInstances()[i]->UpdateBounds();
-		}
-	}
-
 }
 void WorldView::keyReleaseEvent( QKeyEvent * event )
 {
@@ -562,3 +760,759 @@ void WorldView::keyReleaseEvent( QKeyEvent * event )
         controldown = false;
     }
 }
+
+void WorldView::OnToolInitialAction(QString tool, QMouseEvent* event)
+{
+    B9ModelInstance* clickedInst = NULL;
+    Triangle3D* pTopTri = NULL;
+    Triangle3D* pBottomTri = NULL;
+    B9SupportStructure* addedSupport;
+    B9SupportStructure* pSup;
+    bool hitGround;
+
+
+
+    if(currtool == "MODELSELECT" ||
+            currtool == "MODELMOVE" ||
+            currtool == "MODELSPIN" ||
+            currtool == "MODELSCALE" ||
+            currtool == "MODELORIENTATE")
+    {
+        Update3DCursor(event->pos());
+
+        pMain->DeSelectAll();
+        clickedInst = SelectInstanceByScreen(event->pos());
+
+        if(clickedInst)
+        {
+            PreDragInstanceOffset = cursorPos3D - clickedInst->GetPos();
+
+            float theta = qAtan2((cursorPos3D.y() - clickedInst->GetPos().y())
+                               ,
+                               (cursorPos3D.x() - clickedInst->GetPos().x()));
+
+            theta = theta*(180/M_PI);
+
+            PreDragRotationOffsetData.setX(theta);
+            PreDragRotationOffsetData.setY(clickedInst->GetRot().z());
+        }
+    }
+
+    if(currtool == "SUPPORTADD")//after the user clicked the add support button.
+    {
+
+        bool s;
+        unsigned int tri;
+
+        if(!pMain->SupportModeInst())
+            return;
+
+        tri = GetPickTriangleIndx(pMain->SupportModeInst(),event->pos(),s);
+
+        if(s)
+        {
+
+            QVector3D topPos = GetPickOnTriangle(event->pos(),pMain->SupportModeInst(),tri);
+            pTopTri = pMain->SupportModeInst()->triList[tri];
+
+            if(pTopTri->normal.z() <= 0)
+            {
+                addedSupport = pMain->SupportModeInst()->AddSupport(QVector3D(),QVector3D());
+                pMain->FillSupportList();
+
+                addedSupport->SetTopPoint(topPos);
+                addedSupport->SetTopNormal(pTopTri->normal*-1.0);
+
+                //"drill" down from the toppivot position and see where the vertical ray hits.
+                QVector3D basePos = GetDrillingHit(addedSupport->GetTopPivot(),pMain->SupportModeInst(), hitGround, pBottomTri);
+                if(hitGround)
+                {
+                    addedSupport->SetIsGrounded(true);
+                }
+                else
+                {
+                    addedSupport->SetBottomPoint(basePos);
+                    addedSupport->SetBottomNormal(pBottomTri->normal*-1.0);
+                    addedSupport->SetIsGrounded(false);
+                }
+                //now the support is created - but we want to load in the default user settings for
+                //things like shape and radius
+                QSettings appSettings;
+                appSettings.beginGroup("USERSUPPORTPARAMS");
+                appSettings.beginGroup("SUPPORT_TOP");
+                    addedSupport->SetTopAttachShape(appSettings.value("ATTACHSHAPE",addedSupport->GetTopAttachShape()).toString());
+                    addedSupport->SetTopLength(appSettings.value("LENGTH",addedSupport->GetTopLength()).toDouble());
+                    addedSupport->SetTopPenetration(appSettings.value("PENETRATION",addedSupport->GetTopPenetration()).toDouble());
+                    addedSupport->SetTopRadius(appSettings.value("RADIUS",addedSupport->GetTopRadius()).toDouble());
+                    addedSupport->SetTopAngleFactor(appSettings.value("ANGLEFACTOR",addedSupport->GetTopAngleFactor()).toDouble());
+                appSettings.endGroup();
+                appSettings.beginGroup("SUPPORT_MID");
+                    addedSupport->SetMidAttachShape(appSettings.value("ATTACHSHAPE",addedSupport->GetMidAttachShape()).toString());
+                    addedSupport->SetMidRadius(appSettings.value("RADIUS",addedSupport->GetMidLength()).toDouble());
+                appSettings.endGroup();
+
+
+                if(addedSupport->GetIsGrounded())
+                {
+                    appSettings.beginGroup("SUPPORT_BOTTOM_GROUNDED");
+                    addedSupport->SetBottomAttachShape(appSettings.value("ATTACHSHAPE",addedSupport->GetTopAttachShape()).toString());
+                        addedSupport->SetBottomLength(appSettings.value("LENGTH",addedSupport->GetTopLength()).toDouble());
+                        addedSupport->SetBottomPenetration(appSettings.value("PENETRATION",addedSupport->GetTopPenetration()).toDouble());
+                        addedSupport->SetBottomRadius(appSettings.value("RADIUS",addedSupport->GetTopRadius()).toDouble());
+                        addedSupport->SetBottomAngleFactor(appSettings.value("ANGLEFACTOR",addedSupport->GetTopAngleFactor()).toDouble());
+                    appSettings.endGroup();
+                    addedSupport->SetBottomPoint(addedSupport->GetTopPivot());
+                }
+                else
+                {
+                    appSettings.beginGroup("SUPPORT_BOTTOM_NONGROUNDED");
+                        addedSupport->SetBottomAttachShape(appSettings.value("ATTACHSHAPE",addedSupport->GetTopAttachShape()).toString());
+                        addedSupport->SetBottomLength(appSettings.value("LENGTH",addedSupport->GetTopLength()).toDouble());
+                        addedSupport->SetBottomPenetration(appSettings.value("PENETRATION",addedSupport->GetTopPenetration()).toDouble());
+                        addedSupport->SetBottomRadius(appSettings.value("RADIUS",addedSupport->GetTopRadius()).toDouble());
+                        addedSupport->SetBottomAngleFactor(appSettings.value("ANGLEFACTOR",addedSupport->GetTopAngleFactor()).toDouble());
+                    appSettings.endGroup();
+                }
+                appSettings.endGroup();
+            }
+        }
+    }
+
+    if(currtool == "SUPPORTMODIFY")
+    {
+        pMain->DeSelectAllSupports();
+
+        pSup = GetSupportByScreen(event->pos());
+        if(pSup != NULL)
+        {
+            pMain->SelectSupport(pSup);
+            //also figure what part we clicked on ("TOP", "MID", "BOTTOM")
+            toolStringMemory = GetSupportSectionByScreen(event->pos(),pSup);
+            toolSupportMemory.CopyFrom(pSup);//remember support settings.
+
+        }
+    }
+
+    if(currtool == "SUPPORTDELETE")
+    {
+        pMain->DeSelectAllSupports();
+
+        pSup = GetSupportByScreen(event->pos());
+        if(pSup != NULL)
+        {
+            pMain->DeleteSupport(pSup);
+        }
+    }
+}
+
+void WorldView::OnToolDragAction(QString tool, QMouseEvent* event)
+{
+    unsigned int i;
+    B9ModelInstance* pInst;
+    B9SupportStructure* pSup;
+    QSettings appSettings;
+
+
+
+    if(currtool == "MODELMOVE")
+    {
+        Update3DCursor(event->pos());
+
+        for(i = 0; i < pMain->GetSelectedInstances().size(); i++)
+        {
+            if(shiftdown)
+            {
+                pMain->GetSelectedInstances()[i]->Move(QVector3D(0,0,-mouseDeltaPos.y()*0.1));
+            }
+            else
+            {
+                if(currViewAngle == "FREE" || currViewAngle == "TOP")
+                {
+                    pMain->GetSelectedInstances()[i]->SetX(cursorPos3D.x() - PreDragInstanceOffset.x());
+                    pMain->GetSelectedInstances()[i]->SetY(cursorPos3D.y() - PreDragInstanceOffset.y());
+                }
+                else if(currViewAngle == "FRONT")
+                {
+                    pMain->GetSelectedInstances()[i]->SetX(cursorPos3D.x() - PreDragInstanceOffset.x());
+                    pMain->GetSelectedInstances()[i]->SetZ(cursorPos3D.z() - PreDragInstanceOffset.z());
+                }
+                else if(currViewAngle == "RIGHT")
+                {
+                    pMain->GetSelectedInstances()[i]->SetY(cursorPos3D.y() - PreDragInstanceOffset.y());
+                    pMain->GetSelectedInstances()[i]->SetZ(cursorPos3D.z() - PreDragInstanceOffset.z());
+                }
+            }
+            pMain->UpdateInterface();
+        }
+
+    }
+    if(currtool == "MODELSPIN")
+    {
+        Update3DCursor(event->pos());
+            for(unsigned int i = 0; i < pMain->GetSelectedInstances().size(); i++)
+            {
+                pInst = pMain->GetSelectedInstances()[i];
+
+                if(currViewAngle == "FREE" || currViewAngle == "TOP")
+                {
+                    float theta = qAtan2((cursorPos3D.y() - pInst->GetPos().y())
+                                         ,
+                                         (cursorPos3D.x()-pInst->GetPos().x()));
+                    theta = theta*(180/M_PI);
+                    pInst->SetRot(QVector3D(pInst->GetRot().x(),pInst->GetRot().y(),
+                                            PreDragRotationOffsetData.y() + (theta - PreDragRotationOffsetData.x())));
+                }
+                else
+                    pInst->Rotate(QVector3D(0,0,mouseDeltaPos.x()*0.2));
+            }
+            pMain->UpdateInterface();
+
+
+    }
+    if(currtool == "MODELORIENTATE")
+    {
+
+            for(unsigned int i = 0; i < pMain->GetSelectedInstances().size(); i++)
+            {
+                pInst = pMain->GetSelectedInstances()[i];
+                pInst->Rotate(QVector3D(mouseDeltaPos.y()*0.2,mouseDeltaPos.x()*0.2,0));
+            }
+            pMain->UpdateInterface();
+
+
+    }
+    if(currtool == "MODELSCALE")
+    {
+        for(unsigned int i = 0; i<pMain->GetSelectedInstances().size(); i++)
+        {
+            //pMain->GetSelectedInstances()[i]->Scale(QVector3D(dx*0.01,dx*0.01,dx*0.01));
+            QVector3D cScale = pMain->GetSelectedInstances()[i]->GetScale();
+
+            pMain->GetSelectedInstances()[i]->SetScale(cScale*(1+mouseDeltaPos.x()/50.0));
+        }
+        pMain->UpdateInterface();
+
+    }
+    if(currtool == "SUPPORTMODIFY")
+    {
+        pInst = pMain->SupportModeInst();
+        if(!pInst)
+            return;
+
+        if(!pMain->GetSelectedSupports()->size())
+            return;
+
+        bool isAgainstInst;
+        Update3DCursor(event->pos(),pInst,isAgainstInst);
+
+        pSup = pMain->GetSelectedSupports()->at(0);
+
+        //check if we need to render warning
+        if(!pSup->IsPrintable())
+            pSup->EnableErrorGlow();
+        else
+            pSup->DisableErrorGlow();
+
+        if(toolStringMemory == "BOTTOM" )
+        {
+            pSup->SetBottomPoint(cursorPos3D - pInst->GetPos());//back to local pos
+            pSup->SetBottomNormal(-cursorNormal3D);
+            pSup->SetBottomAngleFactor(1.0);
+            //todo make this stuff memorybased?
+            if(isAgainstInst)
+            {
+                pSup->SetIsGrounded(false);
+                if(toolSupportMemory.GetIsGrounded())//tracking on the inst and not originally inst based
+                {
+                    appSettings.beginGroup("USERSUPPORTPARAMS");
+                    appSettings.beginGroup("SUPPORT_BOTTOM_NONGROUNDED");
+                    pSup->SetBottomAttachShape(appSettings.value("ATTACHSHAPE").toString());
+                    pSup->SetBottomRadius(appSettings.value("RADIUS").toDouble());
+                    pSup->SetBottomLength(appSettings.value("LENGTH").toDouble());
+                    appSettings.endGroup();
+                    appSettings.endGroup();
+                }
+                else
+                {
+                    pSup->SetBottomAttachShape(toolSupportMemory.GetBottomAttachShape());
+                    pSup->SetBottomRadius(toolSupportMemory.GetBottomRadius());
+                    pSup->SetBottomLength(toolSupportMemory.GetBottomLength());
+                }
+            }
+            else
+            {
+                pSup->SetIsGrounded(true);
+                if(!toolSupportMemory.GetIsGrounded())//tracking on the ground and not originally grounded
+                {
+                    appSettings.beginGroup("USERSUPPORTPARAMS");
+                    appSettings.beginGroup("SUPPORT_BOTTOM_GROUNDED");
+                    pSup->SetBottomAttachShape(appSettings.value("ATTACHSHAPE").toString());
+                    pSup->SetBottomRadius(appSettings.value("RADIUS").toDouble());
+                    pSup->SetBottomLength(appSettings.value("LENGTH").toDouble());
+                    appSettings.endGroup();
+                    appSettings.endGroup();
+
+                }
+                else
+                {
+                    pSup->SetBottomAttachShape(toolSupportMemory.GetBottomAttachShape());
+                    pSup->SetBottomRadius(toolSupportMemory.GetBottomRadius());
+                    pSup->SetBottomLength(toolSupportMemory.GetBottomLength());
+                }
+            }
+
+        }
+        else if(toolStringMemory == "TOP" || toolStringMemory == "MID")
+        {
+            pSup->SetTopPoint(cursorPos3D - pInst->GetPos());//back to local pos
+            pSup->SetTopNormal(-cursorNormal3D);
+            pSup->SetTopAngleFactor(1.0);
+
+            //if we started out vertical, move base along with top
+            if(toolSupportMemory.IsVertical() && toolSupportMemory.GetIsGrounded())
+            {
+                pSup->SetBottomPoint(QVector3D(pSup->GetTopPivot().x(),
+                                               pSup->GetTopPivot().y(),
+                                               pSup->GetBottomPoint().z()));
+
+            }
+        }
+    }
+}
+
+void WorldView::OnToolReleaseAction(QString tool, QMouseEvent* event)
+{
+    B9SupportStructure* pSup;
+
+    pMain->UpdateInterface();
+    if(currtool == "MODELSPIN" || currtool == "MODELORIENTATE" || currtool == "MODELSCALE")
+    {
+        UpdateSelectedBounds();
+    }
+    if(currtool == "MODELMOVE")
+    {
+
+    }
+    if(currtool == "SUPPORTMODIFY")
+    {
+        if(pMain->GetSelectedSupports()->size() == 1)
+        {
+            pSup = pMain->GetSelectedSupports()->at(0);
+
+            if(!pSup->IsPrintable())//if we've released the support in the wrong spot
+            {
+
+               pSup->CopyFrom(&toolSupportMemory);//revert
+            }
+            else
+            {
+
+            }
+            pSup->DisableErrorGlow();
+        }
+    }
+}
+
+void WorldView::OnToolHoverMove(QString tool, QMouseEvent* event)
+{
+
+    if(tool == "SUPPORTADD")
+    {
+       if(!pMain->SupportModeInst())
+            return;
+
+       Update3DCursor(event->pos(),pMain->SupportModeInst());
+    }
+}
+
+
+
+////////////////////////////////////////////////////////////////////
+//Private Functions
+////////////////////////////////////////////////////////////////////
+
+
+B9ModelInstance* WorldView::SelectInstanceByScreen(QPoint pos)
+{
+   unsigned int i;
+   unsigned char pixel[3];
+   //clear the screen
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   glDisable(GL_LIGHTING);
+
+   for(i = 0; i < pMain->GetAllInstances().size();i++)
+   {
+       pMain->GetAllInstances()[i]->RenderPickGL();
+   }
+
+   glReadPixels(pos.x(), this->height() - pos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+   glEnable(GL_LIGHTING);
+
+   //now that we have the color, compare it against every instance
+   for(i = 0; i < pMain->GetAllInstances().size();i++)
+   {
+       B9ModelInstance* inst = pMain->GetAllInstances()[i];
+
+       if((pixel[0] == inst->pickcolor[0]) && (pixel[1] == inst->pickcolor[1]) && (pixel[2] == inst->pickcolor[2]))
+       {
+
+           pMain->Select(inst);
+           return inst;
+       }
+   }
+
+   return NULL;
+}
+
+B9SupportStructure* WorldView::GetSupportByScreen(QPoint pos)
+{
+    unsigned int i;
+    unsigned char pixel[3];
+    B9ModelInstance* pInst;
+    B9SupportStructure* pSup;
+
+    pInst = pMain->SupportModeInst();
+    if(pInst == NULL)
+        return NULL;
+
+
+
+    //clear the screen
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_LIGHTING);
+
+    for(i = 0; i < pInst->GetSupports().size(); i++)
+    {
+        pSup = pInst->GetSupports()[i];
+        pSup->RenderPickGL();
+    }
+
+    glReadPixels(pos.x(), this->height() - pos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glEnable(GL_LIGHTING);
+
+    //now that we have the color, compare it against every instance
+    for(i = 0; i < pInst->GetSupports().size();i++)
+    {
+        pSup = pInst->GetSupports()[i];
+
+        if((pixel[0] == pSup->pickcolor[0]) && (pixel[1] == pSup->pickcolor[1]) && (pixel[2] == pSup->pickcolor[2]))
+        {
+            return pSup;
+        }
+    }
+    return NULL;
+}
+
+QString WorldView::GetSupportSectionByScreen(QPoint pos, B9SupportStructure* sup)
+{
+    unsigned char pixel[3];
+
+    //clear the screen
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_LIGHTING);
+
+    sup->RenderPartPickGL();//renders all 3 sections in different colors.
+
+    glReadPixels(pos.x(), this->height() - pos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glEnable(GL_LIGHTING);
+
+    if(pixel[0] > 200)
+        return "TOP";
+
+    if(pixel[1] > 200)
+        return "MID";
+
+    if(pixel[2] > 200)
+        return "BOTTOM";
+
+    //else
+    return "";
+}
+
+
+
+
+//Unseen by the user - does a two pass render on the base of the
+// track the mouse against the plane given by current view angle
+// if an instance is given - it will track against the whole model AS WELL
+void WorldView::Update3DCursor(QPoint pos)
+{
+    bool b;
+    Update3DCursor(pos, NULL, b);
+}
+void WorldView::Update3DCursor(QPoint pos, B9ModelInstance* trackInst)
+{
+    bool b;
+    Update3DCursor(pos, trackInst, b);
+}
+void WorldView::Update3DCursor(QPoint pos, B9ModelInstance* trackInst, bool &isAgainstInst)
+{
+    unsigned char pixel[3];//color picked pixel
+    QVector3D firstPassPos;
+    bool hitInstSuccess;
+    unsigned int hitTri;
+
+    isAgainstInst = false;
+
+    //before starting plane tracking - see if we hit the instance
+    if(trackInst != NULL)
+    {
+
+        hitTri = GetPickTriangleIndx(trackInst,pos,hitInstSuccess);
+        if( hitInstSuccess )
+        {
+            isAgainstInst = true;
+            cursorPos3D = GetPickOnTriangle(pos,trackInst,hitTri) + trackInst->GetPos();
+            cursorNormal3D = trackInst->triList[hitTri]->normal;
+
+            return;
+        }
+    }
+
+
+
+
+    //clear the screen and set the background to pure green.
+    qglClearColor(QColor(0,255,0));
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);//dont cull so we can track from back side too :)
+    glPushMatrix();
+    //Depending on the current view angle - we may want the cursor canvas
+    //vertical and/or rotated
+    if(currViewAngle == "FREE" || currViewAngle == "TOP")
+        glRotatef(0.0f,0.0f,0.0f,1.0f);//no rotating - put on ground
+    else if(currViewAngle == "FRONT"){
+        glRotatef(-90.0f,1.0f,0.0f,0.0f);
+    }
+    else if(currViewAngle == "RIGHT")
+    {
+        glRotatef(-90.0f,0.0f,0.0f,1.0f);
+        glRotatef(-90.0f,1.0f,0.0f,0.0f);
+    }
+
+    //In the first pass we will render a very large quad
+    //that is 10 times the size of the build area
+
+    //render colored cordinate table
+    //255,0,0-------------255,0,255
+    //|                       |
+    //|                       |
+    //|                       |
+    //0,0,0----------------0,0,255
+    //
+    //y cordinate maps to red channel
+    //x cordinate maps to blue channel
+
+    glNormal3f(0,0,1.0f);
+    glBegin(GL_QUADS);
+        glColor3f(0.0f,0.0f,0.0f);
+        glVertex3f( -buildsizex*5, -buildsizey*5, 0);
+        glColor3f(0.0f,0.0f,1.0f);
+        glVertex3f( buildsizex*5, -buildsizey*5, 0);
+        glColor3f(1.0f,0.0f,1.0f);
+        glVertex3f( buildsizex*5, buildsizey*5, 0);
+        glColor3f(1.0f,0.0f,0.0f);
+        glVertex3f( -buildsizex*5, buildsizey*5, 0);
+    glEnd();
+
+    glReadPixels(pos.x(), this->height() - pos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+
+    //lets map the colors to the first pass course position
+    firstPassPos.setX((float(pixel[2])/255.0)*buildsizex*10 - buildsizex*5);
+    firstPassPos.setY((float(pixel[0])/255.0)*buildsizey*10 - buildsizey*5);
+
+
+    //now we are ready to begin second pass based on first pass position
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glBegin(GL_QUADS);
+        glColor3f(0.0f,0.0f,0.0f);
+        glVertex3f( firstPassPos.x() - buildsizex*2*0.039063*0.5, firstPassPos.y() - buildsizey*2*0.039063*0.5, 0);
+        glColor3f(0.0f,0.0f,1.0f);
+        glVertex3f( firstPassPos.x() + buildsizex*2*0.039063*0.5, firstPassPos.y() - buildsizey*2*0.039063*0.5, 0);
+        glColor3f(1.0f,0.0f,1.0f);
+        glVertex3f( firstPassPos.x() + buildsizex*2*0.039063*0.5, firstPassPos.y() + buildsizey*2*0.039063*0.5, 0);
+        glColor3f(1.0f,0.0f,0.0f);
+        glVertex3f( firstPassPos.x() - buildsizex*2*0.039063*0.5, firstPassPos.y() + buildsizey*2*0.039063*0.5, 0);
+    glEnd();
+    //re-read pixels for second pass
+    glReadPixels(pos.x(), this->height() - pos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+    glPopMatrix();
+
+    //set openGl stuff back the way we found it...
+    glEnable(GL_LIGHTING);
+    glEnable(GL_CULL_FACE);
+
+    qglClearColor(QColor(0,100,100));
+
+
+    //if we hit pure green - we've hit the clear color and dont want to make any changes
+    if(pixel[1] > 200)
+        return;
+
+
+    //lets map the colors to the real world
+    if(currViewAngle == "FREE" || currViewAngle == "TOP"){
+        cursorPos3D.setX((float(pixel[2])/255.0)*buildsizex*2*0.039063 - buildsizex*2*0.039063*0.5 + firstPassPos.x());
+        cursorPos3D.setY((float(pixel[0])/255.0)*buildsizey*2*0.039063 - buildsizey*2*0.039063*0.5 + firstPassPos.y());
+        cursorPos3D.setZ(0.0);
+        cursorNormal3D = QVector3D(0,0,1);
+        cursorPosOnTrackCanvas.setX(cursorPos3D.x());
+        cursorPosOnTrackCanvas.setY(cursorPos3D.y());
+    }
+    else if(currViewAngle == "FRONT"){
+        cursorPos3D.setX((float(pixel[2])/256.0)*buildsizex*2*0.039063 - buildsizex*2*0.039063*0.5 + firstPassPos.x());
+        cursorPos3D.setY(0.0);
+        cursorPos3D.setZ(-((float(pixel[0])/256.0)*buildsizey*2*0.039063 - buildsizey*2*0.039063*0.5 + firstPassPos.y()));
+        cursorNormal3D = QVector3D(0,1,0);
+        cursorPosOnTrackCanvas.setX(cursorPos3D.x());
+        cursorPosOnTrackCanvas.setY(cursorPos3D.z());
+    }
+    else if(currViewAngle == "RIGHT")
+    {
+        cursorPos3D.setX(0.0);
+        cursorPos3D.setY(-((float(pixel[2])/255.0)*buildsizex*2*0.039063 - buildsizex*2*0.039063*0.5 + firstPassPos.x()));
+        cursorPos3D.setZ(-((float(pixel[0])/255.0)*buildsizey*2*0.039063 - buildsizey*2*0.039063*0.5 + firstPassPos.y()));
+        cursorNormal3D = QVector3D(1,0,0);
+        cursorPosOnTrackCanvas.setX(cursorPos3D.y());
+        cursorPosOnTrackCanvas.setY(cursorPos3D.z());
+    }
+}
+
+unsigned int WorldView::GetPickTriangleIndx(B9ModelInstance* inst, QPoint pos, bool &success)
+{
+    unsigned char pixel[3];
+
+    if(inst == NULL)
+    {
+        success = false;
+        return 0;
+    }
+
+    //clear the screen
+    qglClearColor(QColor(0,0,0));
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_LIGHTING);
+
+    inst->RenderTrianglePickGL();
+
+    glReadPixels(pos.x(), this->height() - pos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+
+    qglClearColor(QColor(0,100,100));
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_LIGHTING);
+
+
+    //now that we have the color, we should know what triangle index it is.
+    //if the color is 0,0,0, then we missed the model
+    unsigned int result = pixel[0]*1 + pixel[1]*256 + pixel[2]*65536;
+
+    if(!result)
+    {
+        success = false;
+        return 0;
+    }
+    else
+    {
+        if((result - 1) < inst->triList.size())//make sure the indx is in a valid range!
+        {                                //just in case..
+            success = true;
+            return result - 1;//to get actual index
+        }
+        else
+        {
+            success = false;
+            return 0;
+        }
+
+    }
+}
+//return position relative to instance center!
+QVector3D WorldView::GetPickOnTriangle(QPoint pos, B9ModelInstance* inst, unsigned int triIndx)
+{
+    unsigned char pixel[3];
+
+    //clear the screen
+    qglClearColor(QColor(128,128,128));// so if by chance we miss it will be center bounds
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_LIGHTING);
+
+    inst->RenderSingleTrianglePickGL(triIndx);
+
+    glReadPixels(pos.x(), this->height() - pos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+
+    double xPercent = float(pixel[0])/256.0;
+    double yPercent = float(pixel[1])/256.0;
+    double zPercent = float(pixel[2])/256.0;
+    QVector3D Slew(xPercent,yPercent,zPercent);
+
+    QVector3D minBound = inst->triList[triIndx]->minBound;
+    QVector3D maxBound = inst->triList[triIndx]->maxBound;
+
+    QVector3D globalPos = minBound + (maxBound - minBound)*Slew;
+
+
+    QVector3D localPos = globalPos - inst->GetPos();
+
+
+    qglClearColor(QColor(0,100,100));
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_LIGHTING);
+
+    return localPos;
+
+}
+
+//returns local position on the instance
+QVector3D WorldView::GetDrillingHit(QVector3D localBeginPosition, B9ModelInstance *inst, bool &hitground, Triangle3D *&pTri)
+{
+    unsigned int hitTri;
+    const float viewRad = 1.0;
+    const float nearPlane = 0.5;
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    //lets set up a ortho view facing down from the begining position.
+    glOrtho((inst->GetPos().x() + localBeginPosition.x()) - viewRad,
+            (inst->GetPos().x() + localBeginPosition.x()) + viewRad,
+            (inst->GetPos().y() + localBeginPosition.y()) - viewRad,
+            (inst->GetPos().y() + localBeginPosition.y()) + viewRad,
+            nearPlane,
+            (inst->GetMaxBound().z() - inst->GetMinBound().z()));
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    //move the "camera" into the right position.
+    glTranslatef(0.0f,
+                 0.0f,
+                 -(inst->GetPos().z() + localBeginPosition.z()));
+
+    bool s;
+    hitTri = GetPickTriangleIndx(inst, QPoint(this->width()/2,this->height()/2), s);
+    if(!s)
+    {
+        hitground = true;
+        pTri = NULL;
+        return QVector3D(0,0,0);
+    }
+
+    hitground = false;
+    pTri = inst->triList[hitTri];
+    return GetPickOnTriangle(QPoint(this->width()/2,this->height()/2),inst,hitTri);
+}
+
+
+
+
