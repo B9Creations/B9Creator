@@ -37,7 +37,7 @@
 *************************************************************************************/
 
 #include "triangle3d.h"
-#include "utlilityfunctions.h"
+#include "geometricfunctions.h"
 #include <QDebug>
 
 Triangle3D::Triangle3D()
@@ -59,6 +59,7 @@ Triangle3D::Triangle3D()
 	minBound.setZ(99999999.0);
 
 }
+
 Triangle3D::~Triangle3D()
 {
 
@@ -109,8 +110,12 @@ void Triangle3D::UpdateBounds()
 		}	
 	}
 
-    //also recompute normal
 
+}
+void Triangle3D::UpdateNormalFromGeom()
+{
+    normal = QVector3D::crossProduct(vertex[1] - vertex[0], vertex[2] - vertex[0]);
+    normal.normalize();
 }
 
 bool Triangle3D::IsBad()
@@ -133,6 +138,7 @@ bool Triangle3D::IntersectsXYPlane(double realAltitude)
 	{
 		return true;
 	}
+
 	//the triangle is not in bounds at all:
 	return false;
 }

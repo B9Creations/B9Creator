@@ -192,37 +192,6 @@ void DlgPrintPrep::on_checkBoxMirrored_clicked(bool checked)
     m_bMirrored = checked;
 }
 
-void DlgPrintPrep::on_checkBoxDryRun_clicked(bool checked)
-{
-    if(checked && !m_pTerminal->isConnected()){
-        ui->checkBoxDryRun->setChecked(false);
-        QMessageBox msg;
-        msg.setText("Sorry, you must be connected to the B9Creator to proceed.");
-        msg.exec();
-        return;
-    }
-    m_bDryRun = checked;
-    if(checked){
-    int ret = QMessageBox::information(this, tr("Dry Run?"),
-                                   tr("Selecting the 'Dry Run' option will operate the printer without turning on the projector.\n"
-                                      "The slice images will be sent to your primary monitor for preview.\n"
-                                      "Removing the VAT is optional, but BE SURE TO REMOVE THE BUILD TABLE AND THE SWEEPER!\n"
-                                      "Operating the printer 'dry' with these in place can damage the delicate PDMS coating "
-                                      "on the bottom of the VAT.\n"
-                                      "Are you sure you want to do a 'Dry Run'?"),
-                                   QMessageBox::Yes | QMessageBox::No);
-    if(ret==QMessageBox::No){ui->checkBoxDryRun->setChecked(false);return;}
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setText("Dry Run");
-    }
-    ui->checkBoxStep1->setEnabled(!m_bDryRun);
-    ui->label_Step1a->setEnabled(!m_bDryRun);
-    ui->pushButtonStep3->setEnabled(m_bDryRun);
-    if(!checked){
-        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-        ui->buttonBox->button(QDialogButtonBox::Ok)->setText("Print");
-    }
-}
-
 void DlgPrintPrep::on_checkBoxStep1_clicked(bool checked)
 {
     if(checked && !m_pTerminal->isConnected()){
@@ -232,9 +201,7 @@ void DlgPrintPrep::on_checkBoxStep1_clicked(bool checked)
         msg.exec();
         return;
     }
-    ui->checkBoxDryRun->setEnabled(!checked);
     ui->checkBoxStep2->setEnabled(checked);
-
 }
 
 void DlgPrintPrep::on_checkBoxStep2_clicked(bool checked)

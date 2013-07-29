@@ -250,12 +250,16 @@
     <addaction name="actionB9Creator_Terminal_Utility"/>
     <addaction name="actionMaterialsCatalog"/>
     <addaction name="separator"/>
+    <addaction name="actionCheck_For_Updates"/>
+    <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="actionContents"/>
+    <addaction name="separator"/>
     <addaction name="actionAbout_B9Creator"/>
    </widget>
    <addaction name="menuFile"/>
@@ -316,6 +320,11 @@
    </property>
    <property name="toolTip">
     <string>Monitor Serial Communications</string>
+   </property>
+  </action>
+  <action name="actionCheck_For_Updates">
+   <property name="text">
+    <string>Check For Updates</string>
    </property>
   </action>
  </widget>
@@ -418,6 +427,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionCheck_For_Updates</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>CheckForUpdates()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>94</x>
+     <y>119</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>myOpen()</slot>
@@ -428,5 +453,6 @@
   <slot>showCatalog()</slot>
   <slot>showPrintWiz()</slot>
   <slot>showAbout()</slot>
+  <slot>CheckForUpdates()</slot>
  </slots>
 </ui>

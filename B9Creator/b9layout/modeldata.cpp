@@ -37,33 +37,28 @@
 *************************************************************************************/
 
 #include "modeldata.h"
-
-#include <assimp/cimport.h>       // C++ importer interface
-#include <assimp/scene.h>           // Output data structure
-#include <assimp/postprocess.h>     // Post processing flags
+#include "b9modelloader.h"
+#include "loadingbar.h"
 
 #include <QtOpenGL>
 #include <QFileInfo>
-#include <iostream>
+
 
 
 
 //////////////////////////////////////
 //Public 
 //////////////////////////////////////
-ModelData::ModelData(B9Layout* main)
+ModelData::ModelData(B9Layout* main, bool bypassDisplayLists)
 {
 	pMain = main;
 	filepath = "";
-	loadedcount=0;
+    loadedcount = 0;
+    displaySkipping = 0;
+    bypassDispLists = bypassDisplayLists;
 
 	maxbound = QVector3D(-999999.0,-999999.0,-999999.0);
 	minbound = QVector3D(999999.0,999999.0,999999.0);
-
-    displaylistindx = glGenLists(2);//get an available display index
-    displaylistflippedindx = displaylistindx + 1;
-    qDebug() << "ModelData created with display list: " << displaylistindx;
-    qDebug() << " and a flipped display list of: " << displaylistflippedindx;
 
 }
 
@@ -81,12 +76,17 @@ ModelData::~ModelData()
 	}
 
 
-    glDeleteLists(displaylistindx,2);
+    for( i = 0; i < normDispLists.size(); i++)
+    {
+        glDeleteLists(normDispLists[i],1);
+    }
+    for( i = 0; i < flippedDispLists.size(); i++)
+    {
+        glDeleteLists(flippedDispLists[i],1);
+    }
 
 
 
-    qDebug() << "ModelData Deleted with displaylist " << displaylistindx;
-    qDebug() << " and a flipped display list of: " << displaylistflippedindx;
 }
 
 QString ModelData::GetFilePath()
@@ -101,128 +101,95 @@ QString ModelData::GetFileName()
 //data loading
 bool ModelData::LoadIn(QString filepath)
 {	
-    unsigned int m;
-    unsigned int t;
-    unsigned int i;
+    bool loaderReady;
+    bool abort;
 
+    STLTri* pLoadedTri = NULL;
     Triangle3D newtri;
-    const struct aiFace* face;
 
-	
 	this->filepath = filepath;
 	
 	if(filepath.isEmpty())
 		return false;
 	
 	//extract filename from path!
-	filename = QFileInfo(filepath).baseName();
+    filename = QFileInfo(filepath).fileName();
 
-	//AI_CONFIG_PP_FD_REMOVE = aiPrimitiveType_POINTS | aiPrimitiveType_LINES;
-    pScene = aiImportFile(filepath.toAscii(), aiProcess_Triangulate);// | aiProcess_JoinIdenticalVertices); //trian
-	
-    if(pScene == NULL)//assimp cant handle the file - lets try our own reader.
+    B9ModelLoader mLoader(filepath,loaderReady,NULL);
+
+    if(loaderReady == false)//error opening model data
 	{
-		//display Assimp Error
+        //display Loader Error
 		QMessageBox msgBox;
-		msgBox.setText("Assimp Error:  " + QString().fromAscii(aiGetErrorString()));
-		msgBox.exec();
-
-        aiReleaseImport(pScene);
-
+        msgBox.setText(mLoader.GetError());
+        msgBox.exec();
 		return false;
 	}
 
-    qDebug() << "Model imported with " << pScene->mMeshes[0]->mNumFaces << " faces.";
-	
+    //make a progress bar and connect it to
+    LoadingBar loadbar(0,100);
+    loadbar.useCancelButton(false);
+    loadbar.setDescription("Importing: " + filename);
+    QObject::connect(&mLoader,SIGNAL(PercentCompletedUpdate(qint64,qint64)),
+                     &loadbar,SLOT(setProgress(qint64,qint64)));
 
-	for (m = 0; m < pScene->mNumMeshes; m++) 
-	{
-		const aiMesh* mesh = pScene->mMeshes[m];
-		
-	    for (t = 0; t < mesh->mNumFaces; t++)
-		{
-            face = &mesh->mFaces[t];
-			
-			if(face->mNumIndices == 3)
-			{
-				for(i = 0; i < face->mNumIndices; i++) 
-				{
-					int index = face->mIndices[i];
-				
-                    newtri.normal.setX(mesh->mNormals[index].x);
-                    newtri.normal.setY(mesh->mNormals[index].y);
-                    newtri.normal.setZ(mesh->mNormals[index].z);
-			
-                    newtri.vertex[i].setX(mesh->mVertices[index].x);
-                    newtri.vertex[i].setY(mesh->mVertices[index].y);
-                    newtri.vertex[i].setZ(mesh->mVertices[index].z);
-				}
-                newtri.UpdateBounds();
-                triList.push_back(newtri);
 
-			}
-		}
-	}
 
-    aiReleaseImport(pScene);
+    //now we are ready to walk the loader through reading each triangle
+    //and copying it into the this model data.
+    while(mLoader.LoadNextTri(pLoadedTri,abort))
+    {
+        if(abort)
+        {
+            //display Loader abort error
+            QMessageBox msgBox;
+            msgBox.setText(mLoader.GetError());
+            msgBox.exec();
+            return false;
+        }
+        else
+        {
+            newtri.normal.setX(pLoadedTri->nx);
+            newtri.normal.setY(pLoadedTri->ny);
+            newtri.normal.setZ(pLoadedTri->nz);
+
+            newtri.vertex[0].setX(pLoadedTri->x0);
+            newtri.vertex[0].setY(pLoadedTri->y0);
+            newtri.vertex[0].setZ(pLoadedTri->z0);
+            newtri.vertex[1].setX(pLoadedTri->x1);
+            newtri.vertex[1].setY(pLoadedTri->y1);
+            newtri.vertex[1].setZ(pLoadedTri->z1);
+            newtri.vertex[2].setX(pLoadedTri->x2);
+            newtri.vertex[2].setY(pLoadedTri->y2);
+            newtri.vertex[2].setZ(pLoadedTri->z2);
+
+            delete pLoadedTri;
+            newtri.UpdateBounds();
+
+            triList.push_back(newtri);
+        }
+    }
+
+
 
     qDebug() << "Loaded triangles: " << triList.size();
 	//now center it!
 	CenterModel();
 
-	//generate a displaylist
-    int displayerror = FormDisplayList();
+    //generate a normal display lists.
 
-    //check for errors in display list creation (if its a large model the card may run out of memory.
+    int displaySuccess = FormNormalDisplayLists();
 
-    if(displayerror){
-    while(displayerror)//loop and see if there are additional errors as well.
-    {
-        //display Assimp Error
-        qDebug() << "Display List Error: " << displayerror; //write to log as well.
-        QMessageBox msgBox;
-
-        switch(displayerror)
-        {
-        case GL_OUT_OF_MEMORY:
-            msgBox.setText("OpenGL Error:  GL_OUT_OF_MEMORY\nModel is too large to render on your graphics card.");
-            break;
-        case GL_INVALID_ENUM:
-            msgBox.setText("OpenGL Error:  GL_INVALID_ENUM");
-            break;
-        case GL_INVALID_VALUE:
-            msgBox.setText("OpenGL Error:  GL_INVALID_VALUE");
-            break;
-        case GL_INVALID_FRAMEBUFFER_OPERATION:
-            msgBox.setText("OpenGL Error:  GL_INVALID_FRAMEBUFFER_OPERATION");
-            break;
-        case GL_STACK_UNDERFLOW:
-            msgBox.setText("OpenGL Error:  GL_STACK_UNDERFLOW");
-            break;
-        case GL_STACK_OVERFLOW:
-            msgBox.setText("OpenGL Error:  GL_STACK_OVERFLOW");
-            break;
-        default:
-            break;
-        }
-
-        msgBox.exec();
-        displayerror = glGetError();
-    }
-    return false;
-    }
-
-
-
-
-	return true;
+    if(displaySuccess)
+        return true;
+    else
+        return false;
 }
-
 //instance
-ModelInstance* ModelData::AddInstance()
+B9ModelInstance* ModelData::AddInstance()
 {
 	loadedcount++;
-	ModelInstance* pNewInst = new ModelInstance(this);
+	B9ModelInstance* pNewInst = new B9ModelInstance(this);
 	instList.push_back(pNewInst);
 	pNewInst->SetTag(filename + " " + QString().number(loadedcount));
 	return pNewInst;
@@ -291,51 +258,210 @@ void ModelData::CenterModel()
 
 //rendering
 //generate opengl display list, flipx generates with inverted x normals and vertices
-int ModelData::FormDisplayList() //returns opengl error enunum.
+bool ModelData::FormNormalDisplayLists() //returns opengl error enunum.
 {
-
+    unsigned int l;
     unsigned int t;
-	if (displaylistindx != 0) 
-	{
-		glNewList(displaylistindx,GL_COMPILE);
-		glBegin(GL_TRIANGLES);// Drawing Using Triangles
-		for(t = 0; t < triList.size(); t++)//for each triangle
-		{
+    const unsigned int listSize = 10000;//each list to be 10000 triangles big.
+    unsigned int tSeamCount = 0;
 
-                glNormal3f(triList[t].normal.x(),triList[t].normal.y(),triList[t].normal.z());//normals
-			
-                glVertex3f( triList[t].vertex[0].x(), triList[t].vertex[0].y(), triList[t].vertex[0].z());
-                glVertex3f( triList[t].vertex[1].x(), triList[t].vertex[1].y(), triList[t].vertex[1].z());
-                glVertex3f( triList[t].vertex[2].x(), triList[t].vertex[2].y(), triList[t].vertex[2].z());
-
-		}
-		glEnd();
-		glEndList();
-	}
-    else
-        return glGetError();
-
-
-    //form the flipped version as well.
-    if (displaylistflippedindx != 0)
+    //first lets free up existing display lists if there are any
+    for( l = 0; l < normDispLists.size(); l++)
     {
-        glNewList(displaylistflippedindx,GL_COMPILE);
-        glBegin(GL_TRIANGLES);// Drawing Using Triangles
-        for(t = 0; t < triList.size(); t++)//for each triangle
-        {
-                glNormal3f(-triList[t].normal.x(),triList[t].normal.y(),triList[t].normal.z());//normals
-
-                glVertex3f( -triList[t].vertex[2].x(), triList[t].vertex[2].y(), triList[t].vertex[2].z());
-                glVertex3f( -triList[t].vertex[1].x(), triList[t].vertex[1].y(), triList[t].vertex[1].z());
-                glVertex3f( -triList[t].vertex[0].x(), triList[t].vertex[0].y(), triList[t].vertex[0].z());
-
-        }
-        glEnd();
-        glEndList();
+        glDeleteLists(normDispLists[l],1);
     }
-    else
-        return glGetError();
+
+    if(bypassDispLists)
+        return true;
+
+    normDispLists.push_back(glGenLists(1));
+    if(normDispLists.at(normDispLists.size()-1) == 0)
+        return false;//failure to allocate a list index???
+
+    glNewList(normDispLists.at(normDispLists.size()-1),GL_COMPILE);
+    glBegin(GL_TRIANGLES);// Drawing Using Triangles
+    for(t = 0; t < triList.size(); t = t + 1 + displaySkipping)//for each triangle
+    {
+
+        glNormal3f(triList[t].normal.x(),triList[t].normal.y(),triList[t].normal.z());//normals
+
+        glVertex3f( triList[t].vertex[0].x(), triList[t].vertex[0].y(), triList[t].vertex[0].z());
+        glVertex3f( triList[t].vertex[1].x(), triList[t].vertex[1].y(), triList[t].vertex[1].z());
+        glVertex3f( triList[t].vertex[2].x(), triList[t].vertex[2].y(), triList[t].vertex[2].z());
+
+        //make a new seam.
+        if(tSeamCount >= listSize)
+        {
+            glEnd();
+            glEndList();
+            normDispLists.push_back(glGenLists(1));
+            if(normDispLists.at(normDispLists.size()-1) == 0)
+                return false;//failure to allocate a list index???
+
+            //when creating a seam check for graphics error
+            int err = GetGLError();
+            if(err)
+            {
+                if(err == GL_OUT_OF_MEMORY)
+                {
+                    displaySkipping += 10;
+                    return FormNormalDisplayLists();
+                }
+                else
+                    return false;
+            }
+
+            glNewList(normDispLists.at(normDispLists.size()-1),GL_COMPILE);
+            glBegin(GL_TRIANGLES);// Drawing Using Triangles
+            tSeamCount = 0;
+        }
+
+        tSeamCount++;
+    }
+    glEnd();
+    glEndList();
+
+    int err = GetGLError();
+    if(err)
+    {
+        if(err == GL_OUT_OF_MEMORY)
+        {
+            displaySkipping += 10;
+            return FormNormalDisplayLists();
+        }
+        else
+            return false;
+    }
 
 
-    return 0;
+
+    qDebug() << normDispLists.size() << "Normal Display Lists created for model " << filename;
+
+
+    return true;
+}
+
+
+bool ModelData::FormFlippedDisplayLists() //returns opengl error enunum.
+{
+    unsigned int l;
+    unsigned int t;
+    const unsigned int listSize = 10000;//each list to be 10000 triangles big.
+    unsigned int tSeamCount = 0;
+
+    //first lets free up existing display lists if there are any
+    for( l = 0; l < flippedDispLists.size(); l++)
+    {
+        glDeleteLists(flippedDispLists[l],1);
+    }
+
+    if(bypassDispLists)
+        return true;
+
+
+    flippedDispLists.push_back(glGenLists(1));
+    if(flippedDispLists.at(flippedDispLists.size()-1) == 0)
+        return false;//failure to allocate a list index???
+
+    glNewList(flippedDispLists.at(flippedDispLists.size()-1),GL_COMPILE);
+    glBegin(GL_TRIANGLES);// Drawing Using Triangles
+    for(t = 0; t < triList.size(); t = t + 1 + displaySkipping)//for each triangle
+    {
+
+        glNormal3f(-triList[t].normal.x(),triList[t].normal.y(),triList[t].normal.z());//normals
+
+        glVertex3f( -triList[t].vertex[2].x(), triList[t].vertex[2].y(), triList[t].vertex[2].z());
+        glVertex3f( -triList[t].vertex[1].x(), triList[t].vertex[1].y(), triList[t].vertex[1].z());
+        glVertex3f( -triList[t].vertex[0].x(), triList[t].vertex[0].y(), triList[t].vertex[0].z());
+        //make a new seam.
+        if(tSeamCount >= listSize)
+        {
+            glEnd();
+            glEndList();
+            flippedDispLists.push_back(glGenLists(1));
+            if(flippedDispLists.at(flippedDispLists.size()-1) == 0)
+                return false;//failure to allocate a list index???
+
+            //when creating a seam check for graphics error
+            int err = GetGLError();
+            if(err)
+            {
+                if(err == GL_OUT_OF_MEMORY)
+                {
+                    displaySkipping += 10;
+                    return FormFlippedDisplayLists();
+                }
+                else
+                    return false;
+            }
+
+            glNewList(flippedDispLists.at(flippedDispLists.size()-1),GL_COMPILE);
+            glBegin(GL_TRIANGLES);// Drawing Using Triangles
+            tSeamCount = 0;
+        }
+
+        tSeamCount++;
+    }
+    glEnd();
+    glEndList();
+
+    int err = GetGLError();
+    if(err)
+    {
+        if(err == GL_OUT_OF_MEMORY)
+        {
+            displaySkipping += 10;
+            return FormFlippedDisplayLists();
+        }
+        else
+            return false;
+    }
+
+    qDebug() << flippedDispLists.size() << "Flipped Display Lists created for model " << filename;
+
+
+    return true;
+
+}
+
+int ModelData::GetGLError()
+{
+    int displayerror = glGetError();
+
+    if(displayerror)
+    {
+        //display Assimp Error
+        qDebug() << "Display List Error: " << displayerror; //write to log as well.
+        QMessageBox msgBox;
+
+        switch(displayerror)
+        {
+        case GL_OUT_OF_MEMORY:
+            msgBox.setText("OpenGL Error:  GL_OUT_OF_MEMORY\nModel is too large to render on your graphics card.\nAttemping To Draw Sparse Triangles.");
+            break;
+        case GL_INVALID_ENUM:
+            msgBox.setText("OpenGL Error:  GL_INVALID_ENUM");
+            break;
+        case GL_INVALID_VALUE:
+            msgBox.setText("OpenGL Error:  GL_INVALID_VALUE");
+            break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+            msgBox.setText("OpenGL Error:  GL_INVALID_FRAMEBUFFER_OPERATION");
+            break;
+        case GL_STACK_UNDERFLOW:
+            msgBox.setText("OpenGL Error:  GL_STACK_UNDERFLOW");
+            break;
+        case GL_STACK_OVERFLOW:
+            msgBox.setText("OpenGL Error:  GL_STACK_OVERFLOW");
+            break;
+        default:
+            break;
+        }
+
+        msgBox.exec();
+        return displayerror;
+   }
+   else
+        return 0;
+
 }

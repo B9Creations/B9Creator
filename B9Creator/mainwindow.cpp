@@ -39,6 +39,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "OS_Wrapper_Functions.h"
+#include "b9printermodelmanager.h"
+#include "b9updatemanager.h"
+#include "b9supportstructure.h"
+#include <QDebug>
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -53,10 +58,34 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowFlags(Qt::MSWindowsFixedSizeDialogHint);
 
     // Always set up the log manager in the MainWindow constructor
-    pLogManager = new LogFileManager("B9Creator_LOG.txt", "B9Creator Log Entries");
+    pLogManager = new LogFileManager(CROSS_OS_GetDirectoryFromLocationTag("DOCUMENTS_DIR") + "/B9Creator_LOG.txt", "B9Creator Log Entries");
     m_bOpenLogOnExit = false;
     qDebug() << "Program Start";
+    qDebug() << "Relevent Used Application Directories";
+    qDebug() << "   EXECUTABLE_DIR: " << CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR");
+    qDebug() << "   APPLICATION_DIR: " << CROSS_OS_GetDirectoryFromLocationTag("APPLICATION_DIR");
+    qDebug() << "   TEMP_DIR: " << CROSS_OS_GetDirectoryFromLocationTag("TEMP_DIR");
+    qDebug() << "   DOCUMENTS_DIR: " << CROSS_OS_GetDirectoryFromLocationTag("DOCUMENTS_DIR");
 
+
+    //create update manager.
+    m_pUpdateManager = new B9UpdateManager(this);
+
+    //do things like move, delete old files from previous
+    //installations
+    m_pUpdateManager->TransitionFromPreviousVersions();
+    m_pUpdateManager->PromptDoUpdates(false);
+
+    //create Printer Model Manager, withough importing definitions - it will start with a default printer
+    pPrinterModelManager = new b9PrinterModelManager(this);
+    //pPrinterModelManager->ImportDefinitions(CROSS_OS_SPOT + "/B9Printer.DEF")
+    //pPrinterModelManager->ImportMaterials();//looks at mat file and user registry.
+
+    //import premade stls for support structures
+    B9SupportStructure::ImportAttachmentDataFromStls();
+    B9SupportStructure::FillRegistryDefaults();//if needed
+
+    //create terminal
     pTerminal = new B9Terminal(QApplication::desktop());
     pTerminal->setEnabled(true);
 
@@ -81,17 +110,26 @@ MainWindow::~MainWindow()
 {
     delete m_pCPJ;
     delete pTerminal;
-    qDebug() << "Program End";
+
     if(m_bOpenLogOnExit)
         pLogManager->openLogFileInFolder(); // Show log file location
     delete pLogManager; // delete last so all messages are logged
     delete ui;
+    delete pPrinterModelManager;//free printer model manager.
+    B9SupportStructure::FreeAttachmentData();
+    delete pMW1;
+    delete pMW2;
+    delete pMW3;
+    delete pMW4;
+
+
+    qDebug() << "Program End";
 }
 
 void MainWindow::showSplash()
 {
     if(m_pSplash!=NULL){
-        m_pSplash->showMessage("Version 1.4     Copyright 2013 B9Creations, LLC     www.b9creator.com\n ",Qt::AlignBottom|Qt::AlignCenter,QColor(255,130,36));
+        m_pSplash->showMessage("Version 1.5     Copyright 2013 B9Creations, LLC     www.b9creator.com\n ",Qt::AlignBottom|Qt::AlignCenter,QColor(255,130,36));
         m_pSplash->show();
         QTimer::singleShot(3000,this,SLOT(hideSplash()));
     }
@@ -100,7 +138,7 @@ void MainWindow::showSplash()
 void MainWindow::showAbout()
 {
     if(m_pSplash!=NULL){
-        m_pSplash->showMessage("Version 1.4     Copyright 2013 B9Creations, LLC     www.b9creator.com\n ",Qt::AlignBottom|Qt::AlignCenter,QColor(255,130,36));
+        m_pSplash->showMessage("Version 1.5     Copyright 2013 B9Creations, LLC     www.b9creator.com\n ",Qt::AlignBottom|Qt::AlignCenter,QColor(255,130,36));
         m_pSplash->show();
     }
 }
@@ -159,6 +197,10 @@ void MainWindow::handleW4Hide()
     pTerminal->setIsPrinting(false);
     CROSS_OS_DisableSleeps(false);// return system screensavers back to normal.
 
+}
+void MainWindow::CheckForUpdates()
+{
+    m_pUpdateManager->PromptDoUpdates();
 }
 
 void MainWindow::on_commandLayout_clicked(bool checked)
@@ -239,3 +281,16 @@ void MainWindow::doPrint()
 
     return;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

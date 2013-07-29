@@ -148,6 +148,9 @@ private:
     void streamOut(QDataStream* pOut);
     void streamIn(QDataStream* pIn);
 
+    int LoadUserMaterialsFromRegister();
+    void SaveUserMaterialsToRegister();
+
     int m_iCurMatIndex;
     int m_iCurXYIndex;
     int m_iCurZIndex;

@@ -255,11 +255,12 @@ void SliceEditView::PromptBaseOptions()
 	int baselayers;
 	int fills;
 	bool cont;
-	
-    baselayers = QInputDialog::getInteger(this, tr("Attachment Base"), tr("Object Standoff, # of Layers:"), pCPJ->getBase(), 4, 1000, 1, &cont, windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    baselayers = QInputDialog::getInteger(this, tr("Attachment Base"),
+                                          tr("Object Standoff, # of Layers:"),
+                                          pCPJ->getBase(), 0, 1000, 1, &cont, windowFlags() & ~Qt::WindowContextHelpButtonHint);
     if (!cont)
 		return;
-    fills = QInputDialog::getInteger(this, tr("Attachment Base"), tr("Filled Layers:"), pCPJ->getFilled(), 1, baselayers, 1, &cont, windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    fills = QInputDialog::getInteger(this, tr("Attachment Base"), tr("Filled Layers:"), pCPJ->getFilled(), 0, baselayers, 1, &cont, windowFlags() & ~Qt::WindowContextHelpButtonHint);
 	if (!cont)
 		return;
 
@@ -283,7 +284,7 @@ void SliceEditView::AddSupport(QPoint pos, int size, SupportType type, int fastm
 	QCursor prevC = pDrawingContext->cursor();
 	pDrawingContext->setCursor(QCursor(Qt::WaitCursor));
 	
-	pCPJ->AddSupport(currSlice - 1,pos,size,type,fastmode);
+    pCPJ->AddSupport(currSlice - 1,pos,size,type,fastmode);
 	
 	DeCompressIntoContext();
 	pDrawingContext->GenerateLogicImage();

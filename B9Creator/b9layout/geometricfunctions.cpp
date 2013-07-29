@@ -36,7 +36,7 @@
 //
 *************************************************************************************/
 
-#include "utlilityfunctions.h"
+#include "geometricfunctions.h"
 #include "math.h"
 #include <algorithm>
 #include "qmath.h"
@@ -118,38 +118,26 @@ double Distance3D(QVector3D point1, QVector3D point2)
 	return sqrt( pow((point2.x()-point1.x()),2) + pow((point2.y()-point1.y()),2) + pow((point2.z()-point1.z()),2));
 }
 
-void RotateVector(QVector3D &vec, double angledeg, QVector3D axis)//choose 1 axis of rotation at a time..
+bool VectorComponentsEqual(QVector3D &vec)
 {
-	double prevx;
-	double prevy;
-	double prevz;
-	double cosval = qCos( angledeg * TO_RAD );
-	double sinval = qSin( angledeg * TO_RAD );
+    if((vec.x() == vec.y()) && vec.x() == vec.z())
+        return true;
 
-	if(axis.x())
-	{
-		prevx = vec.x();
-		prevy = vec.y();
-		prevz = vec.z();
-		vec.setY( prevy * cosval - prevz * sinval);
-		vec.setZ( prevy * sinval + prevz * cosval);
-	}
+    return false;
+}
 
-	if(axis.y())
-	{
-		prevx = vec.x();
-		prevy = vec.y();
-		prevz = vec.z();
-		vec.setZ( prevz * cosval - prevx * sinval);
-		vec.setX( prevz * sinval + prevx * cosval);
-	}
+//returns the length of the largest compent in the vector.
+double VectorMaxComponentLength(QVector3D vec)
+{
+    double max = -1.0;
 
-	if(axis.z())
-	{
-		prevx = vec.x();
-		prevy = vec.y();
-		prevz = vec.z();
-		vec.setX( prevx * cosval - prevy * sinval);
-		vec.setY( prevx * sinval + prevy * cosval);
-	}
+    if(abs(vec.x()) > max)
+        max = abs(vec.x());
+    if(abs(vec.y()) > max)
+        max = abs(vec.y());
+    if(abs(vec.z()) > max)
+        max = abs(vec.z());
+
+
+    return max;
 }

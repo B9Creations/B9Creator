@@ -41,77 +41,165 @@
 
 #include <QGLWidget>
 #include "b9layout.h"
+#include "b9supportstructure.h"
 #include <QPoint>
-class ModelInstance;
+class B9ModelInstance;
+class B9SupportStructure;
 class MainWindow;
 class B9Layout;
+class Triangle3D;
 class WorldView : public QGLWidget
 {
     Q_OBJECT
  public:
      WorldView(QWidget *parent, B9Layout* main);
      ~WorldView();
-     QTimer* pDrawTimer; //refreshed the 3d scene
+     QTimer* pDrawTimer; //refreshes the 3d scene
 
      bool shiftdown; //public so that the mainwindow can alter these values easy.
      bool controldown;
  public slots:
-    void setXRotation(int angle);
-    void setYRotation(int angle);
-    void setZRotation(int angle);
+
+
 	void CenterView();
-	void UpdateTick();//called every 1/60th of a second by update timer. also refreshes the openGL Screen
+    void TopView();
+    void RightView();
+    void FrontView();
+    void SetPerpective(bool persp){perspective = persp;}
+    void SetRevolvePoint(QVector3D point);
+    void SetPan(QVector3D pan);
+    void SetZoom(double zoom);
+    void setXRotation(float angle);
+    void setYRotation(float angle);
+    void setZRotation(float angle);
+
+
+    void UpdatePlasmaFence();//check if any instances are out of the build area and show fence.
+
+
+    void UpdateTick();//called every 1/60th of a second by update timer. also refreshes the openGL Screen
 	void SetTool(QString tool);
+    QString GetTool();
+    void ExitToolAction();//stops the using of tool while the mouse is moving.
+
+ public://GETS
+
+    QVector3D GetPan();
+    float GetZoom();
+    QVector3D GetRotation();
+
+public: //Events
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void wheelEvent(QWheelEvent *event);
+    void keyPressEvent(QKeyEvent * event );
+    void keyReleaseEvent(QKeyEvent * event );
+
+    //tools code
+    void OnToolInitialAction(QString tool, QMouseEvent* event);
+    void OnToolDragAction(QString tool, QMouseEvent* event);
+    void OnToolReleaseAction(QString tool, QMouseEvent* event);
+    void OnToolHoverMove(QString tool, QMouseEvent* event);
+    QString toolStringMemory;
+    QString toolStringMemory2;
+    QVector3D toolVectorMemory1;
+    QVector3D toolVectorMemory2;
+    double toolDoubleMemory1;
+    double toolDoubleMemory2;
+    double toolDoubleMemory3;
+    B9SupportStructure toolSupportMemory;
+    bool toolBoolMemory1;
+
+
  signals:
+
     void xRotationChanged(int angle);
     void yRotationChanged(int angle);
     void zRotationChanged(int angle);
 
- private:
+ private://functions
     void initializeGL();
     void paintGL();
     void resizeGL(int width, int height);
+
+
 
 
 	void DrawInstances(); //draws all instances!
 	void DrawBuildArea();//draws the bounds of the build area.
 	
 
-	ModelInstance* SelectByScreen(QPoint pos,bool singleselect = true);// quarrys the screen for an object at the pos, then gives pMain the go ahead to select it etc..
-	void UpdateSelectedBounds();
+    B9ModelInstance* SelectInstanceByScreen(QPoint pos);// quarrys the screen for an object at the pos,
+    B9SupportStructure* GetSupportByScreen(QPoint pos);// returns pointer to object.
+    QString GetSupportSectionByScreen(QPoint pos, B9SupportStructure* sup);
 
-    void mousePressEvent(QMouseEvent *event);
-	void mouseReleaseEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-	void wheelEvent(QWheelEvent *event);
-	void keyPressEvent(QKeyEvent * event );
-	void keyReleaseEvent(QKeyEvent * event );
+    void Update3DCursor(QPoint pos);
+    void Update3DCursor(QPoint pos, B9ModelInstance *trackInst);
+    void Update3DCursor(QPoint pos, B9ModelInstance *trackInst, bool &isAgainstInst);
 
 
- private:
+    unsigned int GetPickTriangleIndx(B9ModelInstance *inst, QPoint pos, bool &success);//returns the triangle of any model that the user clicks on. success is returned.
+    QVector3D GetPickOnTriangle(QPoint pos, B9ModelInstance *inst, unsigned int triIndx);
+    QVector3D GetDrillingHit(QVector3D localBeginPosition, B9ModelInstance *inst, bool &hitground, Triangle3D *&pTri);
+
+
+    void UpdateSelectedBounds();
+
+
+ private: //members
+    //viewing vars
     float xRot;
     float yRot;
     float zRot;
-	QVector3D pan;
-	
+    float xRotTarget;//target values for smooth transitions.
+    float yRotTarget;
+    float zRotTarget;
 
-	float camdist;
+    float camdist;
+    float camdistTarget;
+
+    QString currViewAngle;//"FREE", "TOP", "FRONT", etc
+
+    bool perspective;
+
+    QVector3D pan;
+    QVector3D panTarget;
+    QVector3D revolvePoint;
+    QVector3D revolvePointTarget;
+
+    float deltaTime;//frame rate and delta time vars
+    float lastFrameTime;
+
+
+    QVector3D cursorPos3D;//true global position of cursor
+    QVector3D cursorNormal3D;//
+    QVector2D cursorPosOnTrackCanvas;//similar to pixel cords, but in real units in world.
+    QVector3D cursorPreDragPos3D;
+    QVector3D cursorPostDragPos3D;//TODO not yet implemented
+    QVector3D PreDragInstanceOffset;
+    QVector3D PreDragRotationOffsetData;//not really a cordinate just info.
+
 	//tools/keys
 	QString currtool;
-
 	bool pandown;
 	bool dragdown;
-	ModelInstance* selectedinst;
 
-	//visual
+    //visual build size only - use project settings as actual size
 	float buildsizex;
 	float buildsizey;
 	float buildsizez;
 
-    QPoint mousedownPos;
-    bool initialsnap;
-	QPoint lastPos;
+    //visual fence stuff
+    bool fencesOn[4];
+    float fenceAlpha;
 
+    //mouse cords
+    QVector2D mouseDeltaPos;
+    QPoint mouseDownInitialPos;
+    QPoint mouseLastPos;
+
+    //layout window pointer.
     B9Layout* pMain;
  };
 

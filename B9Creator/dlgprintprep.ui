@@ -402,19 +402,6 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0" colspan="3">
-       <widget class="QCheckBox" name="checkBoxDryRun">
-        <property name="toolTip">
-         <string>Dry Run Only</string>
-        </property>
-        <property name="whatsThis">
-         <string>A Dry Run is the same as a normal print but the projector remains off and the image output is redirected to the primary monitor.</string>
-        </property>
-        <property name="text">
-         <string>Do a &quot;Dry Run&quot; only.  Ensure that the Build Table and Sweeper are REMOVED.</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="3">
        <widget class="QCheckBox" name="checkBoxStep1">
         <property name="toolTip">
          <string>Step 1 - Inspect the Printer.</string>
@@ -427,7 +414,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2">
+      <item row="1" column="0" colspan="2">
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -443,7 +430,7 @@
         </property>
        </spacer>
       </item>
-      <item row="2" column="2">
+      <item row="1" column="2">
        <widget class="QLabel" name="label_Step1a">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -456,20 +443,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0" colspan="3">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>490</width>
-          <height>15</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="4" column="0" colspan="3">
+      <item row="2" column="0" colspan="3">
        <widget class="QCheckBox" name="checkBoxStep2">
         <property name="toolTip">
          <string>Step 2 - Remove the Sweeper.</string>
@@ -482,7 +456,7 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0" colspan="3">
+      <item row="3" column="0" colspan="3">
        <widget class="QPushButton" name="pushButtonStep3">
         <property name="toolTip">
          <string>Click to reset the printer and move to the fill position.</string>
@@ -495,7 +469,7 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0" colspan="3">
+      <item row="4" column="0" colspan="3">
        <widget class="QCheckBox" name="checkBoxStep4">
         <property name="toolTip">
          <string>Fill the VAT with Resin. DO NOT OVERFILL!</string>
@@ -508,7 +482,7 @@
         </property>
        </widget>
       </item>
-      <item row="7" column="0" colspan="3">
+      <item row="5" column="0" colspan="3">
        <widget class="QCheckBox" name="checkBoxStep5">
         <property name="toolTip">
          <string>Intall the Sweeper and close the Hatch</string>
@@ -1335,7 +1309,6 @@
   <tabstop>spinBoxLayersToPrint</tabstop>
   <tabstop>pushButtonResetPrintAll</tabstop>
   <tabstop>pushButtonReleaseCycle</tabstop>
-  <tabstop>checkBoxDryRun</tabstop>
   <tabstop>checkBoxStep1</tabstop>
   <tabstop>checkBoxStep2</tabstop>
   <tabstop>pushButtonStep3</tabstop>

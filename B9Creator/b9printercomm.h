@@ -45,9 +45,9 @@
 // The Firmware version is tied to a specific version
 // These defines determine how we attempt to update Firmware
 // The correctly named current hex file MUST be in the application directory
-#define CURRENTFIRMWARE "v1.0.9"
+#define CURRENTFIRMWARE "v1.1.0"
 #define FIRMWAREUPDATESPEED 115200
-#define FIRMWAREHEXFILE "B9Firmware_1_0_9.hex"
+#define FIRMWAREHEXFILE "B9Firmware_1_1_0.hex"
 #define MSG_SEARCHING "Searching..."
 #define MSG_CONNECTED "Connected"
 #define MSG_FIRMUPDATE "Updating Firmware..."

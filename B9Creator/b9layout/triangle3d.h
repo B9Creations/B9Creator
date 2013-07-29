@@ -55,9 +55,20 @@ public:
     ~Triangle3D();
 
 	void UpdateBounds();
+    void UpdateNormalFromGeom();//recomputes normal from vertex's
 	bool IsBad(); //returns true if the triangle has no "area" or no bounds.
 	bool ParallelXYPlane();
 	bool IntersectsXYPlane(double realAltitude);
+
+    static bool GreaterTopAltitude(Triangle3D* t1, Triangle3D* t2)
+    {
+        return (t1->maxBound.z() < t2->maxBound.z());
+    }
+
+    static bool GreaterBottomAltitude(Triangle3D* t1, Triangle3D* t2)
+    {
+        return (t1->minBound.z() < t2->minBound.z());
+    }
 };
 
 #endif

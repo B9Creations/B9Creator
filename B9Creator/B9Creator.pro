@@ -45,14 +45,13 @@
 QT       += core gui
 QT       += svg
 QT       += opengl
+QT       += network
 
-TARGET = B9Creator
 TEMPLATE = app
 
 INCLUDEPATH += b9slice
 INCLUDEPATH += b9edit
 INCLUDEPATH += b9create
-INCLUDEPATH += assimp--3.0.1270-sdk/include
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -74,7 +73,6 @@ SOURCES += main.cpp\
     b9matcat.cpp \
     b9print.cpp \
     b9layout/worldview.cpp \
-    b9layout/utilityfunctions.cpp \
     b9layout/triangulate.cpp \
     b9layout/triangle3d.cpp \
     b9layout/sliceset.cpp \
@@ -83,15 +81,24 @@ SOURCES += main.cpp\
     b9layout/slice.cpp \
     b9layout/SlcExporter.cpp \
     b9layout/segment.cpp \
-    b9layout/projectdata.cpp \
-    b9layout/modelinstance.cpp \
     b9layout/modeldata.cpp \
     b9layout/loop.cpp \
     b9layout/b9layout.cpp \
     b9slice/b9slice.cpp \
     dlgprintprep.cpp \
     OS_Wrapper_Functions.cpp \
-    screensaverwaker.cpp
+    screensaverwaker.cpp \
+    b9material.cpp \
+    b9printermodeldata.cpp \
+    b9printermodelmanager.cpp \
+    b9updatemanager.cpp \
+    b9modelloader.cpp \
+    b9layout/b9layoutprojectdata.cpp \
+    b9layout/b9modelinstance.cpp \
+    b9supportstructure.cpp \
+    b9layout/geometricfunctions.cpp \
+    b9layout/b9verticaltricontainer.cpp \
+    b9modelwriter.cpp
 
 HEADERS  += mainwindow.h \
     logfilemanager.h \
@@ -112,7 +119,6 @@ HEADERS  += mainwindow.h \
     b9matcat.h \
     b9print.h \
     b9layout/worldview.h \
-    b9layout/utlilityfunctions.h \
     b9layout/triangulate.h \
     b9layout/triangle3d.h \
     b9layout/sliceset.h \
@@ -121,8 +127,6 @@ HEADERS  += mainwindow.h \
     b9layout/slice.h \
     b9layout/SlcExporter.h \
     b9layout/segment.h \
-    b9layout/projectdata.h \
-    b9layout/modelinstance.h \
     b9layout/modeldata.h \
     b9layout/loop.h \
     OS_GL_Wrapper.h \
@@ -130,7 +134,19 @@ HEADERS  += mainwindow.h \
     b9slice/b9slice.h \
     dlgprintprep.h \
     OS_Wrapper_Functions.h \
-    screensaverwaker.h
+    screensaverwaker.h \
+    b9material.h \
+    b9printermodeldata.h \
+    b9printermodelmanager.h \
+    b9updatemanager.h \
+    b9updateentry.h \
+    b9modelloader.h \
+    b9layout/b9layoutprojectdata.h \
+    b9layout/b9modelinstance.h \
+    b9supportstructure.h \
+    b9layout/geometricfunctions.h \
+    b9layout/b9verticaltricontainer.h \
+    b9modelwriter.h
 
 FORMS    += mainwindow.ui \
     b9terminal.ui \
@@ -149,8 +165,6 @@ RESOURCES += \
     b9edit/sliceeditview.qrc \
     b9edit/b9edit.qrc \
     b9edit/sliceeditview.qrc
-
-
 
 
 
@@ -185,19 +199,14 @@ OTHER_FILES += \
 
 win32{
 
-#Application Icon For Windows
-RC_FILE = Application_Icons/Windows/b9c_icon.rc
+#Recource File For Windows
+#Includes information for app icon
+RC_FILE = WindowsResources/b9c_win_resources.rc
 
+#In windows this application needs elevated privileges to do self updates.
+QMAKE_LFLAGS += /MANIFESTUAC:\"level=\'requireAdministrator\' uiAccess=\'false\'\"
 
-#Windows Assimp Static Library Loading
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/assimp--3.0.1270-sdk/lib/assimp_release-noboost-st_Win32/ -lassimp
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/assimp--3.0.1270-sdk/lib/assimp_debug-noboost-st_Win32/ -lassimp
-
-INCLUDEPATH += $$PWD/assimp--3.0.1270-sdk/include
-DEPENDPATH += $$PWD/assimp--3.0.1270-sdk/include
-
-win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/assimp--3.0.1270-sdk/lib/assimp_release-noboost-st_Win32/assimp.lib
-else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/assimp--3.0.1270-sdk/lib/assimp_debug-noboost-st_Win32/assimp.lib
+TARGET = B9Creator
 
 
 }
@@ -208,32 +217,24 @@ else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/assimp--3.0.127
 macx{
 
 #Application Icon For Mac
-ICON = Application_Icons/Mac/b9c_icon.icns
+ICON = MacResources/b9c_icon.icns
 
+#Slightly Different Executable name
+TARGET = B9Creator
 
 CONFIG -= x86_64
 
 #Mac CoreLibrary Functions
 macx: LIBS += -framework CoreServices
 
-#Mac Assimp Static Lbrary Loading
-macx: LIBS += -L$$PWD/assimp--3.0.1270-sdk/bin/assimp_Release_MacOSX/ -lassimp
-INCLUDEPATH += $$PWD/assimp--3.0.1270-sdk/bin/assimp_Release_MacOSX
-DEPENDPATH += $$PWD/assimp--3.0.1270-sdk/bin/assimp_Release_MacOSX
-macx: PRE_TARGETDEPS += $$PWD/assimp--3.0.1270-sdk/bin/assimp_Release_MacOSX/libassimp.a
 
 }
 
 
-#Linux Library Specifics-------------------------------------------------------------
+#Linux Specifics-------------------------------------------------------------
+unix:!macx: TARGET = B9Creator
 
-
-#Linux Assimp Static Library Loading
-unix:!macx:!symbian: LIBS += -L$$PWD/assimp--3.0.1270-sdk/lib/ -lassimp
-unix:!macx:!symbian: PRE_TARGETDEPS += $$PWD/assimp--3.0.1270-sdk/lib/libassimp.a
-
-unix:!macx:!symbian: LIBS += -lGLU
-unix:!macx:!symbian: LIBS += -lz
-
+unix:!macx: LIBS += -lGLU
+unix:!macx: LIBS += -lz
 
 

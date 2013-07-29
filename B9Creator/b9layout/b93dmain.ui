@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>979</width>
-    <height>766</height>
+    <width>1600</width>
+    <height>792</height>
    </rect>
   </property>
   <property name="contextMenuPolicy">
@@ -17,582 +17,1200 @@
    <string>B9Creator - Layout</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QGroupBox" name="layoutBox">
+     <widget class="QTabWidget" name="TabWidget">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="maximumSize">
        <size>
-        <width>300</width>
+        <width>400</width>
         <height>16777215</height>
        </size>
       </property>
-      <property name="title">
-       <string>Layout</string>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
-       <property name="leftMargin">
-        <number>5</number>
+      <property name="tabShape">
+       <enum>QTabWidget::Rounded</enum>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <property name="elideMode">
+       <enum>Qt::ElideRight</enum>
+      </property>
+      <property name="usesScrollButtons">
+       <bool>false</bool>
+      </property>
+      <property name="documentMode">
+       <bool>false</bool>
+      </property>
+      <property name="tabsClosable">
+       <bool>false</bool>
+      </property>
+      <widget class="QWidget" name="tab">
+       <property name="maximumSize">
+        <size>
+         <width>400</width>
+         <height>16777215</height>
+        </size>
        </property>
-       <property name="rightMargin">
-        <number>5</number>
+       <attribute name="title">
+        <string>Models</string>
+       </attribute>
+       <attribute name="toolTip">
+        <string>Organize your models</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Build Space:</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Pixel Size(µm):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Projector Resolution:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="projectorcombo">
+             <property name="toolTip">
+              <string>Printer projector's native resolution</string>
+             </property>
+             <property name="whatsThis">
+              <string>Printer projector's native resolution</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>(XGA) 1024x768</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>(SXGA) 1280x1024</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>(1080p) 1920x1080</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>(WUXGA) 1920x1200</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>(QXGA) 2048x1536</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="pixelsizecombo">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="contextMenuPolicy">
+              <enum>Qt::DefaultContextMenu</enum>
+             </property>
+             <property name="toolTip">
+              <string>X Y Pixel dimensions as determined by printer calibration</string>
+             </property>
+             <property name="whatsThis">
+              <string>X Y Pixel dimensions as determined by printer calibration</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>50</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>75</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="title">
+           <string>Model List:</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="leftMargin">
+            <number>5</number>
+           </property>
+           <property name="topMargin">
+            <number>6</number>
+           </property>
+           <property name="rightMargin">
+            <number>5</number>
+           </property>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_15">
+             <item>
+              <widget class="QPushButton" name="AddButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Add a 3D model to the Layout</string>
+               </property>
+               <property name="whatsThis">
+                <string>Add a 3D model to the Layout</string>
+               </property>
+               <property name="text">
+                <string>Add</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="duplicateButton">
+               <property name="toolTip">
+                <string>Duplicate the selected model(s)</string>
+               </property>
+               <property name="whatsThis">
+                <string>Duplicate the selected model(s)</string>
+               </property>
+               <property name="text">
+                <string>Duplicate</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="RemoveButton">
+               <property name="toolTip">
+                <string>Delete the selected Model(s) from the layout</string>
+               </property>
+               <property name="whatsThis">
+                <string>Delete the selected Model(s) from the layout</string>
+               </property>
+               <property name="text">
+                <string>Remove</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QListWidget" name="ModelList">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Listing of all models in the current layout</string>
+             </property>
+             <property name="whatsThis">
+              <string>Listing of all models in the current layout</string>
+             </property>
+             <property name="dragEnabled">
+              <bool>false</bool>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::ExtendedSelection</enum>
+             </property>
+             <property name="selectionBehavior">
+              <enum>QAbstractItemView::SelectItems</enum>
+             </property>
+             <property name="layoutMode">
+              <enum>QListView::SinglePass</enum>
+             </property>
+             <property name="viewMode">
+              <enum>QListView::ListMode</enum>
+             </property>
+             <property name="sortingEnabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>400</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="ModelTranslationBox">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="title">
+           <string>Model Information:</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_11">
+           <property name="spacing">
+            <number>2</number>
+           </property>
+           <property name="leftMargin">
+            <number>5</number>
+           </property>
+           <property name="topMargin">
+            <number>6</number>
+           </property>
+           <property name="rightMargin">
+            <number>5</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_21">
+             <property name="text">
+              <string>Size(mm):</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_14">
+             <item>
+              <widget class="QLabel" name="label_23">
+               <property name="text">
+                <string>X:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="modelsizex">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="toolTip">
+                <string>Size of model in the x axis</string>
+               </property>
+               <property name="whatsThis">
+                <string>Size of model in the x axis</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_22">
+               <property name="text">
+                <string>Y:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="modelsizey">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="toolTip">
+                <string>Size of model in the y axis</string>
+               </property>
+               <property name="whatsThis">
+                <string>Size of model in the y axis</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_24">
+               <property name="text">
+                <string>Z:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="modelsizez">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="toolTip">
+                <string>Size of model in the z axis</string>
+               </property>
+               <property name="whatsThis">
+                <string>Size of model in the z axis</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_8">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Position(mm):</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_11">
+             <item>
+              <widget class="QLabel" name="label_11">
+               <property name="text">
+                <string>X:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="posx">
+               <property name="toolTip">
+                <string>Position of model's center in the x axis</string>
+               </property>
+               <property name="whatsThis">
+                <string>Position of model's center in the x axis</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_12">
+               <property name="text">
+                <string>Y:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="posy">
+               <property name="toolTip">
+                <string>Position of model's center in the y axis</string>
+               </property>
+               <property name="whatsThis">
+                <string>Position of model's center in the y axis</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_13">
+               <property name="text">
+                <string>Z:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="posz">
+               <property name="toolTip">
+                <string>Position of model's center in the z axis</string>
+               </property>
+               <property name="whatsThis">
+                <string>Position of model's center in the z axis</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_9">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Rotation(degrees):</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_12">
+             <item>
+              <widget class="QLabel" name="label_30">
+               <property name="text">
+                <string>X:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="rotx"/>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_31">
+               <property name="text">
+                <string>Y:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="roty"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton">
+               <property name="text">
+                <string>Reset Rotation</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_22">
+             <item>
+              <widget class="QLabel" name="label_16">
+               <property name="text">
+                <string>Spin:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="rotz">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Rotation of model about its z axis</string>
+               </property>
+               <property name="whatsThis">
+                <string>Rotation of model about its z axis</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="Model_Spin_horizontalSlider">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximum">
+                <number>360</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="invertedAppearance">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_10">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Scaling Factor:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_13">
+             <item>
+              <widget class="QLabel" name="label_19">
+               <property name="text">
+                <string>X:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="scalex">
+               <property name="toolTip">
+                <string>Model's x axis scaling factor</string>
+               </property>
+               <property name="statusTip">
+                <string/>
+               </property>
+               <property name="whatsThis">
+                <string>Model's x axis scaling factor</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_17">
+               <property name="text">
+                <string>Y:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="scaley">
+               <property name="toolTip">
+                <string>Model's y axis scaling factor</string>
+               </property>
+               <property name="whatsThis">
+                <string>Model's y axis scaling factor</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_18">
+               <property name="text">
+                <string>Z:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="scalez">
+               <property name="toolTip">
+                <string>Model's z axis scaling factor</string>
+               </property>
+               <property name="whatsThis">
+                <string>Model's z axis scaling factor</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QCheckBox" name="scalelock">
+               <property name="toolTip">
+                <string>Select to lock the model's x, y &amp; z axis scaling factors</string>
+               </property>
+               <property name="whatsThis">
+                <string>Select to lock the model's x, y &amp; z axis scaling factors</string>
+               </property>
+               <property name="text">
+                <string>Lock Aspect Ratio</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="flipx">
+               <property name="text">
+                <string>Mirrored</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QPushButton" name="ApplyButton">
+             <property name="toolTip">
+              <string>Apply entered changes to selected model's parameters</string>
+             </property>
+             <property name="whatsThis">
+              <string>Apply entered changes to selected model's parameters</string>
+             </property>
+             <property name="text">
+              <string>Apply Changes</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <property name="maximumSize">
+        <size>
+         <width>400</width>
+         <height>16777215</height>
+        </size>
        </property>
-       <item>
-        <widget class="QGroupBox" name="groupBox_2">
-         <property name="title">
-          <string>Build Space:</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Pixel Size(µm):</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Projector Resolution:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="projectorcombo">
-            <property name="toolTip">
-             <string>Printer projector's native resolution</string>
-            </property>
-            <property name="whatsThis">
-             <string>Printer projector's native resolution</string>
-            </property>
-            <item>
-             <property name="text">
-              <string>(XGA) 1024x768</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>(SXGA) 1280x1024</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>(1080p) 1920x1080</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>(WUXGA) 1920x1200</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>(QXGA) 2048x1536</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="pixelsizecombo">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="contextMenuPolicy">
-             <enum>Qt::DefaultContextMenu</enum>
-            </property>
-            <property name="toolTip">
-             <string>X Y Pixel dimensions as determined by printer calibration</string>
-            </property>
-            <property name="whatsThis">
-             <string>X Y Pixel dimensions as determined by printer calibration</string>
-            </property>
-            <item>
-             <property name="text">
-              <string>50</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>75</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>100</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox">
-         <property name="title">
-          <string>Model List:</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <property name="spacing">
-           <number>6</number>
+       <attribute name="title">
+        <string>Supports</string>
+       </attribute>
+       <attribute name="toolTip">
+        <string>Edit supports for the selected model</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QGroupBox" name="Support_Base_GroupBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <property name="leftMargin">
-           <number>5</number>
+          <property name="toolTip">
+           <string>Edit the foundation under the model</string>
           </property>
-          <property name="topMargin">
-           <number>6</number>
+          <property name="title">
+           <string>Foundation:</string>
           </property>
-          <property name="rightMargin">
-           <number>5</number>
+          <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_20">
+             <item>
+              <widget class="QCheckBox" name="Support_Base_Enabled_checkBox">
+               <property name="toolTip">
+                <string>Enable foundation under the model</string>
+               </property>
+               <property name="text">
+                <string>Enabled</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="Support_Base_AttachType_comboBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Choose the shape of the foundation</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QLabel" name="label_32">
+               <property name="text">
+                <string>Coverage:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="Support_Base_Coverage_horizontalSlider">
+               <property name="toolTip">
+                <string>Change the size of the foundation</string>
+               </property>
+               <property name="minimum">
+                <number>50</number>
+               </property>
+               <property name="maximum">
+                <number>200</number>
+               </property>
+               <property name="value">
+                <number>100</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="Support_Base_Coverage_label">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_21">
+             <item>
+              <widget class="QLabel" name="label_34">
+               <property name="text">
+                <string>Thickness(mm):</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="Support_Base_Length_lineEdit">
+               <property name="toolTip">
+                <string>Change the foundation thickness</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_3">
+          <property name="title">
+           <string>Support List:</string>
           </property>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_15">
-            <item>
-             <widget class="QPushButton" name="AddButton">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="toolTip">
-               <string>Add a 3D model to the Layout</string>
-              </property>
-              <property name="whatsThis">
-               <string>Add a 3D model to the Layout</string>
-              </property>
-              <property name="text">
-               <string>Add</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="duplicateButton">
-              <property name="toolTip">
-               <string>Duplicate the selected model(s)</string>
-              </property>
-              <property name="whatsThis">
-               <string>Duplicate the selected model(s)</string>
-              </property>
-              <property name="text">
-               <string>Duplicate</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="RemoveButton">
-              <property name="toolTip">
-               <string>Delete the selected Model(s) from the layout</string>
-              </property>
-              <property name="whatsThis">
-               <string>Delete the selected Model(s) from the layout</string>
-              </property>
-              <property name="text">
-               <string>Remove</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QListWidget" name="ModelList">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTip">
-             <string>Listing of all models in the current layout</string>
-            </property>
-            <property name="whatsThis">
-             <string>Listing of all models in the current layout</string>
-            </property>
-            <property name="dragEnabled">
-             <bool>false</bool>
-            </property>
-            <property name="selectionMode">
-             <enum>QAbstractItemView::ExtendedSelection</enum>
-            </property>
-            <property name="selectionBehavior">
-             <enum>QAbstractItemView::SelectItems</enum>
-            </property>
-            <property name="layoutMode">
-             <enum>QListView::SinglePass</enum>
-            </property>
-            <property name="viewMode">
-             <enum>QListView::ListMode</enum>
-            </property>
-            <property name="sortingEnabled">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="ModelTranslationBox">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="title">
-          <string>Model Information:</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_11">
-          <property name="spacing">
-           <number>2</number>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QListWidget" name="SupportList">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Listing of all the supports belonging to the selected model</string>
+             </property>
+             <property name="whatsThis">
+              <string>Listing of all models in the current layout</string>
+             </property>
+             <property name="dragEnabled">
+              <bool>false</bool>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::ExtendedSelection</enum>
+             </property>
+             <property name="selectionBehavior">
+              <enum>QAbstractItemView::SelectItems</enum>
+             </property>
+             <property name="layoutMode">
+              <enum>QListView::SinglePass</enum>
+             </property>
+             <property name="viewMode">
+              <enum>QListView::ListMode</enum>
+             </property>
+             <property name="sortingEnabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="supportInformationBox">
+          <property name="toolTip">
+           <string>Edit selected support properties</string>
           </property>
-          <property name="leftMargin">
-           <number>5</number>
+          <property name="title">
+           <string>Support Parameters:</string>
           </property>
-          <property name="topMargin">
-           <number>6</number>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <widget class="QTabWidget" name="Support_Section_Information_Box">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="tabPosition">
+              <enum>QTabWidget::West</enum>
+             </property>
+             <property name="tabShape">
+              <enum>QTabWidget::Rounded</enum>
+             </property>
+             <property name="currentIndex">
+              <number>2</number>
+             </property>
+             <property name="usesScrollButtons">
+              <bool>false</bool>
+             </property>
+             <property name="documentMode">
+              <bool>false</bool>
+             </property>
+             <widget class="QWidget" name="Support_Top_Tab">
+              <attribute name="title">
+               <string>Top</string>
+              </attribute>
+              <layout class="QVBoxLayout" name="verticalLayout_12">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_4">
+                 <item>
+                  <widget class="QLabel" name="label_3">
+                   <property name="text">
+                    <string>Shape:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="Support_Top_AttachType_comboBox">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="toolTip">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_7">
+                 <item>
+                  <widget class="QLabel" name="label_6">
+                   <property name="text">
+                    <string>Radius(mm):</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="Support_Top_Radius_lineEdit"/>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_24">
+                 <item>
+                  <widget class="QLabel" name="label_7">
+                   <property name="text">
+                    <string>Length(mm):</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="Support_Top_Length_lineEdit"/>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_8">
+                 <item>
+                  <widget class="QLabel" name="label_20">
+                   <property name="text">
+                    <string>Penetration(mm):</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSlider" name="Support_Top_Penetration_horizontalSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="Support_Top_Penetration_label">
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_17">
+                 <item>
+                  <widget class="QLabel" name="label_28">
+                   <property name="text">
+                    <string>Angle Factor:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSlider" name="Support_Top_AngleFactor_horizontalSlider">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="Support_Top_AngleFactor_label">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Expanding</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="Support_Mid_Tab">
+              <attribute name="title">
+               <string>Mid</string>
+              </attribute>
+              <layout class="QVBoxLayout" name="verticalLayout_13">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_5">
+                 <item>
+                  <widget class="QLabel" name="label_4">
+                   <property name="text">
+                    <string>Shape:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="Support_Mid_AttachType_comboBox">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_9">
+                 <item>
+                  <widget class="QLabel" name="label_14">
+                   <property name="text">
+                    <string>Radius:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="Support_Mid_Radius_lineEdit"/>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_23">
+                 <item>
+                  <widget class="QLabel" name="label_15">
+                   <property name="text">
+                    <string>Length:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="Support_Mid_Length_lineEdit">
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="verticalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="Support_Bottom_Tab">
+              <attribute name="title">
+               <string>Bottom</string>
+              </attribute>
+              <layout class="QVBoxLayout" name="verticalLayout_14">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_6">
+                 <item>
+                  <widget class="QLabel" name="label_5">
+                   <property name="text">
+                    <string>Shape:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="Support_Bottom_AttachType_comboBox">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_16">
+                 <item>
+                  <widget class="QLabel" name="label_26">
+                   <property name="text">
+                    <string>Radius:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="Support_Bottom_Radius_lineEdit"/>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_25">
+                 <item>
+                  <widget class="QLabel" name="label_27">
+                   <property name="text">
+                    <string>Length:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="Support_Bottom_Length_lineEdit"/>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_10">
+                 <item>
+                  <widget class="QLabel" name="label_25">
+                   <property name="text">
+                    <string>Penetration(mm):</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSlider" name="Support_Bottom_Penetration_horizontalSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="Support_Bottom_Penetration_label">
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_18">
+                 <item>
+                  <widget class="QLabel" name="label_29">
+                   <property name="text">
+                    <string>Angle Factor:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSlider" name="Support_Bottom_AngleFactor_horizontalSlider">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="Support_Bottom_AngleFactor_label">
+                   <property name="text">
+                    <string>0</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="Support_Reset_To_Vertical_button">
+             <property name="toolTip">
+              <string>Drops the bottom of the support below the top</string>
+             </property>
+             <property name="text">
+              <string>Make Vertical</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_2">
+          <property name="text">
+           <string>Reset Default Parameters</string>
           </property>
-          <property name="rightMargin">
-           <number>5</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="label_21">
-            <property name="text">
-             <string>Size(mm):</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_14">
-            <item>
-             <widget class="QLabel" name="label_23">
-              <property name="text">
-               <string>X:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="modelsizex">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="toolTip">
-               <string>Size of model in the x axis</string>
-              </property>
-              <property name="whatsThis">
-               <string>Size of model in the x axis</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_22">
-              <property name="text">
-               <string>Y:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="modelsizey">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="toolTip">
-               <string>Size of model in the y axis</string>
-              </property>
-              <property name="whatsThis">
-               <string>Size of model in the y axis</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_24">
-              <property name="text">
-               <string>Z:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="modelsizez">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="toolTip">
-               <string>Size of model in the z axis</string>
-              </property>
-              <property name="whatsThis">
-               <string>Size of model in the z axis</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_8">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Position(mm):</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_11">
-            <item>
-             <widget class="QLabel" name="label_11">
-              <property name="text">
-               <string>X:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="posx">
-              <property name="toolTip">
-               <string>Position of model's center in the x axis</string>
-              </property>
-              <property name="whatsThis">
-               <string>Position of model's center in the x axis</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_12">
-              <property name="text">
-               <string>Y:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="posy">
-              <property name="toolTip">
-               <string>Position of model's center in the y axis</string>
-              </property>
-              <property name="whatsThis">
-               <string>Position of model's center in the y axis</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_13">
-              <property name="text">
-               <string>Z:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="posz">
-              <property name="toolTip">
-               <string>Position of model's center in the z axis</string>
-              </property>
-              <property name="whatsThis">
-               <string>Position of model's center in the z axis</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_9">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Rotation:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_12">
-            <item>
-             <widget class="QLabel" name="label_15">
-              <property name="text">
-               <string>X:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="rotx">
-              <property name="toolTip">
-               <string>Rotation of model about its x axis</string>
-              </property>
-              <property name="whatsThis">
-               <string>Rotation of model about its x axis</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_14">
-              <property name="text">
-               <string>Y:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="roty">
-              <property name="toolTip">
-               <string>Rotation of model about its y axis</string>
-              </property>
-              <property name="whatsThis">
-               <string>Rotation of model about its y axis</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_16">
-              <property name="text">
-               <string>Z:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="rotz">
-              <property name="toolTip">
-               <string>Rotation of model about its z axis</string>
-              </property>
-              <property name="whatsThis">
-               <string>Rotation of model about its z axis</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_10">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Scaling Factor:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_13">
-            <item>
-             <widget class="QLabel" name="label_19">
-              <property name="text">
-               <string>X:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="scalex">
-              <property name="toolTip">
-               <string>Model's x axis scaling factor</string>
-              </property>
-              <property name="statusTip">
-               <string/>
-              </property>
-              <property name="whatsThis">
-               <string>Model's x axis scaling factor</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_17">
-              <property name="text">
-               <string>Y:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="scaley">
-              <property name="toolTip">
-               <string>Model's y axis scaling factor</string>
-              </property>
-              <property name="whatsThis">
-               <string>Model's y axis scaling factor</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_18">
-              <property name="text">
-               <string>Z:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="scalez">
-              <property name="toolTip">
-               <string>Model's z axis scaling factor</string>
-              </property>
-              <property name="whatsThis">
-               <string>Model's z axis scaling factor</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QCheckBox" name="scalelock">
-              <property name="toolTip">
-               <string>Select to lock the model's x, y &amp; z axis scaling factors</string>
-              </property>
-              <property name="whatsThis">
-               <string>Select to lock the model's x, y &amp; z axis scaling factors</string>
-              </property>
-              <property name="text">
-               <string>Lock Aspect Ratio</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="flipx">
-              <property name="text">
-               <string>Mirrored</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QPushButton" name="ApplyButton">
-            <property name="toolTip">
-             <string>Apply entered changes to selected model's parameters</string>
-            </property>
-            <property name="whatsThis">
-             <string>Apply entered changes to selected model's parameters</string>
-            </property>
-            <property name="text">
-             <string>Apply Changes</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
     <item>
@@ -626,8 +1244,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>979</width>
-     <height>25</height>
+     <width>1600</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -640,6 +1258,7 @@
     <addaction name="actionSave_As"/>
     <addaction name="separator"/>
     <addaction name="actionAdd_Model"/>
+    <addaction name="actionExport_STL"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -652,26 +1271,102 @@
      <string>View</string>
     </property>
     <addaction name="actionCenter_View"/>
-   </widget>
-   <widget class="QMenu" name="menuTools">
-    <property name="title">
-     <string>Tools</string>
-    </property>
-    <addaction name="actionSelection"/>
-    <addaction name="actionMove"/>
-    <addaction name="actionRotate"/>
-    <addaction name="actionScale"/>
+    <addaction name="actionTop_View"/>
+    <addaction name="actionRight_View"/>
+    <addaction name="actionFront_View"/>
     <addaction name="separator"/>
+    <addaction name="actionPerspective"/>
+   </widget>
+   <widget class="QMenu" name="menuModelModifiers">
+    <property name="title">
+     <string>Model Actions</string>
+    </property>
     <addaction name="actionDrop_To_Floor"/>
     <addaction name="actionDuplicate"/>
+    <addaction name="actionReset_Rotation"/>
+   </widget>
+   <widget class="QMenu" name="menuModelTools">
+    <property name="title">
+     <string>Model Tools</string>
+    </property>
+    <addaction name="actionScale"/>
+    <addaction name="actionOrientate"/>
+    <addaction name="actionSpin"/>
+    <addaction name="actionMove"/>
+    <addaction name="actionSelection"/>
+   </widget>
+   <widget class="QMenu" name="menuSupport_Tools">
+    <property name="title">
+     <string>Support Tools</string>
+    </property>
+    <addaction name="Support_Add_Supports_action"/>
+    <addaction name="Support_Modify_Support_action"/>
+    <addaction name="Support_Delete_Supports_action"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
-   <addaction name="menuTools"/>
+   <addaction name="menuModelTools"/>
+   <addaction name="menuModelModifiers"/>
+   <addaction name="menuSupport_Tools"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QToolBar" name="mainToolBar">
+  <widget class="QToolBar" name="fileToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="viewToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="modelToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="modelModifierToolBar">
+   <property name="windowTitle">
+    <string>toolBar_2</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="supportToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="supportModifierToolBar">
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -797,18 +1492,18 @@
     <string>Ctrl+M</string>
    </property>
   </action>
-  <action name="actionRotate">
+  <action name="actionSpin">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Rotate</string>
+    <string>Spin</string>
    </property>
    <property name="toolTip">
-    <string>Rotate selected Model(s) about their z axis (Shift +Click &amp; Drag to rotate in X &amp; Y axis)</string>
+    <string>Spin selected Model(s) about their z axis</string>
    </property>
    <property name="whatsThis">
-    <string>Rotate selected Model(s) about their z axis (Shift +Click &amp; Drag to rotate in X &amp; Y axis)</string>
+    <string>Spin selected Model(s) about their z axis</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -873,6 +1568,119 @@
    </property>
    <property name="shortcut">
     <string/>
+   </property>
+  </action>
+  <action name="actionPerspective">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Perspective</string>
+   </property>
+  </action>
+  <action name="actionTop_View">
+   <property name="text">
+    <string>Top View</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+5</string>
+   </property>
+  </action>
+  <action name="actionRight_View">
+   <property name="text">
+    <string>Right View</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+6</string>
+   </property>
+  </action>
+  <action name="actionFront_View">
+   <property name="text">
+    <string>Front View</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+8</string>
+   </property>
+  </action>
+  <action name="actionEdit_Supports">
+   <property name="text">
+    <string>Edit Supports</string>
+   </property>
+  </action>
+  <action name="actionSupportMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Edit Supports</string>
+   </property>
+  </action>
+  <action name="actionOrientate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Orientate</string>
+   </property>
+   <property name="toolTip">
+    <string>Orientate model around its x and y axis</string>
+   </property>
+   <property name="statusTip">
+    <string>Orientate model around its x and y axis</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+R</string>
+   </property>
+  </action>
+  <action name="actionReset_Rotation">
+   <property name="text">
+    <string>Reset Rotation</string>
+   </property>
+   <property name="toolTip">
+    <string>Resets Orientation and Spin to 0 on the model</string>
+   </property>
+   <property name="statusTip">
+    <string>Resets Orientation and Spin to 0 on the model</string>
+   </property>
+  </action>
+  <action name="Support_Add_Supports_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Add</string>
+   </property>
+  </action>
+  <action name="Support_Modify_Support_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Modify</string>
+   </property>
+  </action>
+  <action name="Support_Delete_Supports_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
+  <action name="Support_Modifer_Delete_action">
+   <property name="text">
+    <string>Delete Support</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
+  <action name="actionExport_STL">
+   <property name="text">
+    <string>Export...</string>
    </property>
   </action>
  </widget>
@@ -964,7 +1772,7 @@
    <sender>actionDelete</sender>
    <signal>activated()</signal>
    <receiver>B9Layout</receiver>
-   <slot>DeleteSelectedInstances()</slot>
+   <slot>DeleteSelection()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -980,7 +1788,7 @@
    <sender>actionSelection</sender>
    <signal>activated()</signal>
    <receiver>B9Layout</receiver>
-   <slot>SetToolPointer()</slot>
+   <slot>SetToolModelSelect()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -996,7 +1804,7 @@
    <sender>actionMove</sender>
    <signal>activated()</signal>
    <receiver>B9Layout</receiver>
-   <slot>SetToolMove()</slot>
+   <slot>SetToolModelMove()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1009,10 +1817,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionRotate</sender>
+   <sender>actionSpin</sender>
    <signal>activated()</signal>
    <receiver>B9Layout</receiver>
-   <slot>SetToolRotate()</slot>
+   <slot>SetToolModelSpin()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1073,14 +1881,30 @@
    </hints>
   </connection>
   <connection>
+   <sender>actionScale</sender>
+   <signal>activated()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>SetToolModelScale()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>489</x>
+     <y>378</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>RemoveButton</sender>
    <signal>clicked()</signal>
    <receiver>B9Layout</receiver>
    <slot>DeleteSelectedInstances()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>297</x>
-     <y>223</y>
+     <x>288</x>
+     <y>201</y>
     </hint>
     <hint type="destinationlabel">
      <x>6</x>
@@ -1095,8 +1919,8 @@
    <slot>AddModel()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>110</x>
-     <y>223</y>
+     <x>109</x>
+     <y>201</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -1111,8 +1935,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>297</x>
-     <y>556</y>
+     <x>388</x>
+     <y>587</y>
     </hint>
     <hint type="destinationlabel">
      <x>317</x>
@@ -1127,8 +1951,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>208</x>
-     <y>556</y>
+     <x>265</x>
+     <y>587</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
@@ -1143,44 +1967,12 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>556</y>
+     <x>143</x>
+     <y>587</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
      <y>484</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>rotx</sender>
-   <signal>returnPressed()</signal>
-   <receiver>B9Layout</receiver>
-   <slot>PushTranslations()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>119</x>
-     <y>606</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>315</x>
-     <y>404</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>roty</sender>
-   <signal>returnPressed()</signal>
-   <receiver>B9Layout</receiver>
-   <slot>PushTranslations()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>208</x>
-     <y>606</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>314</x>
-     <y>555</y>
     </hint>
    </hints>
   </connection>
@@ -1191,8 +1983,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>297</x>
-     <y>606</y>
+     <x>106</x>
+     <y>653</y>
     </hint>
     <hint type="destinationlabel">
      <x>317</x>
@@ -1207,8 +1999,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>656</y>
+     <x>143</x>
+     <y>692</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
@@ -1223,8 +2015,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>208</x>
-     <y>656</y>
+     <x>265</x>
+     <y>692</y>
     </hint>
     <hint type="destinationlabel">
      <x>320</x>
@@ -1239,8 +2031,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>297</x>
-     <y>656</y>
+     <x>386</x>
+     <y>681</y>
     </hint>
     <hint type="destinationlabel">
      <x>312</x>
@@ -1255,12 +2047,12 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>210</x>
-     <y>688</y>
+     <x>177</x>
+     <y>736</y>
     </hint>
     <hint type="destinationlabel">
      <x>315</x>
-     <y>675</y>
+     <y>662</y>
     </hint>
    </hints>
   </connection>
@@ -1271,8 +2063,8 @@
    <slot>SetProjectorPreset(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>294</x>
-     <y>156</y>
+     <x>236</x>
+     <y>141</y>
     </hint>
     <hint type="destinationlabel">
      <x>312</x>
@@ -1287,28 +2079,12 @@
    <slot>SetXYPixelSizePreset(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>294</x>
-     <y>123</y>
+     <x>236</x>
+     <y>115</y>
     </hint>
     <hint type="destinationlabel">
      <x>314</x>
      <y>81</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionScale</sender>
-   <signal>activated()</signal>
-   <receiver>B9Layout</receiver>
-   <slot>SetToolScale()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>489</x>
-     <y>378</y>
     </hint>
    </hints>
   </connection>
@@ -1319,8 +2095,8 @@
    <slot>DuplicateSelection()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>208</x>
-     <y>223</y>
+     <x>199</x>
+     <y>201</y>
     </hint>
     <hint type="destinationlabel">
      <x>111</x>
@@ -1330,17 +2106,497 @@
   </connection>
   <connection>
    <sender>flipx</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>SetSelectionFlipped(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>387</x>
+     <y>704</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>311</x>
+     <y>662</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
    <signal>clicked()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>ResetSelectionRotation()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>387</x>
+     <y>611</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>315</x>
+     <y>559</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOrientate</sender>
+   <signal>activated()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>SetToolModelOrientate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>491</x>
+     <y>383</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionReset_Rotation</sender>
+   <signal>activated()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>ResetSelectionRotation()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>491</x>
+     <y>383</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Bottom_AttachType_comboBox</sender>
+   <signal>activated(int)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnSupportPropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>575</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>590</x>
+     <y>397</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Bottom_Radius_lineEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnSupportPropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>579</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>361</x>
+     <y>374</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Bottom_Length_lineEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnSupportPropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>579</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>539</x>
+     <y>638</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Bottom_AngleFactor_horizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnSupportPropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>587</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>366</x>
+     <y>458</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Bottom_Penetration_horizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnSupportPropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>583</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>600</x>
+     <y>540</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Add_Supports_action</sender>
+   <signal>activated()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>SetToolSupportAdd()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>410</x>
+     <y>396</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Modify_Support_action</sender>
+   <signal>activated()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>SetToolSupportModify()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>410</x>
+     <y>396</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>roty</sender>
+   <signal>returnPressed()</signal>
    <receiver>B9Layout</receiver>
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>241</x>
-     <y>671</y>
+     <x>302</x>
+     <y>627</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
-     <y>331</y>
+     <y>703</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rotx</sender>
+   <signal>returnPressed()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>PushTranslations()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>161</x>
+     <y>627</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>312</x>
+     <y>740</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Delete_Supports_action</sender>
+   <signal>activated()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>SetToolSupportDelete()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>410</x>
+     <y>396</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Model_Spin_horizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnModelSpinSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>277</x>
+     <y>637</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>313</x>
+     <y>791</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Model_Spin_horizontalSlider</sender>
+   <signal>sliderReleased()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnModelSpinSliderReleased()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>280</x>
+     <y>637</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>312</x>
+     <y>835</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Base_AttachType_comboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnBasePlatePropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>183</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>309</x>
+     <y>73</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Base_Enabled_checkBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnBasePlatePropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>61</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>313</x>
+     <y>118</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Base_Coverage_horizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnBasePlatePropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>372</x>
+     <y>143</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>169</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Base_Length_lineEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnBasePlatePropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>384</x>
+     <y>171</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>314</x>
+     <y>228</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Top_AttachType_comboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnSupportPropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>371</x>
+     <y>566</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>419</x>
+     <y>579</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Top_Radius_lineEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnSupportPropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>212</x>
+     <y>594</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>414</x>
+     <y>721</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Top_Length_lineEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnSupportPropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>371</x>
+     <y>594</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>416</x>
+     <y>685</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Top_Penetration_horizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnSupportPropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>359</x>
+     <y>621</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>415</x>
+     <y>647</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Top_AngleFactor_horizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnSupportPropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>359</x>
+     <y>648</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>419</x>
+     <y>546</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Mid_AttachType_comboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnSupportPropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>575</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>417</x>
+     <y>574</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Mid_Radius_lineEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnSupportPropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>581</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>675</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Mid_Length_lineEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnSupportPropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>581</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>419</x>
+     <y>535</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Reset_To_Vertical_button</sender>
+   <signal>clicked()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>MakeSelectedSupportsVertical()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>204</x>
+     <y>725</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>411</x>
+     <y>484</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionExport_STL</sender>
+   <signal>activated()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>PromptExportToSTL()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>799</x>
+     <y>395</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>ResetSupportDefaults()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>328</x>
+     <y>728</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>765</y>
     </hint>
    </hints>
   </connection>
@@ -1358,9 +2614,8 @@
   <slot>ProjectorCustomSwitch()</slot>
   <slot>AddModel()</slot>
   <slot>DeleteSelectedInstances()</slot>
-  <slot>SetToolPointer()</slot>
-  <slot>SetToolMove()</slot>
-  <slot>SetToolRotate()</slot>
+  <slot>SetToolModelSelect()</slot>
+  <slot>SetToolModelMove()</slot>
   <slot>SliceWorld()</slot>
   <slot>LockScale(bool)</slot>
   <slot>DropSelectionToFloor()</slot>
@@ -1368,7 +2623,23 @@
   <slot>PushTranslations()</slot>
   <slot>OpenDebugWindow()</slot>
   <slot>SetProjectorPreset(int)</slot>
-  <slot>SetToolScale()</slot>
-  <slot>SetInstanceFlipping(int)</slot>
+  <slot>SetToolModelScale()</slot>
+  <slot>SetSelectionFlipped(bool)</slot>
+  <slot>PromptAddSupport()</slot>
+  <slot>DeleteSelectedSupports()</slot>
+  <slot>ResetSelectionRotation()</slot>
+  <slot>SetToolModelSpin()</slot>
+  <slot>SetToolModelOrientate()</slot>
+  <slot>OnSupportPropertiesChanged()</slot>
+  <slot>SetToolSupportAdd()</slot>
+  <slot>SetToolSupportDelete()</slot>
+  <slot>OnModelSpinSliderChanged(int)</slot>
+  <slot>OnModelSpinSliderReleased()</slot>
+  <slot>OnBasePlatePropertiesChanged()</slot>
+  <slot>DeleteSelection()</slot>
+  <slot>SetToolSupportModify()</slot>
+  <slot>MakeSelectedSupportsVertical()</slot>
+  <slot>PromptExportToSTL()</slot>
+  <slot>ResetSupportDefaults()</slot>
  </slots>
 </ui>

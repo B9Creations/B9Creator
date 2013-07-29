@@ -43,6 +43,7 @@
 #include "b9printercomm.h"
 #include "qextserialport.h"
 #include "qextserialenumerator.h"
+#include "OS_Wrapper_Functions.h"
 
 void B9PrinterStatus::reset(){
     // Reset all status variables to unknown
@@ -111,44 +112,48 @@ QString B9PrinterStatus::getVersion(){
     return "v" + QString::number(iV1)+ "."+ QString::number(iV2)+ "."+ QString::number(iV3);
 }
 
+//upload the firware hex file to the current port - this will freeze the program.
 bool B9FirmwareUpdate::UploadHex(QString sCurPort)
 {
-    QDir appdir = QDir(QCoreApplication::applicationDirPath());
+    QDir avrdir = QDir(CROSS_OS_GetDirectoryFromLocationTag("APPLICATION_DIR"));
     QString launchcommand = "avrdude ";
-    QString args = "-Cavrdude.conf -v -v -v -v -patmega328p -carduino -P" + sCurPort + " -b" + QString::number(FIRMWAREUPDATESPEED) + " -D -Uflash:w:\"" + sHexFilePath + "\":i";
-
-    #ifdef Q_WS_MAC//in mac packages if avrdude is in recources
-        appdir.cdUp();
-        appdir.cd("Resources");
-    #endif
-    #ifndef Q_WS_WIN
+    #ifndef Q_OS_WIN
         launchcommand = "./avrdude ";
     #endif
 
-    qDebug() << "Calling AVRDude...";
+
+    QString args = "-Cavrdude.conf -v -v -v -v -patmega328p -carduino -P" + sCurPort + " -b" + QString::number(FIRMWAREUPDATESPEED) + " -D -Uflash:w:\"" + sHexFilePath + "\":i";
+
+
+    qDebug() << "B9FirwareUpdate: Calling AVRDude...";
 
     QCoreApplication::processEvents(); //Process all pending events prior to proceeding.
     QProcess* myProcess = new QProcess(this);
-    qDebug() << "Looking for avrdude, avrdude.conf, and .hex file in working dir:" << appdir.path();
-    myProcess->setWorkingDirectory(appdir.path());
+    qDebug() << "Looking for avrdude, avrdude.conf, and .hex file in working dir:" <<avrdir.path();
+    QDir::setCurrent(avrdir.path());
     myProcess->setProcessChannelMode(QProcess::MergedChannels);
     myProcess->start(launchcommand + args);
+
+
+
     if (!myProcess->waitForFinished(120000)) //Allow 120 seconds for avrdude to program firmware before timing out
     {
-        qDebug() << "AVRDude Firmware Update FAILED.";
+        qDebug() << "B9FirmwareUpdate: AVRDude Firmware Update Timed Out.";
         return false;
     }
     else
     {
-        qDebug() << "Begin Firmware Update on Port: " + sCurPort;
+        qDebug() << "B9FirmwareUpdate: Begin Firmware Update on Port: " + sCurPort;
         qDebug() << myProcess->readAll();
     }
+
+
     if(myProcess->exitCode() != 0)
     {
-        qDebug() << "Firmware Update FAILED, exit code:" << QString::number(myProcess->exitCode());
+        qDebug() << "B9FirmwareUpdate: Firmware Update FAILED, exit code:" << QString::number(myProcess->exitCode());
         return false;
     }
-    qDebug() << "Firmware Update Complete";
+    qDebug() << "B9FirmwareUpdate: Firmware Update Complete";
 
     return true;
 }
@@ -239,7 +244,7 @@ void B9PrinterComm::RefreshCommPortItems()
         // We've previously located the printer, are we still connected?
         for (int i = 0; i < pPorts->size(); i++) {
         // Check each existing port to see if our's still exists
-        #ifdef Q_WS_X11
+        #ifdef Q_OS_LINUX
             if(pPorts->at(i).physName == m_serialDevice->portName()){
         #else
             if(pPorts->at(i).portName == m_serialDevice->portName()){
@@ -272,13 +277,13 @@ void B9PrinterComm::RefreshCommPortItems()
         for (int i = 0; i < pPorts->size(); i++) {
             qDebug() << "  port name   " << pPorts->at(i).portName;
             qDebug() << "  locationInfo" << pPorts->at(i).physName;
-         #ifndef Q_WS_X11
+         #ifndef Q_OS_LINUX
             //Note: We only trust friendName, vendorID and productID with Windows and OS_X
             qDebug() << "  description " << pPorts->at(i).friendName;
             qDebug() << "  vendorID    " << pPorts->at(i).vendorID;
             qDebug() << "  productID   " << pPorts->at(i).productID;
          #endif
-         #ifdef Q_WS_X11
+         #ifdef Q_OS_LINUX
             // linux ID's ports by physName
             sPortName = pPorts->at(i).physName;
             // We filter ports by requiring the portName to begin with "ttyA"

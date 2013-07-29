@@ -294,7 +294,6 @@ bool CrushedBitMap::crushSlice(QImage* pImage)
 			uCurrentPos++;
 			uData++;
 			if(bCurColorIsWhite)uiWhitePixels++;
-
 		}
 		// store the count
 		iKey = computeKeySize(uData);

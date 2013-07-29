@@ -38,7 +38,7 @@
 
 #include "slice.h"
 #include "math.h"
-#include "utlilityfunctions.h"
+#include "geometricfunctions.h"
 #include <QtDebug>
 
 #include <QtOpenGL>//for the open gl commands in render()...
@@ -65,7 +65,7 @@ void Slice::AddSegment(Segment* pSeg)
 	segmentList.push_back(pSeg);
 }
 
-int Slice::GenerateSegments(ModelInstance* inputInstance)
+int Slice::GenerateSegments(B9ModelInstance* inputInstance)
 {
     unsigned int t;
 	int v1;
@@ -74,6 +74,8 @@ int Slice::GenerateSegments(ModelInstance* inputInstance)
 
 	QVector3D* thisvert = NULL;//local pointer to make quick access to vertices
 	QVector3D* thatvert = NULL;
+
+    std::vector<Triangle3D*>* rangedTriangles;
 
 	double xdisp;
 	double ydisp;
@@ -84,10 +86,15 @@ int Slice::GenerateSegments(ModelInstance* inputInstance)
 
 
 	//Triangle Splitting here:
-	for(t = 0; t < inputInstance->triList.size(); t++)//for each triangle in the model
+    //Get the right container of triangles and use that as the list
+    //(we used to use the triList which was O(n^2))
+    rangedTriangles = inputInstance->GetTrianglesAroundZ(realAltitude);
+
+
+    for(t = 0; t < rangedTriangles->size(); t++)//for each triangle in the model
 	{
 		//we want to create a temporary pointer to the currenct triangle
-		Triangle3D* pTransTri = inputInstance->triList[t];
+        Triangle3D* pTransTri = rangedTriangles->at(t);
 
 		//test if the triangle intersects the XY plane of this slice!
 		if(!pTransTri->IntersectsXYPlane(realAltitude))
@@ -156,9 +163,13 @@ int Slice::GenerateSegments(ModelInstance* inputInstance)
 	return segmentList.size();
 }
 
+void Slice::SortSegmentsByX()
+{
+    std::sort(segmentList.begin(), segmentList.end(),Segment::lessthanX);
+}
+
 void Slice::ConnectSegmentNeighbors()
 {
-
 	unsigned int s;
     unsigned int potential;
     unsigned int s2;
@@ -166,16 +177,17 @@ void Slice::ConnectSegmentNeighbors()
 	double potentialDist;
 	double minDist = 10000.0;
 
-
 	Segment* thisSeg = NULL;
 	Segment* thatSeg = NULL;
-	QVector2D* thisPoint = NULL;
-	QVector2D* thatPoint = NULL;
+    QVector2D* thisPoint = NULL;
 
-	std::vector<Segment*> potentialLeadSegs;
+    QVector2D* thatPoint = NULL;
 
-	Segment* finalLeadSeg = NULL;
-	
+    std::vector<Segment*> sameXStripSegs;
+    std::vector<Segment*> potentialLeadSegs;
+
+    Segment* finalLeadSeg = NULL;
+
 	for(s = 0; s < segmentList.size(); s++)//compare from every segment
 	{
 		thisSeg = segmentList[s];
@@ -186,13 +198,18 @@ void Slice::ConnectSegmentNeighbors()
 		
 		potentialLeadSegs.clear();//clear out the potentials list
 		
-		for(s2 = 0; s2 < segmentList.size(); s2++)//to every other segment
+
+        GetSegmentsAroundX(sameXStripSegs, thisPoint->x());
+
+
+        //////////////////////////////////////
+        for(s2 = 0; s2 < sameXStripSegs.size(); s2++)//to every other segment in ring
 		{
 			//make sure its not the same segment
 			if(s == s2)
 			{continue;}
 			
-			thatSeg = segmentList[s2];
+            thatSeg = sameXStripSegs[s2];
 			if(thatSeg->trailingSeg)//already connected to a trailing segment...
 				continue;
 			
@@ -202,6 +219,7 @@ void Slice::ConnectSegmentNeighbors()
 				potentialLeadSegs.push_back(thatSeg);
             }
 		}
+        //////////////////////////////////////
 
 		//sort through and pick from the potential pile
 		//we want to pick a segment with the sharpest change in direction!
@@ -298,15 +316,6 @@ int Slice::GenerateLoops()
 		currloop++;
 	}
 
-
-
-
-
-
-
-
-
-
 	return numLoops;
 }
 
@@ -355,7 +364,7 @@ void Slice::DebugRender(bool normals, bool connections, bool fills, bool outline
 			loopList[l].RenderTriangles();
 		}
 
-		for(s = 0;s< loopList[l].segListp.size();s++)
+        for(s = 0; s < loopList[l].segListp.size();s++)
 		{
 			if(normals)
 			{
@@ -435,10 +444,45 @@ bool Slice::TestIntersection(QVector2D &vec,Segment* seg1, Segment* seg2)
 		if(IsZero(Distance2D(seg1->p1, seg2->p1),0.001) || IsZero(Distance2D(seg1->p2, seg2->p2),0.001))
 			return false;
 
-		//if(Distance2D(seg1->p1, seg1->p2) < 0.001 || Distance2D(seg2->p1, seg2->p2) < 0.001)
-		//	return false;
-
 		return true;
 	}
 	return false;
+}
+
+//fills outList with segments only around the specified x cordinate
+void Slice::GetSegmentsAroundX(std::vector<Segment*> &outList, double x)
+{
+    const double buffer = 0.04;//needs to be bigger than potentialSegs distance.
+    unsigned long int mid,high,low;
+    Segment* curSeg;
+    outList.clear();
+
+    high = segmentList.size()-1;
+    low = 0;
+
+    //binary search
+    while (high >= low)
+    {
+        mid = (high + low)/2;
+        curSeg = segmentList[mid];
+
+        if (curSeg->p1.x() < (x - buffer))
+            low = mid + 1;
+        else if (curSeg->p1.x() > (x + buffer))
+            high = mid - 1;
+        else
+        {   //were in the ball park
+            while((mid > 0) && (segmentList[mid]->p1.x() > (x - buffer)))
+            {
+                mid--;
+            }
+            while((mid <= segmentList.size()-1) && segmentList[mid]->p1.x() < (x + buffer))
+            {
+                outList.push_back(segmentList[mid]);
+                mid++;
+            }
+            return;
+        }
+    }
+
 }

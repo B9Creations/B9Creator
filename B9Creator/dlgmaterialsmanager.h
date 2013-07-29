@@ -65,11 +65,11 @@ class DlgMaterialsManager;
 class DlgMaterialsManager : public QDialog
 {
     Q_OBJECT
-    
+
 public:
     explicit DlgMaterialsManager(B9MatCat *pCatalog, QWidget *parent = 0);
     ~DlgMaterialsManager();
-    
+
 public slots:
 
     void setXY(int iXY){fillData(m_pCatalog->getCurMatIndex(),iXY);}

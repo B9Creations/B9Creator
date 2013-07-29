@@ -45,6 +45,7 @@
 #include <QDebug>
 #include <QApplication>
 #include <QDesktopServices>
+#include "OS_Wrapper_Functions.h"
 
 bool bGlobalPrinting;
 
@@ -105,7 +106,7 @@ void LogFileManager::setPrinting(bool bPrinting)
 
 void LogFileManager::openLogFileInFolder()
 {
-    QString path = QDir::toNativeSeparators(QApplication::applicationDirPath());
+    QString path = CROSS_OS_GetDirectoryFromLocationTag("DOCUMENTS_DIR");
     path += "/" + sLogFileName;
     qDebug() << "Log File Location "+path;
     path = "file:///" + path;

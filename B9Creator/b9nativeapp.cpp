@@ -81,7 +81,7 @@ bool B9NativeApp::event(QEvent* event)
 {
     if( event->type() == QEvent::FileOpen)
     {
-        //TODO Use this for Macos File associations.
+        //TODO Use this for Mac-Os File associations.
         //pMain->openJob(static_cast<QFileOpenEvent*>(event)->file());
         return true;
     }
