@@ -26,6 +26,8 @@
 -Layout file now contains support informtation for models.
 -Removed "Dry Run" option from printer prep dialog.  No longer needed.
 -Fixed print time estimate bug (breathe and settle times were not calculated correctly)
+-Added Job Name & Description to the Print status dialog
+-Multiple changes to the main window (Edit moved to menu, Settings menu added,etc.)
 
 
 //v1.4 Summary of Changes

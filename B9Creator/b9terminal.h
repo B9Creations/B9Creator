@@ -148,6 +148,8 @@ signals:
     void sendYoff(int yOff);							// signal to the Projector window to update the Y offset
 
     void eventHiding();
+    void HomeFound(); // Done with Reset
+
 
 private slots:
     void makeProjectorConnections();

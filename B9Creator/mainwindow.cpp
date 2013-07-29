@@ -177,6 +177,18 @@ void MainWindow::showTerminal()
     pTerminal->showIt();
 }
 
+
+void MainWindow::showCalibrateBuildTable()
+{
+    if(!pTerminal->isConnected()){
+        QMessageBox::information(this,"Printer Not Found", "You must be connected to the printer to Calibrate",QMessageBox::Ok);
+        return;
+    }
+
+    dlgCalBuildTable dlgCalBT(pTerminal);
+    dlgCalBT.exec();
+}
+
 void MainWindow::showCatalog()
 {
     pTerminal->dlgEditMatCat();

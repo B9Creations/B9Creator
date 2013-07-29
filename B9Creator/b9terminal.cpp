@@ -463,6 +463,7 @@ void B9Terminal::onMotionResetComplete()
         pPrinterComm->SendCmd("G"+QString::number(m_iFillLevel));
         m_iFillLevel=-1;
     }
+    emit HomeFound();
 }
 
 void B9Terminal::onMotionResetTimeout(){

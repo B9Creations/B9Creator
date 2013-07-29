@@ -569,6 +569,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionBuild_Table</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showCalibrateBuildTable()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>94</x>
+     <y>101</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>myOpen()</slot>
@@ -585,5 +601,7 @@
   <slot>showLayout()</slot>
   <slot>showSlice()</slot>
   <slot>showPrint()</slot>
+  <slot>showCalibrateBuildTable()</slot>
+  <slot>isConnected()</slot>
  </slots>
 </ui>

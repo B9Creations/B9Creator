@@ -5,7 +5,7 @@
 //  BCreator(tm)
 //  Software for the control of the 3D Printer, "B9Creator"(tm)
 //
-//  Copyright 2011-2012 B9Creations, LLC
+//  Copyright 2011-2013 B9Creations, LLC
 //  B9Creations(tm) and B9Creator(tm) are trademarks of B9Creations, LLC
 //
 //  This file is part of B9Creator
@@ -36,88 +36,31 @@
 //
 *************************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef DLGCALBUILDTABLE_H
+#define DLGCALBUILDTABLE_H
 
-#include <QMainWindow>
-#include <QCloseEvent>
-#include <QDesktopWidget>
-#include <QSplashScreen>
-#include "logfilemanager.h"
-#include "b9layout/b9layout.h"
-#include "b9slice.h"
-#include "b9edit/b9edit.h"
-#include "b9print.h"
+#include <QDialog>
 #include "b9terminal.h"
-#include "helpsystem.h"
-#include "dlgprintprep.h"
-#include "dlgcalbuildtable.h"
-
-class b9PrinterModelManager;
-class B9UpdateManager;
-
 
 namespace Ui {
-class MainWindow;
+class dlgCalBuildTable;
 }
 
-class MainWindow : public QMainWindow
+class dlgCalBuildTable : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
-
+    explicit dlgCalBuildTable(B9Terminal* pTerminal, QWidget *parent = 0);
+    ~dlgCalBuildTable();
+    
 public slots:
-    void handleW1Hide();
-    void handleW2Hide();
-    void handleW3Hide();
-    void handleW4Hide();
-
-
-    void CheckForUpdates();
-
-    void showLogAndExit();
-    void showTerminal();
-    void showCalibrateBuildTable();
-    void showCatalog();
-    void showPrinterCycles();
-    void showLayout();
-    void showSlice();
-    void showEdit();
-    void showPrint();
-
-    void showAbout();
-    void setSplash(QSplashScreen * splash){m_pSplash = splash;}
-    void showSplash();
-    void hideSplash(){if(m_pSplash!=NULL)m_pSplash->hide();}
-
-private slots:
-    void on_commandLayout_clicked(bool checked);
-    void on_commandSlice_clicked(bool checked);
-    void on_commandEdit_clicked(bool checked);
-    void on_commandPrint_clicked();
-    void showHelp();
-    void doPrint();
+    void findHome();
+    void onResetComplete();
 
 private:
-
-    void closeEvent ( QCloseEvent * event );
-    Ui::MainWindow *ui;
-    LogFileManager *pLogManager;
-    bool m_bOpenLogOnExit;
-    HelpSystem m_HelpSystem;
-    B9UpdateManager *m_pUpdateManager;
-    QSplashScreen * m_pSplash;
-    B9Layout *pMW1;
-    B9Slice *pMW2;
-    B9Edit *pMW3;
-    B9Print *pMW4;
-    CrushedPrintJob *m_pCPJ;
-    B9Terminal *pTerminal;
-    DlgPrintPrep* m_pPrintPrep;
-    b9PrinterModelManager* pPrinterModelManager;
+    Ui::dlgCalBuildTable *ui;
+    B9Terminal* m_pTerminal;
 };
 
-#endif // MAINWINDOW_H
+#endif // DLGCALBUILDTABLE_H
