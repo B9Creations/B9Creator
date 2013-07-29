@@ -28,7 +28,6 @@
 -Fixed print time estimate bug (breathe and settle times were not calculated correctly)
 
 
-
 //v1.4 Summary of Changes
 -Opening B9Edit from the main menu will create an empty job.
 -Fixed "grey image" in B9Edit if job was sliced with object raised (not snapped to floor).
