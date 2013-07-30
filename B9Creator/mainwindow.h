@@ -52,6 +52,7 @@
 #include "helpsystem.h"
 #include "dlgprintprep.h"
 #include "dlgcalbuildtable.h"
+#include "dlgcalprojector.h"
 
 class b9PrinterModelManager;
 class B9UpdateManager;
@@ -81,6 +82,7 @@ public slots:
     void showLogAndExit();
     void showTerminal();
     void showCalibrateBuildTable();
+    void showCalibrateProjector();
     void showCatalog();
     void showPrinterCycles();
     void showLayout();

@@ -140,6 +140,7 @@ signals:
     void updateProjectorOutput(QString sText);  // Data on video to projector connection
     void updateProjectorStatus(QString sText);  // Projector Power Status Changes
     void updateProjector(B9PrinterStatus::ProjectorStatus eStatus);
+    void ProjectorIsOn();
     void PrintReleaseCycleFinished();
 
     void sendStatusMsg(QString text);					// signal to the Projector window to change the status msg

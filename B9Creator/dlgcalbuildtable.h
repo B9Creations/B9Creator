@@ -41,7 +41,6 @@
 
 #include <QDialog>
 #include "b9terminal.h"
-#include "loadingbar.h"
 
 namespace Ui {
 class dlgCalBuildTable;

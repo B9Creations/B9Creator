@@ -44,7 +44,7 @@
 #include "b9supportstructure.h"
 #include <QDebug>
 
-#define B9CVERSION "Version 1.5.1     Copyright 2013 B9Creations, LLC     www.b9creator.com\n "
+#define B9CVERSION "Version 1.5.0     Copyright 2013 B9Creations, LLC     www.b9creator.com\n "
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -189,6 +189,17 @@ void MainWindow::showCalibrateBuildTable()
 
     dlgCalBuildTable dlgCalBT(pTerminal);
     dlgCalBT.exec();
+}
+
+void MainWindow::showCalibrateProjector()
+{
+    if(!pTerminal->isConnected()){
+        QMessageBox::information(this,"Printer Not Found", "You must be connected to the printer to Calibrate",QMessageBox::Ok);
+        return;
+    }
+
+    dlgCalProjector dlgCalProj(pTerminal);
+    dlgCalProj.exec();
 }
 
 void MainWindow::showCatalog()

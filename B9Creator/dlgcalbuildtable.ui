@@ -75,6 +75,12 @@
        </disabled>
       </palette>
      </property>
+     <property name="toolTip">
+      <string>Instructions</string>
+     </property>
+     <property name="whatsThis">
+      <string>Instructions - For more detailed information visit www.b9creator.com</string>
+     </property>
      <property name="text">
       <string>The purpose of the Build Table Calibration is to ensure the Build Table is flush against the PDMS floor of the VAT when commanded to the &quot;Zero&quot; height position.
 
@@ -85,16 +91,34 @@ This calibration should be preformed when a new or re-coated VAT is put into ser
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBoxStep1">
+     <property name="toolTip">
+      <string>Step 1</string>
+     </property>
+     <property name="whatsThis">
+      <string>Step 1 of 8</string>
+     </property>
      <property name="text">
       <string>Step 1- Ensure the VAT is in place and the Sweeper is removed.</string>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBoxStep2">
+     <property name="toolTip">
+      <string>Step 2</string>
+     </property>
+     <property name="whatsThis">
+      <string>Step 2 of 8</string>
+     </property>
      <property name="text">
       <string>Step 2 - Loosen all four build table adjustment screws using a 7/64&quot; allen (hex) wrench and install it on the arm.</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButtonHomeStep3">
+     <property name="toolTip">
+      <string>Step 3</string>
+     </property>
+     <property name="whatsThis">
+      <string>Step 3 of 8</string>
+     </property>
      <property name="text">
       <string>Step 3 - Click here to command the printer to locate the Home position (Arm and VAT will move!)</string>
      </property>
@@ -109,33 +133,63 @@ This calibration should be preformed when a new or re-coated VAT is put into ser
      </property>
     </widget>
     <widget class="QPushButton" name="pushButtonZeroStep4">
+     <property name="toolTip">
+      <string>Step 4</string>
+     </property>
+     <property name="whatsThis">
+      <string>Step 4 of 8</string>
+     </property>
      <property name="text">
       <string>Step 4 - Click here to command the printer to open the VAT and lower the build table to &quot;Zero&quot;</string>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBoxStep5">
+     <property name="toolTip">
+      <string>Step 5</string>
+     </property>
+     <property name="whatsThis">
+      <string>Step 5 of 8</string>
+     </property>
      <property name="text">
       <string>Step 5 - Ensure the bottom of the Build Table is sitting flush on the PDMS.  Tighten all four build table adjustment screws.</string>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBoxStep6">
+     <property name="toolTip">
+      <string>Step 6</string>
+     </property>
+     <property name="whatsThis">
+      <string>Step 6 of 8</string>
+     </property>
      <property name="text">
       <string>Step 6 - REMOVE the Build Table Thumbscrew.  This is important!  Failure to do so may damage the PDMS when the arm lifts.</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButtonRaiseUpStep7">
+     <property name="toolTip">
+      <string>Step 7</string>
+     </property>
+     <property name="whatsThis">
+      <string>Step 7 of 8</string>
+     </property>
      <property name="text">
       <string>Step 7 - Click here to command the printer to raise the arm out of the way.</string>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBoxStep8">
+     <property name="toolTip">
+      <string>Step 8</string>
+     </property>
+     <property name="whatsThis">
+      <string>Final Step</string>
+     </property>
      <property name="text">
       <string>Step 8 - After the arm is clear, carefully lift the Build Table from the PDMS and fully tighten all four screws.</string>
      </property>
     </widget>
    </widget>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -223,6 +277,12 @@ This calibration should be preformed when a new or re-coated VAT is put into ser
          </colorrole>
         </disabled>
        </palette>
+      </property>
+      <property name="toolTip">
+       <string>Status</string>
+      </property>
+      <property name="whatsThis">
+       <string>Status - reports if printer is in motion or read for input.</string>
       </property>
       <property name="text">
        <string>Ready...</string>

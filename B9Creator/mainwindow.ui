@@ -249,19 +249,13 @@
     <property name="title">
      <string>Settings</string>
     </property>
-    <widget class="QMenu" name="menuCalibrate">
-     <property name="title">
-      <string>Calibrate</string>
-     </property>
-     <addaction name="actionBuild_Table"/>
-     <addaction name="actionProjector"/>
-    </widget>
     <addaction name="actionCheck_For_Updates"/>
     <addaction name="separator"/>
     <addaction name="actionMaterialsCatalog"/>
     <addaction name="action_Printer_Cycle_Settings"/>
     <addaction name="separator"/>
-    <addaction name="menuCalibrate"/>
+    <addaction name="actionBuild_Table"/>
+    <addaction name="actionProjector"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
@@ -335,7 +329,7 @@
   </action>
   <action name="actionCheck_For_Updates">
    <property name="text">
-    <string>&amp;Check For Updates</string>
+    <string>Check For &amp;Updates</string>
    </property>
   </action>
   <action name="actionEdit_Job">
@@ -345,7 +339,7 @@
   </action>
   <action name="action_Printer_Cycle_Settings">
    <property name="text">
-    <string>&amp;Printer Cycle Settings...</string>
+    <string>Printer &amp;Cycle Settings...</string>
    </property>
   </action>
   <action name="action_Layout">
@@ -365,12 +359,12 @@
   </action>
   <action name="actionBuild_Table">
    <property name="text">
-    <string>Build Table...</string>
+    <string>Calibrate &amp;Build Table...</string>
    </property>
   </action>
   <action name="actionProjector">
    <property name="text">
-    <string>Projector...</string>
+    <string>Calibrate &amp;Projector...</string>
    </property>
   </action>
  </widget>
@@ -585,6 +579,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionProjector</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showCalibrateProjector()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>94</x>
+     <y>101</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>myOpen()</slot>
@@ -603,5 +613,6 @@
   <slot>showPrint()</slot>
   <slot>showCalibrateBuildTable()</slot>
   <slot>isConnected()</slot>
+  <slot>showCalibrateProjector()</slot>
  </slots>
 </ui>

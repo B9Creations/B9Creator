@@ -386,6 +386,7 @@ void B9Terminal::onBC_ProjStatusChanged()
         break;
     case B9PrinterStatus::PS_ON:
         ui->pushButtonProjPower->setEnabled(true);
+        emit(ProjectorIsOn());
         sText = "ON";
         break;
     case B9PrinterStatus::PS_COOLING:
