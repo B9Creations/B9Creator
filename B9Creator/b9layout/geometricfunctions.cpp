@@ -141,3 +141,9 @@ double VectorMaxComponentLength(QVector3D vec)
 
     return max;
 }
+
+//returns the angle between 2 3dimentional vectors.
+double MinAngleBetweenVectors(QVector3D a, QVector3D b)
+{
+    return acos(QVector3D::dotProduct(a,b));
+}

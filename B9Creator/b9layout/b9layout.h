@@ -149,6 +149,7 @@ public slots:
     void RefreshSupportSelectionsFromList();//Called when the user selects stuff in the support list
 
     void SelectSupport(B9SupportStructure* sup);
+    void SelectOnly(B9SupportStructure* sup);//deselects eveything and selects only the instance
     std::vector<B9SupportStructure*>* GetSelectedSupports();
     bool IsSupportSelected(B9SupportStructure* sup);
     void DeSelectSupport(B9SupportStructure* sup);
@@ -158,19 +159,18 @@ public slots:
     void MakeSelectedSupportsVertical();
 
     //Support Interface
-    void OnSupport_Top_AttachType_Changed();
-    void OnSupport_Top_Radius_Changed();
-    void OnSupport_Top_Length_Changed();
-    void OnSupport_Top_Penetration_Changed();
-    void OnSupport_Top_AngleFactor_Changed();
-    void OnSupport_Mid_AttachType_Changed();
-    void OnSupport_Mid_Radius_Changed();
-    void OnSupport_Bottom_AttachType_Changed();
-    void OnSupport_Bottom_Radius_Changed();
-    void OnSupport_Bottom_Length_Changed();
-    void OnSupport_Bottom_Penetration_Changed();
-    void OnSupport_Bottom_AngleFactor_Changed();
-    void FlushRegisterToSupports();
+    void OnSupport_Top_AttachType_Changed(bool updateInterface = true);
+    void OnSupport_Top_Radius_Changed(bool updateInterface = true);
+    void OnSupport_Top_Length_Changed(bool updateInterface = true);
+    void OnSupport_Top_Penetration_Changed(bool updateInterface = true);
+    void OnSupport_Top_AngleFactor_Changed(bool updateInterface = true);
+    void OnSupport_Mid_AttachType_Changed(bool updateInterface = true);
+    void OnSupport_Mid_Radius_Changed(bool updateInterface = true);
+    void OnSupport_Bottom_AttachType_Changed(bool updateInterface = true);
+    void OnSupport_Bottom_Radius_Changed(bool updateInterface = true);
+    void OnSupport_Bottom_Length_Changed(bool updateInterface = true);
+    void OnSupport_Bottom_Penetration_Changed(bool updateInterface = true);
+    void OnSupport_Bottom_AngleFactor_Changed(bool updateInterface = true);
 
 
     void OnBasePlatePropertiesChanged();

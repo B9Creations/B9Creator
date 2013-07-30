@@ -234,6 +234,15 @@ void WorldView::UpdateTick()
     if(fenceAlpha >= 0.3)
         fenceAlpha = 0.3;
 
+    if(xRot < 200 && xRot >= 180)
+    {
+        supportAlpha = ((xRot-180)/20.0);
+        if(supportAlpha < 0.1)
+            supportAlpha = 0.1;
+    }
+    else
+        supportAlpha = 1.0;
+
     UpdatePlasmaFence();
 
 
@@ -330,7 +339,6 @@ void WorldView::initializeGL()
     glEnable(GL_LIGHT0);
     glDisable(GL_MULTISAMPLE);
     glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   // glBlendFunc(GL_SRC_ALPHA,GL_ONE);
     static GLfloat lightPosition[4] = { 0.0, 0.0, 100.0, 1.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 
@@ -413,6 +421,7 @@ void WorldView::resizeGL(int width, int height)
 void WorldView::DrawInstances()
 {
     unsigned int i;
+    B9ModelInstance* pInst;
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -421,14 +430,27 @@ void WorldView::DrawInstances()
     if(pMain->SupportModeInst() != NULL)
     {
         glColor3f(0.3f,0.3f,0.3f);
-        //pMain->SupportModeInst()->RenderSlopeGL();
+
         pMain->SupportModeInst()->RenderGL(true);
+
+
+        glEnable(GL_BLEND);
+        glPushAttrib(GL_COLOR_BUFFER_BIT);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        pMain->SupportModeInst()->RenderSupportsGL(false,supportAlpha);
+        glPopAttrib();
+        glDisable(GL_BLEND);
     }
     else
     {
         for(i = 0; i < pMain->GetAllInstances().size();i++)
         {
-            pMain->GetAllInstances()[i]->RenderGL();
+            pInst = pMain->GetAllInstances()[i];
+            pInst->RenderGL();
+            glColor3f(pInst->visualcolor.redF()*0.5,
+                    pInst->visualcolor.greenF()*0.5,
+                    pInst->visualcolor.blueF()*0.5);
+            pInst->RenderSupportsGL(true,1.0);
         }
     }
 
@@ -512,8 +534,13 @@ void WorldView::DrawBuildArea()
 
 
         glEnable(GL_LIGHTING);
-		//top rectangle
-        glColor4f(0.0f,0.0f,0.7f,0.3);
+        glEnable(GL_BLEND);
+        //top rectangle
+        if(fencesOn[4] && !pMain->SupportModeInst())
+            glColor4f(1.0f,0.0f,0.0f,0.5f);
+        else
+            glColor4f(0.0f,0.0f,0.7f,1.0f);
+
 		glNormal3f(0,0,1);
 			glBegin(GL_TRIANGLES);                    
                 glVertex3f( buildsizex, 0, 0);
@@ -529,12 +556,16 @@ void WorldView::DrawBuildArea()
 
 		
         //bottom rectangle
-        glEnable(GL_BLEND);
+
         if(!pMain->SupportModeInst())
         {
 
             glNormal3f(0,0,-1);
-            glColor4f(0.0f,0.0f,1.0f,0.3);
+            if(fencesOn[4])
+                glColor4f(1.0f,0.0f,0.0f,0.5f);
+            else
+                glColor4f(0.0f,0.0f,1.0f,0.3f);
+
                 glBegin(GL_TRIANGLES);//-0.1 is to hide z-fighting
                     glVertex3f( 0, buildsizey, -0.1);
                     glVertex3f( buildsizex, buildsizey, -0.1);
@@ -632,6 +663,7 @@ void WorldView::DrawBuildArea()
      fencesOn[1] = false;
      fencesOn[2] = false;
      fencesOn[3] = false;
+     fencesOn[4] = false;
 
      for(i = 0; i < pMain->GetAllInstances().size(); i++)
      {
@@ -644,6 +676,9 @@ void WorldView::DrawBuildArea()
              fencesOn[2] = true;
          if(inst->GetMinBound().y() < -pMain->ProjectData()->GetBuildSpace().y()*0.5)
              fencesOn[3] = true;
+         //Below Build Table
+         if(inst->GetMinBound().z() < -0.01)
+             fencesOn[4] = true;
      }
  }
 
@@ -880,7 +915,8 @@ void WorldView::OnToolInitialAction(QString tool, QMouseEvent* event)
 
     if(currtool == "SUPPORTMODIFY")
     {
-        pMain->DeSelectAllSupports();
+        if(!shiftdown && !controldown)
+            pMain->DeSelectAllSupports();
 
         pSup = GetSupportByScreen(event->pos());
         if(pSup != NULL)
@@ -1003,6 +1039,10 @@ void WorldView::OnToolDragAction(QString tool, QMouseEvent* event)
         if(!pMain->GetSelectedSupports()->size())
             return;
 
+        if(pMain->GetSelectedSupports()->size() > 1)
+            pMain->SelectOnly(pMain->GetSelectedSupports()->at(pMain->GetSelectedSupports()->size()-1));
+
+
         bool isAgainstInst;
         Update3DCursor(event->pos(),pInst,isAgainstInst);
 
@@ -1030,6 +1070,7 @@ void WorldView::OnToolDragAction(QString tool, QMouseEvent* event)
                     pSup->SetBottomAttachShape(appSettings.value("ATTACHSHAPE").toString());
                     pSup->SetBottomRadius(appSettings.value("RADIUS").toDouble());
                     pSup->SetBottomLength(appSettings.value("LENGTH").toDouble());
+                    pSup->SetBottomPenetration(appSettings.value("PENETRATION").toDouble());
                     appSettings.endGroup();
                     appSettings.endGroup();
                 }
@@ -1038,6 +1079,7 @@ void WorldView::OnToolDragAction(QString tool, QMouseEvent* event)
                     pSup->SetBottomAttachShape(toolSupportMemory.GetBottomAttachShape());
                     pSup->SetBottomRadius(toolSupportMemory.GetBottomRadius());
                     pSup->SetBottomLength(toolSupportMemory.GetBottomLength());
+                    pSup->SetBottomPenetration(toolSupportMemory.GetBottomPenetration());
                 }
             }
             else
@@ -1050,6 +1092,7 @@ void WorldView::OnToolDragAction(QString tool, QMouseEvent* event)
                     pSup->SetBottomAttachShape(appSettings.value("ATTACHSHAPE").toString());
                     pSup->SetBottomRadius(appSettings.value("RADIUS").toDouble());
                     pSup->SetBottomLength(appSettings.value("LENGTH").toDouble());
+                    pSup->SetBottomPenetration(appSettings.value("PENETRATION").toDouble());
                     appSettings.endGroup();
                     appSettings.endGroup();
 
@@ -1059,6 +1102,7 @@ void WorldView::OnToolDragAction(QString tool, QMouseEvent* event)
                     pSup->SetBottomAttachShape(toolSupportMemory.GetBottomAttachShape());
                     pSup->SetBottomRadius(toolSupportMemory.GetBottomRadius());
                     pSup->SetBottomLength(toolSupportMemory.GetBottomLength());
+                    pSup->SetBottomPenetration(toolSupportMemory.GetBottomPenetration());
                 }
             }
 

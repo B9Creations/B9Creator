@@ -159,7 +159,9 @@ public:
 
 
     //rendering
-    void Render(bool disableColor = false);//must be called with instance transform
+    void RenderUpper(bool disableColor = false, float alpha = 1.0);//must be called with instance transform
+    void RenderLower(bool disableColor = false, float alpha = 1.0);//must be called with instance transform
+
         void RenderTopGL();
         void RenderMidGL();
         void RenderBottomGL();

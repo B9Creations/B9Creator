@@ -274,6 +274,9 @@ void B9ModelInstance::SetBounds(QVector3D newmax, QVector3D newmin)
 //pre-move checking callbacks
 bool B9ModelInstance::OnPosChangeRequest(QVector3D deltaPos)
 {
+
+
+
     return true;
 }
 
@@ -322,6 +325,8 @@ void B9ModelInstance::OnPosChanged(QVector3D deltaPos)
     unsigned int s;
     double maxDepth = -99999.0;
     double depth;
+    double buildAreaMaxX,buildAreaMaxY;
+
 
     UpdateSupports();
 
@@ -334,7 +339,6 @@ void B9ModelInstance::OnPosChanged(QVector3D deltaPos)
                 maxDepth = depth;
         }
     }
-
     if((maxDepth > 0))
     {
         Move(QVector3D(0,0,maxDepth+0.01));
@@ -347,6 +351,32 @@ void B9ModelInstance::OnPosChanged(QVector3D deltaPos)
             Move(QVector3D(0,0,GetBasePlate()->GetBottomLength() - minbound.z()));
         }
     }
+
+
+    //Restrict movement when completely off build table
+    //allow the min bound to extend out of build table have a instance size
+    buildAreaMaxX = pData->pMain->ProjectData()->GetBuildSpace().x()/2.0 + (maxbound.x() - minbound.x())*0.5;
+    buildAreaMaxY = pData->pMain->ProjectData()->GetBuildSpace().y()/2.0 + (maxbound.y() - minbound.y())*0.5;
+
+
+    if(minbound.x() > buildAreaMaxX)
+    {
+        Move(QVector3D(-(minbound.x() - buildAreaMaxX)-0.01,0,0));
+    }
+    if(maxbound.x() < -buildAreaMaxX)
+    {
+        Move(QVector3D((-buildAreaMaxX - maxbound.x())+0.01,0,0));
+    }
+    if(minbound.y() > buildAreaMaxY)
+    {
+        Move(QVector3D(0,-(minbound.y() - buildAreaMaxY)-0.01,0));
+    }
+    if(maxbound.y() < -buildAreaMaxY)
+    {
+        Move(QVector3D(0,(-buildAreaMaxY - maxbound.y())+0.01,0));
+    }
+
+
 
     pData->pMain->ProjectData()->UpdateZSpace();
 }
@@ -369,7 +399,6 @@ void B9ModelInstance::OnScaleChanged(QVector3D deltaScale)
                 maxDepth = depth;
         }
     }
-
 
     if((maxDepth > 0))
     {
@@ -711,67 +740,27 @@ void B9ModelInstance::RenderGL(bool disableColor)
 
 
 	glPopMatrix();
-    //lets also render all the supports.
-    //sync support are defined as offsets from the global center of an instance
-    //-we have to gltranslate.
-    glPushMatrix();
-        //color supports slightly different
 
-        if(!disableColor)
-        glColor3f(visualcolor.redF()*0.5,visualcolor.greenF()*0.5,visualcolor.blueF()*0.5);
-
-        glTranslatef(pos.x(),pos.y(),pos.z());
-        for(s = 0; s < supportStructureList.size(); s++)
-        {
-            supportStructureList[s]->Render();
-        }
-        if(basePlateSupport) basePlateSupport->Render();
-    glPopMatrix();
 
 }
-//EXPIREMENTAL RENDERING TECHNIQUE
-void B9ModelInstance::RenderSlopeGL()
+void B9ModelInstance::RenderSupportsGL(bool solidColor, float alpha)
 {
-    unsigned long int t,s;
-
-    glPushMatrix();
-    glDisable(GL_LIGHTING);
-    glBegin(GL_TRIANGLES);// Drawing Using Triangles
-    for(t = 0; t < triList.size(); t++)//for each triangle
-    {
-
-        glColor3f(triList[t]->normal.x(),triList[t]->normal.y(),triList[t]->normal.z());
-
-
-        glNormal3f( triList[t]->normal.x(),triList[t]->normal.y(),triList[t]->normal.z());//normals
-
-        if(isFlipped)//if flipped we need to do clockwise..... but the baked geometry will be correct.
-        {
-            glVertex3f( triList[t]->vertex[2].x(), triList[t]->vertex[2].y(), triList[t]->vertex[2].z());
-            glVertex3f( triList[t]->vertex[1].x(), triList[t]->vertex[1].y(), triList[t]->vertex[1].z());
-            glVertex3f( triList[t]->vertex[0].x(), triList[t]->vertex[0].y(), triList[t]->vertex[0].z());
-        }
-        else
-        {
-            glVertex3f( triList[t]->vertex[0].x(), triList[t]->vertex[0].y(), triList[t]->vertex[0].z());
-            glVertex3f( triList[t]->vertex[1].x(), triList[t]->vertex[1].y(), triList[t]->vertex[1].z());
-            glVertex3f( triList[t]->vertex[2].x(), triList[t]->vertex[2].y(), triList[t]->vertex[2].z());
-        }
-    }
-    glEnd();
-    glEnable(GL_LIGHTING);
-    glPopMatrix();
-
+    //lets also render all the supports.
+    //since supports are defined as offsets from the global center of an instance
+    //-we have to gltranslate.
+    unsigned int s;
     glPushMatrix();
         glTranslatef(pos.x(),pos.y(),pos.z());
-        //glRotatef(rot.z(), 0.0, 0.0, 1.0);
         for(s = 0; s < supportStructureList.size(); s++)
         {
-            supportStructureList[s]->Render();
+            supportStructureList[s]->RenderUpper(solidColor, alpha);
         }
-        if(basePlateSupport) basePlateSupport->Render();
+        for(s = 0; s < supportStructureList.size(); s++)
+        {
+            supportStructureList[s]->RenderLower(solidColor, alpha);
+        }
+        if(basePlateSupport) basePlateSupport->RenderLower(solidColor, alpha);
     glPopMatrix();
-
 }
 
 
@@ -805,9 +794,10 @@ void B9ModelInstance::RenderPickGL()
         //glRotatef(rot.z(), 0.0, 0.0, 1.0);
         for(s = 0; s < supportStructureList.size(); s++)
         {
-            supportStructureList[s]->Render();
+            supportStructureList[s]->RenderUpper();
+            supportStructureList[s]->RenderLower();
         }
-        if(basePlateSupport) basePlateSupport->Render();
+        if(basePlateSupport) basePlateSupport->RenderLower();
     glPopMatrix();
 }
 

@@ -126,7 +126,7 @@ public:
 
 	//render
     void RenderGL(bool disableColor = false);//renders the instance using the modeldata's displaylist with this instances transforms applied
-    void RenderSlopeGL();//renders the instance by using colors to show slope
+    void RenderSupportsGL(bool solidColor, float alpha);//renderes the support shapes.
     void RenderPickGL();//simple flat rendering with color id
     void RenderTrianglePickGL();//renders all triangles with slightly different colors, - flat shaded for tri picking.
     void RenderSingleTrianglePickGL(unsigned int triIndx);//renders a color coded triangle for precice position picking.
@@ -159,7 +159,12 @@ public:
 	QListWidgetItem* listItem;
 	ModelData* pData;
 	SliceSet* pSliceSet;//slice set
-	unsigned char pickcolor[3];//this instances pick color!
+    unsigned char pickcolor[3];//this instances pick color!
+
+    static QColor selectedcolor;
+    QColor normalcolor;
+    QColor currcolor;
+    QColor visualcolor;//actual rendering color - is always smoothely running to match currcolor.
 private:
 
     //translation/rotation/scaling
@@ -178,10 +183,7 @@ private:
 	//selection
 	static unsigned char gColorID[3];
 	bool isselected;
-	static QColor selectedcolor;
-	QColor normalcolor;
-	QColor currcolor;
-	QColor visualcolor;//actual rendering color - is always smoothely running to match currcolor.
+
 
     //support
     bool isInSupportMode;

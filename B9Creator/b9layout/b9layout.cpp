@@ -445,6 +445,8 @@ void B9Layout::BuildInterface()
     ui.Support_Bottom_AngleFactor_horizontalSlider->setMaximum(100);
     ui.Support_Bottom_AngleFactor_horizontalSlider->setMinimum(0);
 
+    //show top support tab
+    ui.Support_Section_Information_Box->setCurrentIndex(0);
 
 
     //base plate defaults are really held in the gui
@@ -947,6 +949,13 @@ void B9Layout::SelectOnly(B9ModelInstance* inst)
 	DeSelectAll();
 	Select(inst);
 }
+void B9Layout::SelectOnly(B9SupportStructure* sup)
+{
+    DeSelectAllSupports();
+    SelectSupport(sup);
+}
+
+
 void B9Layout::DeSelectAll()
 {
     unsigned int m;
@@ -1484,7 +1493,7 @@ void B9Layout::MakeSelectedSupportsVertical()
 }
 
 //Support Properties changes
-void B9Layout::OnSupport_Top_AttachType_Changed()
+void B9Layout::OnSupport_Top_AttachType_Changed(bool updateInterface)
 {
     unsigned int i;
     B9SupportStructure* selSup = NULL;
@@ -1493,6 +1502,7 @@ void B9Layout::OnSupport_Top_AttachType_Changed()
         selSup->SetTopAttachShape(ui.Support_Top_AttachType_comboBox->currentText());
     }
 
+    if(updateInterface)
     UpdateInterface();
 
     if(pWorldView->GetTool() == "SUPPORTADD")
@@ -1506,7 +1516,7 @@ void B9Layout::OnSupport_Top_AttachType_Changed()
     }
 
 }
-void B9Layout::OnSupport_Top_Radius_Changed()
+void B9Layout::OnSupport_Top_Radius_Changed(bool updateInterface)
 {
     unsigned int i;
     B9SupportStructure* selSup = NULL;
@@ -1515,6 +1525,7 @@ void B9Layout::OnSupport_Top_Radius_Changed()
         selSup->SetTopRadius(ui.Support_Top_Radius_lineEdit->text().toDouble());
     }
 
+    if(updateInterface)
     UpdateInterface();
 
     if(pWorldView->GetTool() == "SUPPORTADD")
@@ -1527,7 +1538,7 @@ void B9Layout::OnSupport_Top_Radius_Changed()
     appSettings.endGroup();
     }
 }
-void B9Layout::OnSupport_Top_Length_Changed()
+void B9Layout::OnSupport_Top_Length_Changed(bool updateInterface)
 {
     unsigned int i;
     B9SupportStructure* selSup = NULL;
@@ -1536,6 +1547,7 @@ void B9Layout::OnSupport_Top_Length_Changed()
         selSup->SetTopLength(ui.Support_Top_Length_lineEdit->text().toDouble());
     }
 
+    if(updateInterface)
     UpdateInterface();
 
     if(pWorldView->GetTool() == "SUPPORTADD")
@@ -1548,7 +1560,7 @@ void B9Layout::OnSupport_Top_Length_Changed()
     appSettings.endGroup();
     }
 }
-void B9Layout::OnSupport_Top_Penetration_Changed()
+void B9Layout::OnSupport_Top_Penetration_Changed(bool updateInterface)
 {
     unsigned int i;
     B9SupportStructure* selSup = NULL;
@@ -1557,9 +1569,8 @@ void B9Layout::OnSupport_Top_Penetration_Changed()
         selSup->SetTopPenetration(ui.Support_Top_Penetration_horizontalSlider->value()*0.01);
     }
 
+    if(updateInterface)
     UpdateInterface();
-
-
 
     ui.Support_Top_Penetration_label->setText(QString::number(ui.Support_Top_Penetration_horizontalSlider->value()*0.01));
 
@@ -1573,7 +1584,7 @@ void B9Layout::OnSupport_Top_Penetration_Changed()
         appSettings.endGroup();
     }
 }
-void B9Layout::OnSupport_Top_AngleFactor_Changed()
+void B9Layout::OnSupport_Top_AngleFactor_Changed(bool updateInterface)
 {
     unsigned int i;
     B9SupportStructure* selSup = NULL;
@@ -1582,6 +1593,7 @@ void B9Layout::OnSupport_Top_AngleFactor_Changed()
         selSup->SetTopAngleFactor(ui.Support_Top_AngleFactor_horizontalSlider->value()*0.01);
     }
 
+    if(updateInterface)
     UpdateInterface();
 
     ui.Support_Top_AngleFactor_label->setText(QString::number(ui.Support_Top_AngleFactor_horizontalSlider->value()*0.01));
@@ -1596,7 +1608,7 @@ void B9Layout::OnSupport_Top_AngleFactor_Changed()
         appSettings.endGroup();
     }
 }
-void B9Layout::OnSupport_Mid_AttachType_Changed()
+void B9Layout::OnSupport_Mid_AttachType_Changed(bool updateInterface)
 {
     unsigned int i;
     B9SupportStructure* selSup = NULL;
@@ -1605,6 +1617,7 @@ void B9Layout::OnSupport_Mid_AttachType_Changed()
         selSup->SetMidAttachShape(ui.Support_Mid_AttachType_comboBox->currentText());
     }
 
+    if(updateInterface)
     UpdateInterface();
 
     if(pWorldView->GetTool() == "SUPPORTADD")
@@ -1617,7 +1630,7 @@ void B9Layout::OnSupport_Mid_AttachType_Changed()
         appSettings.endGroup();
     }
 }
-void B9Layout::OnSupport_Mid_Radius_Changed()
+void B9Layout::OnSupport_Mid_Radius_Changed(bool updateInterface)
 {
     unsigned int i;
     B9SupportStructure* selSup = NULL;
@@ -1626,6 +1639,7 @@ void B9Layout::OnSupport_Mid_Radius_Changed()
        selSup->SetMidRadius(ui.Support_Mid_Radius_lineEdit->text().toDouble());
     }
 
+    if(updateInterface)
     UpdateInterface();
 
     if(pWorldView->GetTool() == "SUPPORTADD")
@@ -1638,7 +1652,7 @@ void B9Layout::OnSupport_Mid_Radius_Changed()
         appSettings.endGroup();
     }
 }
-void B9Layout::OnSupport_Bottom_AttachType_Changed()
+void B9Layout::OnSupport_Bottom_AttachType_Changed(bool updateInterface)
 {
     unsigned int i;
     B9SupportStructure* selSup = NULL;
@@ -1647,6 +1661,7 @@ void B9Layout::OnSupport_Bottom_AttachType_Changed()
         selSup->SetBottomAttachShape(ui.Support_Bottom_AttachType_comboBox->currentText());
     }
 
+    if(updateInterface)
     UpdateInterface();
 
     if(pWorldView->GetTool() == "SUPPORTADD")
@@ -1659,7 +1674,7 @@ void B9Layout::OnSupport_Bottom_AttachType_Changed()
         appSettings.endGroup();
     }
 }
-void B9Layout::OnSupport_Bottom_Radius_Changed()
+void B9Layout::OnSupport_Bottom_Radius_Changed(bool updateInterface)
 {
     unsigned int i;
     B9SupportStructure* selSup = NULL;
@@ -1668,6 +1683,7 @@ void B9Layout::OnSupport_Bottom_Radius_Changed()
         selSup->SetBottomRadius(ui.Support_Bottom_Radius_lineEdit->text().toDouble());
     }
 
+    if(updateInterface)
     UpdateInterface();
 
 
@@ -1681,7 +1697,7 @@ void B9Layout::OnSupport_Bottom_Radius_Changed()
         appSettings.endGroup();
     }
 }
-void B9Layout::OnSupport_Bottom_Length_Changed()
+void B9Layout::OnSupport_Bottom_Length_Changed(bool updateInterface)
 {
     unsigned int i;
     B9SupportStructure* selSup = NULL;
@@ -1690,6 +1706,7 @@ void B9Layout::OnSupport_Bottom_Length_Changed()
         selSup->SetBottomLength(ui.Support_Bottom_Length_lineEdit->text().toDouble());
     }
 
+    if(updateInterface)
     UpdateInterface();
 
 
@@ -1703,7 +1720,7 @@ void B9Layout::OnSupport_Bottom_Length_Changed()
         appSettings.endGroup();
     }
 }
-void B9Layout::OnSupport_Bottom_Penetration_Changed()
+void B9Layout::OnSupport_Bottom_Penetration_Changed(bool updateInterface)
 {
     unsigned int i;
     B9SupportStructure* selSup = NULL;
@@ -1712,6 +1729,7 @@ void B9Layout::OnSupport_Bottom_Penetration_Changed()
         selSup->SetBottomPenetration(ui.Support_Bottom_Penetration_horizontalSlider->value()*0.01);
     }
 
+    if(updateInterface)
     UpdateInterface();
 
     ui.Support_Bottom_Penetration_label->setText(QString::number(ui.Support_Bottom_Penetration_horizontalSlider->value()*0.01));
@@ -1726,7 +1744,7 @@ void B9Layout::OnSupport_Bottom_Penetration_Changed()
         appSettings.endGroup();
     }
 }
-void B9Layout::OnSupport_Bottom_AngleFactor_Changed()
+void B9Layout::OnSupport_Bottom_AngleFactor_Changed(bool updateInterface)
 {
     unsigned int i;
     B9SupportStructure* selSup = NULL;
@@ -1735,6 +1753,7 @@ void B9Layout::OnSupport_Bottom_AngleFactor_Changed()
         selSup->SetBottomAngleFactor(ui.Support_Bottom_AngleFactor_horizontalSlider->value()*0.01);
     }
 
+    if(updateInterface)
     UpdateInterface();
 
     ui.Support_Bottom_AngleFactor_label->setText(QString::number(ui.Support_Bottom_AngleFactor_horizontalSlider->value()*0.01));
@@ -1750,52 +1769,6 @@ void B9Layout::OnSupport_Bottom_AngleFactor_Changed()
     }
 }
 
-//forces all gui values to selected supports
-void B9Layout::FlushRegisterToSupports()
-{
-    unsigned int i;
-    B9SupportStructure* selSup = NULL;
-    QSettings s;
-
-
-    s.beginGroup("USERSUPPORTPARAMS");
-    for(i = 0; i < currSelectedSupports.size(); i++)
-    {
-        s.beginGroup("SUPPORT_TOP");
-            selSup->SetTopAngleFactor(s.value("ANGLEFACTOR").toDouble());
-            selSup->SetTopAttachShape(s.value("ATTACHSHAPE").toString());
-            selSup->SetTopLength(s.value("LENGTH").toDouble());
-            selSup->SetTopPenetration(s.value("PENETRATION").toDouble());
-            selSup->SetTopRadius(s.value("RADIUS").toDouble());
-        s.endGroup();
-        s.beginGroup("SUPPORT_MID");
-            selSup->SetMidAttachShape(s.value("ATTACHSHAPE").toString());
-            selSup->SetMidRadius(s.value("RADIUS").toDouble());
-        s.endGroup();
-        if(selSup->GetIsGrounded())
-        {
-            s.beginGroup("SUPPORT_BOTTOM_GROUNDED");
-                selSup->SetBottomAngleFactor(s.value("ANGLEFACTOR").toDouble());
-                selSup->SetBottomAttachShape(s.value("ATTACHSHAPE").toString());
-                selSup->SetBottomLength(s.value("LENGTH").toDouble());
-                selSup->SetBottomPenetration(s.value("PENETRATION").toDouble());
-                selSup->SetBottomRadius(s.value("RADIUS").toDouble());
-            s.endGroup();
-        }
-        else
-        {
-            s.beginGroup("SUPPORT_BOTTOM_NONGROUNDED");
-                selSup->SetBottomAngleFactor(s.value("ANGLEFACTOR").toDouble());
-                selSup->SetBottomAttachShape(s.value("ATTACHSHAPE").toString());
-                selSup->SetBottomLength(s.value("LENGTH").toDouble());
-                selSup->SetBottomPenetration(s.value("PENETRATION").toDouble());
-                selSup->SetBottomRadius(s.value("RADIUS").toDouble());
-            s.endGroup();
-        }
-    }
-    s.endGroup();
-    UpdateInterface();
-}
 
 
 
@@ -1905,8 +1878,6 @@ void B9Layout::PushSupportProperties()
     ui.Support_Bottom_Penetration_horizontalSlider->setValue(selSup->GetBottomPenetration()*100.0);
    ui.Support_Bottom_Penetration_horizontalSlider->blockSignals(false);
 
-
-
 }
 
 void B9Layout::PushBasePlateProperties()
@@ -1949,7 +1920,21 @@ void B9Layout::ResetSupportDefaults()//connected to push button will always use 
     }
     else if(pWorldView->GetTool() == "SUPPORTMODIFY")
     {
-        FlushRegisterToSupports();
+        FillSupportParamsWithDefaults();
+
+        OnSupport_Top_AttachType_Changed(false);
+        OnSupport_Top_Radius_Changed(false);
+        OnSupport_Top_Length_Changed(false);
+        OnSupport_Top_Penetration_Changed(false);
+        OnSupport_Top_AngleFactor_Changed(false);
+        OnSupport_Mid_AttachType_Changed(false);
+        OnSupport_Mid_Radius_Changed(false);
+        //TODO THERE IS A DIFFERENCT BETWEEN GROUNDED AND NON GROUNDED WITH GROuPS
+        //OnSupport_Bottom_AttachType_Changed(false);
+        //OnSupport_Bottom_Radius_Changed(false);
+        OnSupport_Bottom_Length_Changed(false);
+        //OnSupport_Bottom_Penetration_Changed(false);
+        //OnSupport_Bottom_AngleFactor_Changed(false);
     }
 }
 
@@ -1962,29 +1947,42 @@ void B9Layout::FillSupportParamsWithDefaults()
     appSettings.beginGroup("USERSUPPORTPARAMS");
     appSettings.beginGroup("SUPPORT_TOP");
         indx = ui.Support_Top_AttachType_comboBox->findText(appSettings.value("ATTACHSHAPE").toString());
-
-        ui.Support_Top_AttachType_comboBox->setCurrentIndex(indx);
-        ui.Support_Top_AngleFactor_horizontalSlider->setValue(appSettings.value("ANGLEFACTOR").toDouble()*100);
+        ui.Support_Top_AttachType_comboBox->blockSignals(true);
+            ui.Support_Top_AttachType_comboBox->setCurrentIndex(indx);
+        ui.Support_Top_AttachType_comboBox->blockSignals(false);
+        ui.Support_Top_AngleFactor_horizontalSlider->blockSignals(true);
+            ui.Support_Top_AngleFactor_horizontalSlider->setValue(appSettings.value("ANGLEFACTOR").toDouble()*100);
+        ui.Support_Top_AngleFactor_horizontalSlider->blockSignals(false);
         ui.Support_Top_AngleFactor_label->setText(appSettings.value("ANGLEFACTOR").toString());
         ui.Support_Top_Length_lineEdit->setText(appSettings.value("LENGTH").toString());
-        ui.Support_Top_Penetration_horizontalSlider->setValue(appSettings.value("PENETRATION").toDouble()*100);
+        ui.Support_Top_Penetration_horizontalSlider->blockSignals(true);
+            ui.Support_Top_Penetration_horizontalSlider->setValue(appSettings.value("PENETRATION").toDouble()*100);
+        ui.Support_Top_Penetration_horizontalSlider->blockSignals(false);
         ui.Support_Top_Penetration_label->setText(appSettings.value("PENETRATION").toString());
         ui.Support_Top_Radius_lineEdit->setText(appSettings.value("RADIUS").toString());
     appSettings.endGroup();
 
     appSettings.beginGroup("SUPPORT_MID");
         indx = ui.Support_Mid_AttachType_comboBox->findText(appSettings.value("ATTACHSHAPE").toString());
+        ui.Support_Mid_AttachType_comboBox->blockSignals(true);
+            ui.Support_Mid_AttachType_comboBox->setCurrentIndex(indx);
+        ui.Support_Mid_AttachType_comboBox->blockSignals(false);
         ui.Support_Mid_Radius_lineEdit->setText(appSettings.value("RADIUS").toString());
     appSettings.endGroup();
 
     appSettings.beginGroup("SUPPORT_BOTTOM_GROUNDED");
         indx = ui.Support_Bottom_AttachType_comboBox->findText(appSettings.value("ATTACHSHAPE").toString());
-
-        ui.Support_Bottom_AttachType_comboBox->setCurrentIndex(indx);
-        ui.Support_Bottom_AngleFactor_horizontalSlider->setValue(appSettings.value("ANGLEFACTOR").toDouble()*100);
+        ui.Support_Bottom_AttachType_comboBox->blockSignals(true);
+            ui.Support_Bottom_AttachType_comboBox->setCurrentIndex(indx);
+        ui.Support_Bottom_AttachType_comboBox->blockSignals(false);
+        ui.Support_Bottom_AngleFactor_horizontalSlider->blockSignals(true);
+            ui.Support_Bottom_AngleFactor_horizontalSlider->setValue(appSettings.value("ANGLEFACTOR").toDouble()*100);
+        ui.Support_Bottom_AngleFactor_horizontalSlider->blockSignals(false);
         ui.Support_Bottom_AngleFactor_label->setText(appSettings.value("ANGLEFACTOR").toString());
         ui.Support_Bottom_Length_lineEdit->setText(appSettings.value("LENGTH").toString());
-        ui.Support_Bottom_Penetration_horizontalSlider->setValue(appSettings.value("PENETRATION").toDouble()*100);
+        ui.Support_Bottom_Penetration_horizontalSlider->blockSignals(true);
+            ui.Support_Bottom_Penetration_horizontalSlider->setValue(appSettings.value("PENETRATION").toDouble()*100);
+        ui.Support_Bottom_Penetration_horizontalSlider->blockSignals(false);
         ui.Support_Bottom_Penetration_label->setText(appSettings.value("PENETRATION").toString());
         ui.Support_Bottom_Radius_lineEdit->setText(appSettings.value("RADIUS").toString());
     appSettings.endGroup();

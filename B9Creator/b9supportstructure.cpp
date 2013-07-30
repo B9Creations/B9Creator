@@ -760,7 +760,8 @@ void B9SupportStructure::RenderPickGL()
                      instanceParent->GetPos().y(),
                      instanceParent->GetPos().z());
 
-        Render(true);
+        RenderUpper(true);
+        RenderLower(true);
     glPopMatrix();
 }
 
@@ -850,20 +851,23 @@ void B9SupportStructure::RenderBottomGL()
     glPopMatrix();
 }
 
-void B9SupportStructure::Render(bool disableColor)
+void B9SupportStructure::RenderUpper(bool disableColor, float alpha)
 {
     glPushAttrib(GL_LIGHTING_BIT);
-    if(instanceParent->IsInSupportMode() && !disableColor)
-        if(!isSelected)
-            glColor3f(0.0f,0.7f,0.0f);
-        else
-            glColor3f(0.0f,1.0f,1.0f);
+    glPushAttrib(GL_COLOR_BUFFER_BIT);
 
+    if(!disableColor)
+    {
+        if(!isSelected)
+            glColor4f(0.0f,0.7f,0.0f,1.0f);
+        else
+            glColor4f(0.0f,1.0f,1.0f,1.0f);
+
+    }
     if(isErrorGlowing && !disableColor)
     {
         glDisable(GL_LIGHTING);
-        glEnable(GL_BLEND);
-        glColor4f(1.0f,0.0f,0.0f,0.2f);
+        glColor4f(1.0f,0.0f,0.0f,1.0f);
     }
 
     //first draw the top
@@ -877,12 +881,34 @@ void B9SupportStructure::Render(bool disableColor)
         RenderMidGL();
     }
 
+    glPopAttrib();
+    glPopAttrib();
+}
+void B9SupportStructure::RenderLower(bool disableColor, float alpha)
+{
+    glPushAttrib(GL_LIGHTING_BIT);
+    glPushAttrib(GL_COLOR_BUFFER_BIT);
+
+    if(!disableColor)
+    {
+        if(!isSelected)
+            glColor4f(0.0f,0.7f,0.0f,alpha);
+        else
+            glColor4f(0.0f,1.0f,1.0f,alpha);
+    }
+    if(isErrorGlowing && !disableColor)
+    {
+        glDisable(GL_LIGHTING);
+        glColor4f(1.0f,0.0f,0.0f,alpha);
+    }
+
     //third draw the base
     if(bottomAttachShape != NULL)
     {
         RenderBottomGL();
     }
-    glDisable(GL_BLEND);
+
+    glPopAttrib();
     glPopAttrib();
 
 
@@ -963,8 +989,6 @@ void B9SupportStructure::SetVisible(bool vis)
 {
     isVisible = vis;
 }
-
-
 
 
 //Baking
@@ -1091,7 +1115,6 @@ void B9SupportStructure::BakeToInstanceGeometry()
         instanceParent->triList.push_back(pNewTri);
     }
 
-
 }
 
 
@@ -1113,6 +1136,7 @@ void B9SupportStructure::ForceUpdate()
     QVector3D alongMidUpNormal;
     QVector3D topPivotCross;
     QVector3D bottomPivotCross;
+
 
     if(isGrounded)
     {
@@ -1149,7 +1173,14 @@ void B9SupportStructure::ForceUpdate()
     alongMidUpNormal = (topPivot - bottomPivot);
     alongMidUpNormal.normalize();
     bottomPivotCross = QVector3D::crossProduct(bottomFinalNormal,alongMidUpNormal);
-    bottomMidExtension = bottomPivotCross.length()*bottomRadius;
+    if(isGrounded)
+    {
+        bottomMidExtension = midRadius*2*bottomPivotCross.length();
+    }
+    else
+        bottomMidExtension = bottomPivotCross.length()*bottomRadius;
+
+
     bottomMidExtensionPoint = bottomPivot - alongMidUpNormal*bottomMidExtension;
 
 

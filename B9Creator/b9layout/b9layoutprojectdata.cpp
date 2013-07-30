@@ -340,11 +340,6 @@
     {
         zthick = thick;
 
-        QSettings appSettings;
-        appSettings.beginGroup("USERLAYOUT");
-            appSettings.setValue("PIXEL_THICKNESS",thick);
-        appSettings.endGroup();
-
         SetDirtied(true);
     }
     void B9LayoutProjectData::SetResolution(QVector2D dim)
@@ -412,11 +407,8 @@
         else
             SetPixelSize(100);
 
-        if(appSettings.value("PIXEL_THICKNESS").toInt())
-            SetPixelThickness(appSettings.value("PIXEL_THICKNESS").toInt());
-        else
-            SetPixelThickness(100);
 
+        SetPixelThickness(50.8);
 
 
         if(appSettings.value("RESOLUTION_X").toInt())

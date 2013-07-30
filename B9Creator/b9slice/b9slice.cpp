@@ -48,6 +48,22 @@ B9Slice::B9Slice(QWidget *parent, B9Layout* Main) :
     ui->setupUi(this);
 
 
+
+    //set the thickness combo box to a the reg value
+    QSettings s;
+    int indx;
+    s.beginGroup("USERSLICE");
+        indx = ui->thicknesscombo->findText(s.value("PIXEL_THICKNESS","50.8").toString());
+    s.endGroup();
+
+    if(indx != -1)
+    {
+        ui->thicknesscombo->blockSignals(true);
+        ui->thicknesscombo->setCurrentIndex(indx);
+        ui->thicknesscombo->blockSignals(false);
+    }
+
+
     pMain = Main;
 
 
@@ -101,10 +117,15 @@ void B9Slice::Slice(){
 
     pMain->ProjectData()->SetPixelThickness(ui->thicknesscombo->currentText().toDouble());
 
+    QSettings s;
+    s.beginGroup("USERSLICE");
+        s.setValue("PIXEL_THICKNESS",ui->thicknesscombo->currentText().toDouble());
+    s.endGroup();
+
+
     pMain->SliceWorld();
 
 }
-
 
 
 

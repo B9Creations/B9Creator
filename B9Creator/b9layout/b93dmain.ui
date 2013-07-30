@@ -1190,23 +1190,27 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="Support_Reset_To_Vertical_button">
-             <property name="toolTip">
-              <string>Drops the bottom of the support below the top</string>
-             </property>
-             <property name="text">
-              <string>Make Vertical</string>
-             </property>
-            </widget>
+            <layout class="QHBoxLayout" name="horizontalLayout_19">
+             <item>
+              <widget class="QPushButton" name="Support_Reset_To_Vertical_button">
+               <property name="toolTip">
+                <string>Drops the bottom of the support below the top</string>
+               </property>
+               <property name="text">
+                <string>Make Vertical</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_2">
+               <property name="text">
+                <string>Reset To Defaults</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_2">
-          <property name="text">
-           <string>Reset Default Parameters</string>
-          </property>
          </widget>
         </item>
        </layout>
@@ -1681,6 +1685,14 @@
   <action name="actionExport_STL">
    <property name="text">
     <string>Export...</string>
+   </property>
+  </action>
+  <action name="actionElevate">
+   <property name="text">
+    <string>Elevate</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
    </property>
   </action>
  </widget>
@@ -2175,8 +2187,8 @@
    <slot>OnSupport_Bottom_AttachType_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>244</x>
-     <y>511</y>
+     <x>328</x>
+     <y>538</y>
     </hint>
     <hint type="destinationlabel">
      <x>590</x>
@@ -2191,8 +2203,8 @@
    <slot>OnSupport_Bottom_Radius_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>246</x>
-     <y>539</y>
+     <x>332</x>
+     <y>566</y>
     </hint>
     <hint type="destinationlabel">
      <x>361</x>
@@ -2207,8 +2219,8 @@
    <slot>OnSupport_Bottom_Length_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>247</x>
-     <y>567</y>
+     <x>334</x>
+     <y>594</y>
     </hint>
     <hint type="destinationlabel">
      <x>539</x>
@@ -2223,8 +2235,8 @@
    <slot>OnSupport_Bottom_AngleFactor_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>274</x>
-     <y>621</y>
+     <x>359</x>
+     <y>648</y>
     </hint>
     <hint type="destinationlabel">
      <x>366</x>
@@ -2239,8 +2251,8 @@
    <slot>OnSupport_Bottom_Penetration_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>160</x>
-     <y>583</y>
+     <x>294</x>
+     <y>621</y>
     </hint>
     <hint type="destinationlabel">
      <x>600</x>
@@ -2431,8 +2443,8 @@
    <slot>OnSupport_Top_AttachType_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>511</y>
+     <x>141</x>
+     <y>518</y>
     </hint>
     <hint type="destinationlabel">
      <x>419</x>
@@ -2447,8 +2459,8 @@
    <slot>OnSupport_Top_Radius_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>322</x>
-     <y>539</y>
+     <x>141</x>
+     <y>522</y>
     </hint>
     <hint type="destinationlabel">
      <x>414</x>
@@ -2463,8 +2475,8 @@
    <slot>OnSupport_Top_Length_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>567</y>
+     <x>141</x>
+     <y>525</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
@@ -2479,8 +2491,8 @@
    <slot>OnSupport_Top_Penetration_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
-     <y>594</y>
+     <x>129</x>
+     <y>529</y>
     </hint>
     <hint type="destinationlabel">
      <x>415</x>
@@ -2495,8 +2507,8 @@
    <slot>OnSupport_Top_AngleFactor_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
-     <y>621</y>
+     <x>129</x>
+     <y>532</y>
     </hint>
     <hint type="destinationlabel">
      <x>419</x>
@@ -2511,8 +2523,8 @@
    <slot>OnSupport_Mid_AttachType_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>244</x>
-     <y>511</y>
+     <x>141</x>
+     <y>518</y>
     </hint>
     <hint type="destinationlabel">
      <x>417</x>
@@ -2527,8 +2539,8 @@
    <slot>OnSupport_Mid_Radius_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>246</x>
-     <y>539</y>
+     <x>141</x>
+     <y>523</y>
     </hint>
     <hint type="destinationlabel">
      <x>418</x>
@@ -2543,8 +2555,8 @@
    <slot>MakeSelectedSupportsVertical()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>710</y>
+     <x>204</x>
+     <y>738</y>
     </hint>
     <hint type="destinationlabel">
      <x>411</x>

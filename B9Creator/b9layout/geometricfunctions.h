@@ -97,5 +97,5 @@ bool VectorComponentsEqual(QVector3D &vec);
 double VectorMaxComponentLength(QVector3D vec);
 bool SegmentIntersection(QVector2D &result, QVector2D seg11, QVector2D seg12, QVector2D seg21, QVector2D seg22) ;
 bool SegmentsAffiliated(Segment* seg1, Segment* seg2, double epsilon);
-
+double MinAngleBetweenVectors(QVector3D a, QVector3D b);
 #endif

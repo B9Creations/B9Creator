@@ -191,8 +191,9 @@ public: //Events
 	float buildsizez;
 
     //visual fence stuff
-    bool fencesOn[4];
+    bool fencesOn[5];
     float fenceAlpha;
+    float supportAlpha;
 
     //mouse cords
     QVector2D mouseDeltaPos;
