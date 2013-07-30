@@ -529,6 +529,7 @@ void B9Terminal::onBC_CurrentZPosInPU(int iCurZPU){
     ui->lineEditCurZPosInMM->setText(QString::number(dZPosMM,'g',8));
     ui->lineEditCurZPosInInches->setText(QString::number(dZPosMM/25.4,'g',8));
     ui->lineEditCurZPosInPU->setText(QString::number(iCurZPU,'g',8));
+    emit ZMotionComplete();
 }
 
 void B9Terminal::on_lineEditTgtZPU_editingFinished()
@@ -810,6 +811,11 @@ void B9Terminal::rcProjectorPwr(bool bPwrOn){
 
 void B9Terminal::rcResetHomePos(){
     on_pushButtonCmdReset_clicked();
+}
+
+void B9Terminal::rcSendCmd(QString sCmd)
+{
+    pPrinterComm->SendCmd(sCmd);
 }
 
 void B9Terminal::rcGotoFillAfterReset(int iFillLevel){

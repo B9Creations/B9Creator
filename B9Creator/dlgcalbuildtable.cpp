@@ -47,6 +47,16 @@ dlgCalBuildTable::dlgCalBuildTable(B9Terminal* pTerminal,QWidget *parent) :
     m_pTerminal = pTerminal;
     ui->setupUi(this);
     connect(m_pTerminal, SIGNAL(HomeFound()), this, SLOT(onResetComplete()));
+    connect(m_pTerminal, SIGNAL(ZMotionComplete()),this, SLOT(onMotionComplete()));
+
+    ui->checkBoxStep2->setEnabled(FALSE);
+    ui->pushButtonHomeStep3->setEnabled(FALSE);
+    ui->pushButtonZeroStep4->setEnabled(FALSE);
+    ui->checkBoxStep5->setEnabled(FALSE);
+    ui->checkBoxStep6->setEnabled(FALSE);
+    ui->pushButtonRaiseUpStep7->setEnabled(FALSE);
+    ui->checkBoxStep8->setEnabled(FALSE);
+    ui->pushButtonDone->setEnabled(FALSE);
 
 }
 
@@ -55,13 +65,93 @@ dlgCalBuildTable::~dlgCalBuildTable()
     delete ui;
 }
 
+void dlgCalBuildTable::closeEvent(QCloseEvent *)
+{
+    done();
+}
+
+void dlgCalBuildTable::done()
+{
+    m_pTerminal->rcSendCmd("s");
+    this->close();
+}
+
+void dlgCalBuildTable::on_Step1(bool checked)
+{
+    ui->checkBoxStep2->setEnabled(checked);
+}
+
+void dlgCalBuildTable::on_Step2(bool checked)
+{
+    ui->checkBoxStep1->setEnabled(!checked);
+    ui->pushButtonHomeStep3->setEnabled(checked);
+}
+
+void dlgCalBuildTable::on_Step3()
+{
+    findHome();
+    ui->checkBoxStep2->setEnabled(FALSE);
+    ui->pushButtonHomeStep3->setEnabled(FALSE);
+    ui->pushButtonZeroStep4->setEnabled(TRUE);
+}
+
+void dlgCalBuildTable::on_Step4()
+{
+    goZero();
+    ui->pushButtonZeroStep4->setEnabled(FALSE);
+    ui->checkBoxStep5->setEnabled(TRUE);
+}
+
+void dlgCalBuildTable::on_Step5(bool checked)
+{
+    ui->checkBoxStep6->setEnabled(checked);
+}
+
+void dlgCalBuildTable::on_Step6(bool checked)
+{
+    ui->checkBoxStep5->setEnabled(!checked);
+    ui->pushButtonRaiseUpStep7->setEnabled(checked);
+}
+
+void dlgCalBuildTable::on_Step7()
+{
+    raiseUp();
+    ui->checkBoxStep6->setEnabled(FALSE);
+    ui->pushButtonRaiseUpStep7->setEnabled(FALSE);
+    ui->checkBoxStep8->setEnabled(TRUE);
+}
+
+void dlgCalBuildTable::on_Step8(bool checked)
+{
+    ui->pushButtonDone->setEnabled(checked);
+}
+
 void dlgCalBuildTable::findHome()
 {
     this->setEnabled(FALSE);
     m_pTerminal->rcResetHomePos();
 }
 
+void dlgCalBuildTable::goZero()
+{
+    this->setEnabled(FALSE);
+    m_pTerminal->rcSendCmd("v100");
+    m_pTerminal->rcSendCmd("g0");
+}
+
+void dlgCalBuildTable::raiseUp()
+{
+    this->setEnabled(FALSE);
+    m_pTerminal->rcSendCmd("g8135");
+}
+
+
 void dlgCalBuildTable::onResetComplete()
+{
+    this->setEnabled(TRUE);
+}
+
+void dlgCalBuildTable::onMotionComplete()
 {
     this->setEnabled(TRUE);
 }

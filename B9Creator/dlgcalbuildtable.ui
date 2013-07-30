@@ -6,82 +6,156 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
-    <height>480</height>
+    <width>644</width>
+    <height>301</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
+  <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>440</y>
-     <width>621</width>
-     <height>32</height>
+     <x>5</x>
+     <y>10</y>
+     <width>631</width>
+     <height>251</height>
     </rect>
    </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
+   <property name="title">
+    <string>Calibrate the Build Table to be flush with the PDMS Vat Floor</string>
    </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
+   <widget class="QSplitter" name="splitter">
+    <property name="geometry">
+     <rect>
+      <x>5</x>
+      <y>20</y>
+      <width>617</width>
+      <height>219</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+    <widget class="QLabel" name="label">
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="WindowText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>127</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="WindowText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>0</red>
+           <green>0</green>
+           <blue>127</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="WindowText">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>120</red>
+           <green>120</green>
+           <blue>120</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
+     </property>
+     <property name="text">
+      <string>The purpose of the Build Table Calibration is to ensure the Build Table is flush against the PDMS floor of the VAT when commanded to the &quot;Zero&quot; height position.
+
+This calibration should be preformed when a new or re-coated VAT is put into service.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBoxStep1">
+     <property name="text">
+      <string>Step 1- Ensure the VAT is in place and the Sweeper is removed.</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBoxStep2">
+     <property name="text">
+      <string>Step 2 - Loosen all four build table adjustment screws using a 7/64&quot; allen (hex) wrench and install it on the arm.</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButtonHomeStep3">
+     <property name="text">
+      <string>Step 3 - Click here to command the printer to locate the Home position (Arm and VAT will move!)</string>
+     </property>
+     <property name="autoDefault">
+      <bool>true</bool>
+     </property>
+     <property name="default">
+      <bool>false</bool>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButtonZeroStep4">
+     <property name="text">
+      <string>Step 4 - Click here to command the printer to open the VAT and lower the build table to &quot;Zero&quot;</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBoxStep5">
+     <property name="text">
+      <string>Step 5 - Ensure the bottom of the Build Table is sitting flush on the PDMS.  Tighten all four build table adjustment screws.</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBoxStep6">
+     <property name="text">
+      <string>Step 6 - REMOVE the Build Table Thumbscrew.  This is important!  Failure to do so may damage the PDMS when the arm lifts.</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButtonRaiseUpStep7">
+     <property name="text">
+      <string>Step 7 - Click here to command the printer to raise the arm out of the way.</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBoxStep8">
+     <property name="text">
+      <string>Step 8 - After the arm is clear, carefully lift the Build Table from the PDMS and fully tighten all four screws.  Done!</string>
+     </property>
+    </widget>
+   </widget>
   </widget>
-  <widget class="QPushButton" name="pushButtonHome">
+  <widget class="QPushButton" name="pushButtonDone">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>220</y>
+     <x>560</x>
+     <y>270</y>
      <width>75</width>
      <height>23</height>
     </rect>
    </property>
    <property name="text">
-    <string>Reset</string>
+    <string>Done</string>
    </property>
   </widget>
  </widget>
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>dlgCalBuildTable</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>dlgCalBuildTable</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButtonHome</sender>
+   <sender>pushButtonHomeStep3</sender>
    <signal>clicked()</signal>
    <receiver>dlgCalBuildTable</receiver>
-   <slot>findHome()</slot>
+   <slot>on_Step3()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>257</x>
@@ -93,8 +167,147 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButtonZeroStep4</sender>
+   <signal>clicked()</signal>
+   <receiver>dlgCalBuildTable</receiver>
+   <slot>on_Step4()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>252</x>
+     <y>276</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>319</x>
+     <y>239</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonRaiseUpStep7</sender>
+   <signal>clicked()</signal>
+   <receiver>dlgCalBuildTable</receiver>
+   <slot>on_Step7()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>252</x>
+     <y>321</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>319</x>
+     <y>239</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonDone</sender>
+   <signal>clicked()</signal>
+   <receiver>dlgCalBuildTable</receiver>
+   <slot>done()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>597</x>
+     <y>281</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>321</x>
+     <y>150</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxStep1</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>dlgCalBuildTable</receiver>
+   <slot>on_Step1(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>318</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>321</x>
+     <y>150</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxStep2</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>dlgCalBuildTable</receiver>
+   <slot>on_Step2(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>318</x>
+     <y>90</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>321</x>
+     <y>150</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxStep5</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>dlgCalBuildTable</receiver>
+   <slot>on_Step5(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>318</x>
+     <y>168</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>321</x>
+     <y>150</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxStep6</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>dlgCalBuildTable</receiver>
+   <slot>on_Step6(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>318</x>
+     <y>190</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>321</x>
+     <y>150</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxStep8</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>dlgCalBuildTable</receiver>
+   <slot>on_Step8(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>318</x>
+     <y>240</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>321</x>
+     <y>150</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>findHome()</slot>
+  <slot>goZero()</slot>
+  <slot>raiseUp()</slot>
+  <slot>done()</slot>
+  <slot>on_Step1(bool)</slot>
+  <slot>on_Step2(bool)</slot>
+  <slot>on_Step3()</slot>
+  <slot>on_Step4()</slot>
+  <slot>on_Step5(bool)</slot>
+  <slot>on_Step6(bool)</slot>
+  <slot>on_Step7()</slot>
+  <slot>on_Step8(bool)</slot>
  </slots>
 </ui>

@@ -56,11 +56,28 @@ public:
     
 public slots:
     void findHome();
+    void goZero();
+    void raiseUp();
+    void done();
     void onResetComplete();
+    void onMotionComplete();
+
+    void on_Step1(bool checked);
+    void on_Step2(bool checked);
+    void on_Step3();
+    void on_Step4();
+    void on_Step5(bool checked);
+    void on_Step6(bool checked);
+    void on_Step7();
+    void on_Step8(bool checked);
+
 
 private:
     Ui::dlgCalBuildTable *ui;
     B9Terminal* m_pTerminal;
+
+protected:
+    void closeEvent ( QCloseEvent * e );
 };
 
 #endif // DLGCALBUILDTABLE_H

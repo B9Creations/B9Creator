@@ -111,6 +111,7 @@ public slots:
     void dlgEditPrinterCycleSettings();
 
     void rcResetHomePos();
+    void rcSendCmd(QString sCmd);
     void rcResetCurrentPositionPU(int iCurPos);
     void rcBasePrint(double dBaseMM); // Position for Base Layer Exposure.
     void rcNextPrint(double dNextMM); // Position for Next Layer Exposure.
@@ -149,6 +150,7 @@ signals:
 
     void eventHiding();
     void HomeFound(); // Done with Reset
+    void ZMotionComplete();
 
 
 private slots:
