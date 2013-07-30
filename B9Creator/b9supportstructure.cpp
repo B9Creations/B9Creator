@@ -862,7 +862,8 @@ void B9SupportStructure::Render(bool disableColor)
     if(isErrorGlowing && !disableColor)
     {
         glDisable(GL_LIGHTING);
-        glColor3f(1.0f,0.0f,0.0f);
+        glEnable(GL_BLEND);
+        glColor4f(1.0f,0.0f,0.0f,0.2f);
     }
 
     //first draw the top
@@ -881,7 +882,7 @@ void B9SupportStructure::Render(bool disableColor)
     {
         RenderBottomGL();
     }
-
+    glDisable(GL_BLEND);
     glPopAttrib();
 
 

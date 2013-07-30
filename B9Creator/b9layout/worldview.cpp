@@ -890,6 +890,7 @@ void WorldView::OnToolInitialAction(QString tool, QMouseEvent* event)
             toolStringMemory = GetSupportSectionByScreen(event->pos(),pSup);
             toolSupportMemory.CopyFrom(pSup);//remember support settings.
 
+            pMain->UpdateSupportList();
         }
     }
 

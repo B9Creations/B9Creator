@@ -143,7 +143,8 @@ public slots:
     void SetSupportMode(bool tog);//Sets everything up for editing supports for the selected instance.
                             //when either the tab is clicked or the menu item - a selected instance
                             //can be assumed
-    void FillSupportList();
+    void FillSupportList();//adds the elements to the list
+    void UpdateSupportList();//selects the correct elements in the list based off of real selection
     B9SupportStructure* FindSupportByName(QString name);
     void RefreshSupportSelectionsFromList();//Called when the user selects stuff in the support list
 
@@ -157,12 +158,26 @@ public slots:
     void MakeSelectedSupportsVertical();
 
     //Support Interface
-    void OnSupportPropertiesChanged();//triggered when anything changes in the support properties.
+    void OnSupport_Top_AttachType_Changed();
+    void OnSupport_Top_Radius_Changed();
+    void OnSupport_Top_Length_Changed();
+    void OnSupport_Top_Penetration_Changed();
+    void OnSupport_Top_AngleFactor_Changed();
+    void OnSupport_Mid_AttachType_Changed();
+    void OnSupport_Mid_Radius_Changed();
+    void OnSupport_Bottom_AttachType_Changed();
+    void OnSupport_Bottom_Radius_Changed();
+    void OnSupport_Bottom_Length_Changed();
+    void OnSupport_Bottom_Penetration_Changed();
+    void OnSupport_Bottom_AngleFactor_Changed();
+    void FlushRegisterToSupports();
+
+
     void OnBasePlatePropertiesChanged();
     void PushSupportProperties();//fills the support properties with relevent data.
     void PushBasePlateProperties();
-    void WriteSupportPropertiesToRegistry(B9SupportStructure *sup);
     void ResetSupportDefaults();//connected to push button
+    void FillSupportParamsWithDefaults();
 
     //returns a valid instance if we are editing it in support mode.
     B9ModelInstance* SupportModeInst();

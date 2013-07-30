@@ -48,7 +48,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideRight</enum>
@@ -2172,11 +2172,11 @@
    <sender>Support_Bottom_AttachType_comboBox</sender>
    <signal>activated(int)</signal>
    <receiver>B9Layout</receiver>
-   <slot>OnSupportPropertiesChanged()</slot>
+   <slot>OnSupport_Bottom_AttachType_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>160</x>
-     <y>575</y>
+     <x>244</x>
+     <y>511</y>
     </hint>
     <hint type="destinationlabel">
      <x>590</x>
@@ -2188,11 +2188,11 @@
    <sender>Support_Bottom_Radius_lineEdit</sender>
    <signal>editingFinished()</signal>
    <receiver>B9Layout</receiver>
-   <slot>OnSupportPropertiesChanged()</slot>
+   <slot>OnSupport_Bottom_Radius_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>160</x>
-     <y>579</y>
+     <x>246</x>
+     <y>539</y>
     </hint>
     <hint type="destinationlabel">
      <x>361</x>
@@ -2204,11 +2204,11 @@
    <sender>Support_Bottom_Length_lineEdit</sender>
    <signal>editingFinished()</signal>
    <receiver>B9Layout</receiver>
-   <slot>OnSupportPropertiesChanged()</slot>
+   <slot>OnSupport_Bottom_Length_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>160</x>
-     <y>579</y>
+     <x>247</x>
+     <y>567</y>
     </hint>
     <hint type="destinationlabel">
      <x>539</x>
@@ -2220,11 +2220,11 @@
    <sender>Support_Bottom_AngleFactor_horizontalSlider</sender>
    <signal>valueChanged(int)</signal>
    <receiver>B9Layout</receiver>
-   <slot>OnSupportPropertiesChanged()</slot>
+   <slot>OnSupport_Bottom_AngleFactor_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>160</x>
-     <y>587</y>
+     <x>274</x>
+     <y>621</y>
     </hint>
     <hint type="destinationlabel">
      <x>366</x>
@@ -2236,7 +2236,7 @@
    <sender>Support_Bottom_Penetration_horizontalSlider</sender>
    <signal>valueChanged(int)</signal>
    <receiver>B9Layout</receiver>
-   <slot>OnSupportPropertiesChanged()</slot>
+   <slot>OnSupport_Bottom_Penetration_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>160</x>
@@ -2428,11 +2428,11 @@
    <sender>Support_Top_AttachType_comboBox</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>B9Layout</receiver>
-   <slot>OnSupportPropertiesChanged()</slot>
+   <slot>OnSupport_Top_AttachType_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>371</x>
-     <y>566</y>
+     <y>511</y>
     </hint>
     <hint type="destinationlabel">
      <x>419</x>
@@ -2444,11 +2444,11 @@
    <sender>Support_Top_Radius_lineEdit</sender>
    <signal>editingFinished()</signal>
    <receiver>B9Layout</receiver>
-   <slot>OnSupportPropertiesChanged()</slot>
+   <slot>OnSupport_Top_Radius_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>212</x>
-     <y>594</y>
+     <x>322</x>
+     <y>539</y>
     </hint>
     <hint type="destinationlabel">
      <x>414</x>
@@ -2460,11 +2460,11 @@
    <sender>Support_Top_Length_lineEdit</sender>
    <signal>editingFinished()</signal>
    <receiver>B9Layout</receiver>
-   <slot>OnSupportPropertiesChanged()</slot>
+   <slot>OnSupport_Top_Length_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>371</x>
-     <y>594</y>
+     <y>567</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
@@ -2476,11 +2476,11 @@
    <sender>Support_Top_Penetration_horizontalSlider</sender>
    <signal>valueChanged(int)</signal>
    <receiver>B9Layout</receiver>
-   <slot>OnSupportPropertiesChanged()</slot>
+   <slot>OnSupport_Top_Penetration_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>359</x>
-     <y>621</y>
+     <y>594</y>
     </hint>
     <hint type="destinationlabel">
      <x>415</x>
@@ -2492,11 +2492,11 @@
    <sender>Support_Top_AngleFactor_horizontalSlider</sender>
    <signal>valueChanged(int)</signal>
    <receiver>B9Layout</receiver>
-   <slot>OnSupportPropertiesChanged()</slot>
+   <slot>OnSupport_Top_AngleFactor_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>359</x>
-     <y>648</y>
+     <y>621</y>
     </hint>
     <hint type="destinationlabel">
      <x>419</x>
@@ -2508,11 +2508,11 @@
    <sender>Support_Mid_AttachType_comboBox</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>B9Layout</receiver>
-   <slot>OnSupportPropertiesChanged()</slot>
+   <slot>OnSupport_Mid_AttachType_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>160</x>
-     <y>575</y>
+     <x>244</x>
+     <y>511</y>
     </hint>
     <hint type="destinationlabel">
      <x>417</x>
@@ -2524,31 +2524,15 @@
    <sender>Support_Mid_Radius_lineEdit</sender>
    <signal>editingFinished()</signal>
    <receiver>B9Layout</receiver>
-   <slot>OnSupportPropertiesChanged()</slot>
+   <slot>OnSupport_Mid_Radius_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>160</x>
-     <y>581</y>
+     <x>246</x>
+     <y>539</y>
     </hint>
     <hint type="destinationlabel">
      <x>418</x>
      <y>675</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>Support_Mid_Length_lineEdit</sender>
-   <signal>editingFinished()</signal>
-   <receiver>B9Layout</receiver>
-   <slot>OnSupportPropertiesChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>160</x>
-     <y>581</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>419</x>
-     <y>535</y>
     </hint>
    </hints>
   </connection>
@@ -2559,8 +2543,8 @@
    <slot>MakeSelectedSupportsVertical()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>204</x>
-     <y>725</y>
+     <x>225</x>
+     <y>710</y>
     </hint>
     <hint type="destinationlabel">
      <x>411</x>
@@ -2630,7 +2614,6 @@
   <slot>ResetSelectionRotation()</slot>
   <slot>SetToolModelSpin()</slot>
   <slot>SetToolModelOrientate()</slot>
-  <slot>OnSupportPropertiesChanged()</slot>
   <slot>SetToolSupportAdd()</slot>
   <slot>SetToolSupportDelete()</slot>
   <slot>OnModelSpinSliderChanged(int)</slot>
@@ -2641,5 +2624,17 @@
   <slot>MakeSelectedSupportsVertical()</slot>
   <slot>PromptExportToSTL()</slot>
   <slot>ResetSupportDefaults()</slot>
+  <slot>OnSupport_Top_AttachType_Changed()</slot>
+  <slot>OnSupport_Top_Radius_Changed()</slot>
+  <slot>OnSupport_Top_Length_Changed()</slot>
+  <slot>OnSupport_Top_Penetration_Changed()</slot>
+  <slot>OnSupport_Top_AngleFactor_Changed()</slot>
+  <slot>OnSupport_Mid_AttachType_Changed()</slot>
+  <slot>OnSupport_Mid_Radius_Changed()</slot>
+  <slot>OnSupport_Bottom_AttachType_Changed()</slot>
+  <slot>OnSupport_Bottom_Radius_Changed()</slot>
+  <slot>OnSupport_Bottom_Length_Changed()</slot>
+  <slot>OnSupport_Bottom_Penetration_Changed()</slot>
+  <slot>OnSupport_Bottom_AngleFactor_Changed()</slot>
  </slots>
 </ui>
