@@ -17,11 +17,11 @@ dlgCalProjector::dlgCalProjector(B9Terminal *pTerminal, QWidget *parent) :
     if(iXY<100)ui->comboBoxXPPixelSize->setCurrentIndex(1);
     if(iXY<75)ui->comboBoxXPPixelSize->setCurrentIndex(0);
 
-    ui->checkBoxStep2->setEnabled(FALSE);
-    ui->pushButtonStep3->setEnabled(FALSE);
-    ui->checkBoxStep4->setEnabled(FALSE);
-    ui->checkBoxStep5->setEnabled(FALSE);
-    ui->pushButtonStep6->setEnabled(FALSE);
+    ui->checkBoxStep2->setEnabled(false);
+    ui->pushButtonStep3->setEnabled(false);
+    ui->checkBoxStep4->setEnabled(false);
+    ui->checkBoxStep5->setEnabled(false);
+    ui->pushButtonStep6->setEnabled(false);
 }
 
 dlgCalProjector::~dlgCalProjector()
@@ -45,7 +45,7 @@ void dlgCalProjector::closeEvent(QCloseEvent *event)
 void dlgCalProjector::done()
 {
     m_pTerminal->rcSendCmd("s");
-    m_pTerminal->rcProjectorPwr(FALSE);
+    m_pTerminal->rcProjectorPwr(false);
     m_pTerminal->rcSendCmd("P0");
     this->close();
 }
@@ -70,13 +70,13 @@ void dlgCalProjector::on_comboBoxXPPixelSize_currentIndexChanged(int index)
 }
 void dlgCalProjector::findHome()
 {
-    this->setEnabled(FALSE);
+    this->setEnabled(false);
     m_pTerminal->rcResetHomePos();
 }
 
 void dlgCalProjector::onResetComplete()
 {
-    m_pTerminal->rcProjectorPwr(TRUE);
+    m_pTerminal->rcProjectorPwr(true);
 }
 
 void dlgCalProjector::onProjectorIsOn()
@@ -84,7 +84,7 @@ void dlgCalProjector::onProjectorIsOn()
     m_pTerminal->rcSendCmd("v100");
     m_pTerminal->rcSendCmd("P7");
     ui->lineEditStatus->setText("Projector Powered On");
-    this->setEnabled(TRUE);
+    this->setEnabled(true);
 }
 
 void dlgCalProjector::onStep1(bool checked)
@@ -103,12 +103,12 @@ void dlgCalProjector::onStep3()
 {
     ui->lineEditStatus->setText("Projector warming up, please wait...");
     findHome();
-    ui->checkBoxStep2->setEnabled(FALSE);
-    ui->checkBoxStep2->setEnabled(FALSE);
-    ui->checkBoxStep4->setEnabled(TRUE);
-    ui->pushButtonStep3->setEnabled(FALSE);
-    ui->checkBoxStep5->setEnabled(FALSE);
-    ui->pushButtonStep6->setEnabled(FALSE);
+    ui->checkBoxStep2->setEnabled(false);
+    ui->checkBoxStep2->setEnabled(false);
+    ui->checkBoxStep4->setEnabled(true);
+    ui->pushButtonStep3->setEnabled(false);
+    ui->checkBoxStep5->setEnabled(false);
+    ui->pushButtonStep6->setEnabled(false);
 }
 
 void dlgCalProjector::onStep4(bool checked)
@@ -124,12 +124,12 @@ void dlgCalProjector::onStep5(bool checked)
 
 void dlgCalProjector::onStep6()
 {
-    ui->checkBoxStep5->setEnabled(FALSE);
-    ui->pushButtonStep6->setEnabled(FALSE);
+    ui->checkBoxStep5->setEnabled(false);
+    ui->pushButtonStep6->setEnabled(false);
     ui->pushButtonDone->setText("Finished!");
-    ui->pushButtonDone->setEnabled(TRUE);
+    ui->pushButtonDone->setEnabled(true);
     m_pTerminal->rcSendCmd("s");
-    m_pTerminal->rcProjectorPwr(FALSE);
+    m_pTerminal->rcProjectorPwr(false);
     ui->lineEditStatus->setText("Calibration Completed.");
 }
 

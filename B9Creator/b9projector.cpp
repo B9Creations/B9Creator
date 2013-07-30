@@ -534,7 +534,7 @@ void B9Projector::paintEvent (QPaintEvent * pEvent)
 
 void B9Projector::keyReleaseEvent(QKeyEvent * pEvent)
 {
-	QWidget::keyReleaseEvent(pEvent);
+    QWidget::keyReleaseEvent(pEvent);
     if(pEvent->modifiers()!=Qt::ShiftModifier)
         emit keyReleased(pEvent->key()+32);
     else

@@ -98,7 +98,9 @@ SOURCES += main.cpp\
     b9supportstructure.cpp \
     b9layout/geometricfunctions.cpp \
     b9layout/b9verticaltricontainer.cpp \
-    b9modelwriter.cpp
+    b9modelwriter.cpp \
+    dlgcalbuildtable.cpp \
+    dlgcalprojector.cpp
 
 HEADERS  += mainwindow.h \
     logfilemanager.h \
@@ -146,7 +148,9 @@ HEADERS  += mainwindow.h \
     b9supportstructure.h \
     b9layout/geometricfunctions.h \
     b9layout/b9verticaltricontainer.h \
-    b9modelwriter.h
+    b9modelwriter.h \
+    dlgcalbuildtable.h \
+    dlgcalprojector.h
 
 FORMS    += mainwindow.ui \
     b9terminal.ui \
@@ -159,7 +163,9 @@ FORMS    += mainwindow.ui \
     b9print.ui \
     b9layout/slicedebugwindow.ui \
     b9layout/b93dmain.ui \
-    dlgprintprep.ui
+    dlgprintprep.ui \
+    dlgcalbuildtable.ui \
+    dlgcalprojector.ui
 
 RESOURCES += \
     b9edit/sliceeditview.qrc \

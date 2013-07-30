@@ -3,8 +3,8 @@
 
 ///NOTE - Dont use https - windows 8 doesnt like it for some reason.
 //Instead use http
-#define REMOTE_FILE_VERSIONS_URL "http://dl.dropboxusercontent.com/u/4223056/B9CreatorUpdates/Manifest.txt"
-#define REMOTE_FILE_LOCATIONS_PATH "http://dl.dropboxusercontent.com/u/4223056/B9CreatorUpdates/"
+#define REMOTE_FILE_VERSIONS_URL "http://www.b9creator.com/B9CreatorUpdates/Manifest.txt"
+#define REMOTE_FILE_LOCATIONS_PATH "http://www.b9creator.com/B9CreatorUpdates/"
 
 #define UPDATE_TIMOUT 10000
 

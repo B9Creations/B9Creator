@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>629</width>
-    <height>519</height>
+    <width>636</width>
+    <height>521</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Calibrate XY Resolution (Projector)</string>
@@ -20,7 +26,7 @@
       <string>Calibrate the Projector for the desired XY Pixel Resolution</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0" colspan="3">
+      <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="label">
         <property name="palette">
          <palette>
@@ -77,7 +83,7 @@ The 3 XY Pixel resolution options are:
    Medium - 75 micron pixels - Build volume of 76.8 x 57.6 x 200 mm (3&quot; x 2.27&quot; x 8&quot;)
    Low - 100 micron pixels - Build volume of 102.4 x 76.8 x 200 mm (4&quot; x 3&quot; x 8&quot;)
 
-Ensure the Projector is connected via VGA or HDMI cable and display settings select &quot;Extended&quot; Mode.
+Ensure the Projector is connected via VGA or HDMI cable and display is set to &quot;Extended&quot; Mode.
 </string>
         </property>
         <property name="wordWrap">
@@ -85,7 +91,7 @@ Ensure the Projector is connected via VGA or HDMI cable and display settings sel
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="1" column="0">
        <widget class="QLabel" name="label_2">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
@@ -98,7 +104,7 @@ Ensure the Projector is connected via VGA or HDMI cable and display settings sel
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
+      <item row="1" column="1">
        <widget class="QComboBox" name="comboBoxXPPixelSize">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -129,7 +135,7 @@ Ensure the Projector is connected via VGA or HDMI cable and display settings sel
         </item>
        </widget>
       </item>
-      <item row="2" column="0" colspan="3">
+      <item row="2" column="0" colspan="2">
        <widget class="QCheckBox" name="checkBoxStep1">
         <property name="toolTip">
          <string>Step 1</string>
@@ -142,7 +148,7 @@ Ensure the Projector is connected via VGA or HDMI cable and display settings sel
         </property>
        </widget>
       </item>
-      <item row="3" column="0" colspan="3">
+      <item row="3" column="0" colspan="2">
        <widget class="QCheckBox" name="checkBoxStep2">
         <property name="toolTip">
          <string>Step 2</string>
@@ -155,28 +161,27 @@ Ensure the Projector is connected via VGA or HDMI cable and display settings sel
         </property>
        </widget>
       </item>
-      <item row="4" column="0" colspan="3">
+      <item row="4" column="0" colspan="2">
        <widget class="QLabel" name="label_3">
         <property name="text">
-         <string>The next step may take a few minutes. </string>
+         <string>Note:  The next step may take a few minutes as the projector warms up. </string>
         </property>
        </widget>
       </item>
-      <item row="5" column="0" colspan="3">
+      <item row="5" column="0" colspan="2">
        <widget class="QLabel" name="label_4">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
-         <string>If you have a single video output and use a spliter to feed that output to the projector then this screen will be</string>
+         <string>(If using a single video output and spliter setup then see the web site for additional documentation.)</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="0" colspan="3">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>replaced by the grid pattern until you are finished and exit. (Click the grid pattern and then hit the &quot;Esc&quot; key)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0" colspan="3">
+      <item row="6" column="0" colspan="2">
        <widget class="QPushButton" name="pushButtonStep3">
         <property name="toolTip">
          <string>Step 3</string>
@@ -189,7 +194,7 @@ Ensure the Projector is connected via VGA or HDMI cable and display settings sel
         </property>
        </widget>
       </item>
-      <item row="8" column="0" colspan="3">
+      <item row="7" column="0" colspan="2">
        <widget class="QCheckBox" name="checkBoxStep4">
         <property name="toolTip">
          <string>Step 4</string>
@@ -202,7 +207,20 @@ Ensure the Projector is connected via VGA or HDMI cable and display settings sel
         </property>
        </widget>
       </item>
-      <item row="9" column="0" colspan="3">
+      <item row="8" column="0" colspan="2">
+       <widget class="QLabel" name="label_5">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>(The paper template should be placed printed side up on the bottom of the vat and aligned with the projected grid manually.)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0" colspan="2">
        <widget class="QCheckBox" name="checkBoxStep5">
         <property name="toolTip">
          <string>Step 5</string>
@@ -215,7 +233,7 @@ Ensure the Projector is connected via VGA or HDMI cable and display settings sel
         </property>
        </widget>
       </item>
-      <item row="10" column="0" colspan="3">
+      <item row="10" column="0" colspan="2">
        <widget class="QPushButton" name="pushButtonStep6">
         <property name="toolTip">
          <string>Step 6</string>
