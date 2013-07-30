@@ -195,6 +195,9 @@ This calibration should be preformed when a new or re-coated VAT is put into ser
    </item>
    <item row="1" column="1">
     <widget class="QLineEdit" name="lineEditStatus">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -273,6 +276,9 @@ This calibration should be preformed when a new or re-coated VAT is put into ser
      </property>
      <property name="text">
       <string>Ready...</string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

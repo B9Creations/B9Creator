@@ -1127,7 +1127,6 @@ void B9Terminal::on_pushButtonCycleSettings_clicked()
 
 void B9Terminal::getKey(int iKey)
 {
-    qDebug()<<"KEYSTROKE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
     if(!m_bPrimaryScreen)return; // Ignore keystrokes from the print window unless we're using the primary monitor
     if(isVisible()&&isEnabled())
     {

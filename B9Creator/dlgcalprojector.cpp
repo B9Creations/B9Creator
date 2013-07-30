@@ -11,6 +11,8 @@ dlgCalProjector::dlgCalProjector(B9Terminal *pTerminal, QWidget *parent) :
 
     connect(m_pTerminal, SIGNAL(HomeFound()), this, SLOT(onResetComplete()));
     connect(m_pTerminal, SIGNAL(ProjectorIsOn()),this, SLOT(onProjectorIsOn()));
+    connect(m_pTerminal, SIGNAL(updateProjectorOutput(QString)), this, SLOT(on_updateProjectorOutput(QString)));
+    m_pTerminal->onScreenCountChanged();
 
     int iXY = m_pTerminal->getXYPixelSize();
     ui->comboBoxXPPixelSize->setCurrentIndex(2);
@@ -77,6 +79,11 @@ void dlgCalProjector::findHome()
 void dlgCalProjector::onResetComplete()
 {
     m_pTerminal->rcProjectorPwr(true);
+}
+
+void dlgCalProjector::on_updateProjectorOutput(QString sText)
+{
+    ui->lineEditStatusDisplay->setText(sText);
 }
 
 void dlgCalProjector::onProjectorIsOn()

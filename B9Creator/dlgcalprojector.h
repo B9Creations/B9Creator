@@ -25,6 +25,7 @@ public slots:
     void done();
     void onResetComplete();
     void onProjectorIsOn();
+    void on_updateProjectorOutput(QString sText);
     void onStep1(bool checked);
     void onStep2(bool checked);
     void onStep3();
