@@ -7,19 +7,19 @@
     <x>0</x>
     <y>0</y>
     <width>644</width>
-    <height>301</height>
+    <height>332</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Calibration - Build Table</string>
   </property>
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
      <x>5</x>
-     <y>10</y>
+     <y>5</y>
      <width>631</width>
-     <height>251</height>
+     <height>281</height>
     </rect>
    </property>
    <property name="title">
@@ -29,9 +29,9 @@
     <property name="geometry">
      <rect>
       <x>5</x>
-      <y>20</y>
-      <width>617</width>
-      <height>219</height>
+      <y>15</y>
+      <width>611</width>
+      <height>261</height>
      </rect>
     </property>
     <property name="orientation">
@@ -130,23 +130,113 @@ This calibration should be preformed when a new or re-coated VAT is put into ser
     </widget>
     <widget class="QCheckBox" name="checkBoxStep8">
      <property name="text">
-      <string>Step 8 - After the arm is clear, carefully lift the Build Table from the PDMS and fully tighten all four screws.  Done!</string>
+      <string>Step 8 - After the arm is clear, carefully lift the Build Table from the PDMS and fully tighten all four screws.</string>
      </property>
     </widget>
    </widget>
   </widget>
-  <widget class="QPushButton" name="pushButtonDone">
+  <widget class="QWidget" name="">
    <property name="geometry">
     <rect>
-     <x>560</x>
-     <y>270</y>
-     <width>75</width>
-     <height>23</height>
+     <x>10</x>
+     <y>295</y>
+     <width>626</width>
+     <height>25</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Done</string>
-   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Status:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="lineEditStatus">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="palette">
+       <palette>
+        <active>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>0</red>
+            <green>0</green>
+            <blue>127</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>204</red>
+            <green>204</green>
+            <blue>204</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </active>
+        <inactive>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>0</red>
+            <green>0</green>
+            <blue>127</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>204</red>
+            <green>204</green>
+            <blue>204</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </inactive>
+        <disabled>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>120</red>
+            <green>120</green>
+            <blue>120</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>240</red>
+            <green>240</green>
+            <blue>240</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </disabled>
+       </palette>
+      </property>
+      <property name="text">
+       <string>Ready...</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButtonDone">
+      <property name="text">
+       <string>Cancel</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <resources/>

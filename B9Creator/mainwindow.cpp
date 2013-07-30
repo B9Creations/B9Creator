@@ -44,6 +44,8 @@
 #include "b9supportstructure.h"
 #include <QDebug>
 
+#define B9CVERSION "Version 1.5.1     Copyright 2013 B9Creations, LLC     www.b9creator.com\n "
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -132,7 +134,7 @@ MainWindow::~MainWindow()
 void MainWindow::showSplash()
 {
     if(m_pSplash!=NULL){
-        m_pSplash->showMessage("Version 1.5     Copyright 2013 B9Creations, LLC     www.b9creator.com\n ",Qt::AlignBottom|Qt::AlignCenter,QColor(255,130,36));
+        m_pSplash->showMessage(B9CVERSION,Qt::AlignBottom|Qt::AlignCenter,QColor(255,130,36));
         m_pSplash->show();
         QTimer::singleShot(3000,this,SLOT(hideSplash()));
     }
@@ -141,7 +143,7 @@ void MainWindow::showSplash()
 void MainWindow::showAbout()
 {
     if(m_pSplash!=NULL){
-        m_pSplash->showMessage("Version 1.5     Copyright 2013 B9Creations, LLC     www.b9creator.com\n ",Qt::AlignBottom|Qt::AlignCenter,QColor(255,130,36));
+        m_pSplash->showMessage(B9CVERSION,Qt::AlignBottom|Qt::AlignCenter,QColor(255,130,36));
         m_pSplash->show();
     }
 }

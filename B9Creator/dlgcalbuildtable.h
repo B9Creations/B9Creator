@@ -41,6 +41,7 @@
 
 #include <QDialog>
 #include "b9terminal.h"
+#include "loadingbar.h"
 
 namespace Ui {
 class dlgCalBuildTable;
@@ -71,10 +72,10 @@ public slots:
     void on_Step7();
     void on_Step8(bool checked);
 
-
 private:
     Ui::dlgCalBuildTable *ui;
     B9Terminal* m_pTerminal;
+    bool bFindingHome;
 
 protected:
     void closeEvent ( QCloseEvent * e );
