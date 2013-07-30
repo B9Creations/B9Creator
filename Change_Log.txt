@@ -29,6 +29,7 @@
 -Added Job Name & Description to the Print status dialog
 -Multiple changes to the main window (Edit moved to menu, Settings menu added,etc.)
 -Added Build Table and Projector Calibration wizards
+-Fixed bug in materials manager that allowed changing factory material settings
 
 
 //v1.4 Summary of Changes

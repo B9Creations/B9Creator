@@ -5,7 +5,7 @@
 //  BCreator(tm)
 //  Software for the control of the 3D Printer, "B9Creator"(tm)
 //
-//  Copyright 2011-2012 B9Creations, LLC
+//  Copyright 2011-2013 B9Creations, LLC
 //  B9Creations(tm) and B9Creator(tm) are trademarks of B9Creations, LLC
 //
 //  This file is part of B9Creator
@@ -36,7 +36,6 @@
 //
 *************************************************************************************/
 
-
 #include "b9material.h"
 #include "qstring.h"
 
@@ -44,8 +43,6 @@ B9Material::B9Material()
 {
     m_sMaterialLabel = "Default Material Name";
     m_sMaterialDescription = "Defualt Material Description";
-
-
     AddXYSize(100);
 }
 
@@ -74,7 +71,6 @@ XYData* B9Material::FindXYData(double xySize)
             return &XYSizes[i];
         }
     }
-
     return NULL;
 }
 
@@ -108,5 +104,4 @@ double B9Material::GetXYAttachmentCureTime(double xySize)
     if(d==NULL) return -1;
     else
         return d->attachmentLayersCureTime;
-
 }

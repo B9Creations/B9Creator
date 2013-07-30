@@ -97,6 +97,8 @@ DlgMaterialsManager::~DlgMaterialsManager()
 void DlgMaterialsManager::updateEnabledStates()
 {
     // Disable everything first
+    ui->doubleSpinBox->setEnabled(false);
+    ui->spinBoxNumberOfAttachLayers->setEnabled(false);
     ui->groupBox_ExposureSettings->setEnabled(false);
     ui->pushButtonDuplicate->setEnabled(false);
     ui->pushButtonDelete->setEnabled(false);
@@ -107,12 +109,11 @@ void DlgMaterialsManager::updateEnabledStates()
         if(!m_pCatalog->isFactoryEntry(ui->comboBoxMaterial->currentIndex())){
             ui->pushButtonDelete->setEnabled(true);
             ui->tableWidget->setEnabled(true);
-            //ui->tableWidget->setColumnHidden(0,false);
-            //ui->tableWidget->setColumnHidden(1,false);
+            ui->doubleSpinBox->setEnabled(true);
+            ui->spinBoxNumberOfAttachLayers->setEnabled(true);
         }
         ui->groupBox_ExposureSettings->setEnabled(true);
         ui->pushButtonDuplicate->setEnabled(true);
-
     }
 }
 
@@ -243,12 +244,16 @@ void DlgMaterialsManager::on_comboBoxMaterial_currentIndexChanged(int index)
         ui->groupBox_ExposureSettings->setEnabled(false);
         ui->pushButtonDuplicate->setEnabled(false);
         ui->pushButtonDelete->setEnabled(false);
+        ui->doubleSpinBox->setEnabled(false);
+        ui->spinBoxNumberOfAttachLayers->setEnabled(false);
     }
     else if(m_pCatalog->isFactoryEntry(m_pCatalog->getCurMatIndex())){
         ui->groupBox_ExposureSettings->setEnabled(true);
         ui->tableWidget->setEnabled(false);
         ui->pushButtonDuplicate->setEnabled(true);
         ui->pushButtonDelete->setEnabled(false);
+        ui->doubleSpinBox->setEnabled(false);
+        ui->spinBoxNumberOfAttachLayers->setEnabled(false);
     }
     else
     {
@@ -256,6 +261,8 @@ void DlgMaterialsManager::on_comboBoxMaterial_currentIndexChanged(int index)
         ui->tableWidget->setEnabled(true);
         ui->pushButtonDuplicate->setEnabled(true);
         ui->pushButtonDelete->setEnabled(true);
+        ui->doubleSpinBox->setEnabled(true);
+        ui->spinBoxNumberOfAttachLayers->setEnabled(true);
     }
 }
 
