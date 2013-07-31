@@ -572,9 +572,26 @@ bool B9UpdateManager::CopyFromTemp()
         else
         {
             //at this point we have copied the file.
-            //on unix - we have to mark the file as an executable file.
-
+            //on unix - we have to mark the files as executable files.
             if(updateEntries[i].fileName == "B9Creator")
+            {
+                #ifdef Q_OS_MAC
+                    system(QString("chmod +x " + dest).toAscii());
+                #endif
+                #ifdef Q_OS_LINUX
+                    system(QString("chmod +x " + dest).toAscii());
+                #endif
+            }
+            if(updateEntries[i].fileName == "avrdude")
+            {
+                #ifdef Q_OS_MAC
+                    system(QString("chmod +x " + dest).toAscii());
+                #endif
+                #ifdef Q_OS_LINUX
+                    system(QString("chmod +x " + dest).toAscii());
+                #endif
+            }
+            if(updateEntries[i].fileName == "avrdude.conf")
             {
                 #ifdef Q_OS_MAC
                     system(QString("chmod +x " + dest).toAscii());
