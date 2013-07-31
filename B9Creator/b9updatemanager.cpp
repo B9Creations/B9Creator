@@ -576,7 +576,7 @@ bool B9UpdateManager::CopyFromTemp()
             if(updateEntries[i].fileName == "B9Creator")
             {
                 #ifdef Q_OS_MAC
-                system(QString("chmod +x " + dest + "\"").toAscii());
+                system(QString("chmod +x " + dest).toAscii());
                 #endif
                 #ifdef Q_OS_LINUX
                     system(QString("chmod +x \"" + dest + "\"").toAscii());
