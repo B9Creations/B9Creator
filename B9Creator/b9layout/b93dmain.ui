@@ -1190,23 +1190,65 @@
             </widget>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_19">
+            <widget class="QPushButton" name="Support_Reset_To_Vertical_button">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Drops the bottom of the support below the top</string>
+             </property>
+             <property name="text">
+              <string>Make Vertical</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_26">
              <item>
-              <widget class="QPushButton" name="Support_Reset_To_Vertical_button">
-               <property name="toolTip">
-                <string>Drops the bottom of the support below the top</string>
-               </property>
-               <property name="text">
-                <string>Make Vertical</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_2">
-               <property name="text">
-                <string>Reset To Defaults</string>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="horizontalLayout_19">
+               <item>
+                <widget class="QPushButton" name="Support_Reset_Light_button">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Light</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_2">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Medium</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_3">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="text">
+                  <string>Heavy</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
             </layout>
            </item>
@@ -2187,8 +2229,8 @@
    <slot>OnSupport_Bottom_AttachType_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>328</x>
-     <y>538</y>
+     <x>371</x>
+     <y>507</y>
     </hint>
     <hint type="destinationlabel">
      <x>590</x>
@@ -2203,8 +2245,8 @@
    <slot>OnSupport_Bottom_Radius_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>332</x>
-     <y>566</y>
+     <x>371</x>
+     <y>535</y>
     </hint>
     <hint type="destinationlabel">
      <x>361</x>
@@ -2219,8 +2261,8 @@
    <slot>OnSupport_Bottom_Length_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>334</x>
-     <y>594</y>
+     <x>371</x>
+     <y>563</y>
     </hint>
     <hint type="destinationlabel">
      <x>539</x>
@@ -2236,7 +2278,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>359</x>
-     <y>648</y>
+     <y>617</y>
     </hint>
     <hint type="destinationlabel">
      <x>366</x>
@@ -2251,8 +2293,8 @@
    <slot>OnSupport_Bottom_Penetration_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>294</x>
-     <y>621</y>
+     <x>359</x>
+     <y>590</y>
     </hint>
     <hint type="destinationlabel">
      <x>600</x>
@@ -2444,7 +2486,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>141</x>
-     <y>518</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>419</x>
@@ -2460,7 +2502,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>141</x>
-     <y>522</y>
+     <y>491</y>
     </hint>
     <hint type="destinationlabel">
      <x>414</x>
@@ -2476,7 +2518,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>141</x>
-     <y>525</y>
+     <y>494</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
@@ -2492,7 +2534,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>129</x>
-     <y>529</y>
+     <y>498</y>
     </hint>
     <hint type="destinationlabel">
      <x>415</x>
@@ -2508,7 +2550,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>129</x>
-     <y>532</y>
+     <y>501</y>
     </hint>
     <hint type="destinationlabel">
      <x>419</x>
@@ -2524,7 +2566,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>141</x>
-     <y>518</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>417</x>
@@ -2540,7 +2582,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>141</x>
-     <y>523</y>
+     <y>492</y>
     </hint>
     <hint type="destinationlabel">
      <x>418</x>
@@ -2555,8 +2597,8 @@
    <slot>MakeSelectedSupportsVertical()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>204</x>
-     <y>738</y>
+     <x>225</x>
+     <y>706</y>
     </hint>
     <hint type="destinationlabel">
      <x>411</x>
@@ -2581,18 +2623,50 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_2</sender>
+   <sender>Support_Reset_Light_button</sender>
    <signal>clicked()</signal>
    <receiver>B9Layout</receiver>
-   <slot>ResetSupportDefaults()</slot>
+   <slot>ResetSupportLight()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>328</x>
-     <y>728</y>
+     <x>144</x>
+     <y>737</y>
     </hint>
     <hint type="destinationlabel">
      <x>413</x>
      <y>765</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>ResetSupportMedium()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>243</x>
+     <y>729</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>548</x>
+     <y>767</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_3</sender>
+   <signal>clicked()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>ResetSupportHeavy()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>314</x>
+     <y>724</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>691</x>
+     <y>766</y>
     </hint>
    </hints>
   </connection>
@@ -2635,7 +2709,6 @@
   <slot>SetToolSupportModify()</slot>
   <slot>MakeSelectedSupportsVertical()</slot>
   <slot>PromptExportToSTL()</slot>
-  <slot>ResetSupportDefaults()</slot>
   <slot>OnSupport_Top_AttachType_Changed()</slot>
   <slot>OnSupport_Top_Radius_Changed()</slot>
   <slot>OnSupport_Top_Length_Changed()</slot>
@@ -2648,5 +2721,8 @@
   <slot>OnSupport_Bottom_Length_Changed()</slot>
   <slot>OnSupport_Bottom_Penetration_Changed()</slot>
   <slot>OnSupport_Bottom_AngleFactor_Changed()</slot>
+  <slot>ResetSupportLight()</slot>
+  <slot>ResetSupportMedium()</slot>
+  <slot>ResetSupportHeavy()</slot>
  </slots>
 </ui>

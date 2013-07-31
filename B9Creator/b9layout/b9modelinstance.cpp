@@ -794,10 +794,10 @@ void B9ModelInstance::RenderPickGL()
         //glRotatef(rot.z(), 0.0, 0.0, 1.0);
         for(s = 0; s < supportStructureList.size(); s++)
         {
-            supportStructureList[s]->RenderUpper();
-            supportStructureList[s]->RenderLower();
+            supportStructureList[s]->RenderUpper(true, 1.0);
+            supportStructureList[s]->RenderLower(true, 1.0);
         }
-        if(basePlateSupport) basePlateSupport->RenderLower();
+        if(basePlateSupport) basePlateSupport->RenderLower(true, 1.0);
     glPopMatrix();
 }
 

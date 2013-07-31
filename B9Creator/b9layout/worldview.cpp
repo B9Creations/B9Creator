@@ -904,8 +904,12 @@ void WorldView::OnToolInitialAction(QString tool, QMouseEvent* event)
                         addedSupport->SetBottomAttachShape(appSettings.value("ATTACHSHAPE",addedSupport->GetTopAttachShape()).toString());
                         addedSupport->SetBottomLength(appSettings.value("LENGTH",addedSupport->GetTopLength()).toDouble());
                         addedSupport->SetBottomPenetration(appSettings.value("PENETRATION",addedSupport->GetTopPenetration()).toDouble());
-                        addedSupport->SetBottomRadius(appSettings.value("RADIUS",addedSupport->GetTopRadius()).toDouble());
+                        //addedSupport->SetBottomRadius(appSettings.value("RADIUS",addedSupport->GetTopRadius()).toDouble());
                         addedSupport->SetBottomAngleFactor(appSettings.value("ANGLEFACTOR",addedSupport->GetTopAngleFactor()).toDouble());
+                    appSettings.endGroup();
+                    //new support grounded on instance take que from for radius......
+                    appSettings.beginGroup("SUPPORT_TOP");
+                    addedSupport->SetBottomRadius(appSettings.value("RADIUS",addedSupport->GetBottomRadius()).toDouble());
                     appSettings.endGroup();
                 }
                 appSettings.endGroup();

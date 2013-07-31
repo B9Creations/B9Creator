@@ -319,7 +319,7 @@ void B9SupportStructure::ImportAttachmentDataFromStls()
 
 
 //Default support parameters here!
-void B9SupportStructure::FillRegistryDefaults(bool reset)
+void B9SupportStructure::FillRegistryDefaults(bool reset, QString supportWeight)
 {
     QSettings appSettings;
 
@@ -328,11 +328,13 @@ void B9SupportStructure::FillRegistryDefaults(bool reset)
         appSettings.setValue("SUPPORTPARAMSLOADED",true);
         appSettings.beginGroup("USERSUPPORTPARAMS");
 
+        if(supportWeight == "LIGHT")
+        {
         appSettings.beginGroup("SUPPORT_TOP");
             appSettings.setValue("ATTACHSHAPE","Cone 25%");
                 appSettings.setValue("ANGLEFACTOR",0.8);
-                appSettings.setValue("LENGTH",1.0);
-                appSettings.setValue("PENETRATION",0.4);
+                appSettings.setValue("LENGTH",2.0);
+                appSettings.setValue("PENETRATION",0.25);
                 appSettings.setValue("RADIUS",0.5);
 
             appSettings.endGroup();
@@ -344,7 +346,7 @@ void B9SupportStructure::FillRegistryDefaults(bool reset)
             appSettings.beginGroup("SUPPORT_BOTTOM_GROUNDED");
                 appSettings.setValue("ATTACHSHAPE","Cylinder");
                 appSettings.setValue("ANGLEFACTOR",1.0);
-                appSettings.setValue("LENGTH",0.5);
+                appSettings.setValue("LENGTH",0.25);
                 appSettings.setValue("PENETRATION",0.0);
                 appSettings.setValue("RADIUS",3.0);
 
@@ -358,6 +360,73 @@ void B9SupportStructure::FillRegistryDefaults(bool reset)
                 appSettings.setValue("RADIUS",0.5);
 
             appSettings.endGroup();
+        }
+        else if(supportWeight == "MEDIUM")
+        {
+        appSettings.beginGroup("SUPPORT_TOP");
+            appSettings.setValue("ATTACHSHAPE","Cone 25%");
+                appSettings.setValue("ANGLEFACTOR",0.8);
+                appSettings.setValue("LENGTH",4.0);
+                appSettings.setValue("PENETRATION",0.5);
+                appSettings.setValue("RADIUS",1.0);
+
+            appSettings.endGroup();
+            appSettings.beginGroup("SUPPORT_MID");
+            appSettings.setValue("ATTACHSHAPE","Cylinder");
+                appSettings.setValue("RADIUS",1.0);
+
+            appSettings.endGroup();
+            appSettings.beginGroup("SUPPORT_BOTTOM_GROUNDED");
+                appSettings.setValue("ATTACHSHAPE","Cylinder");
+                appSettings.setValue("ANGLEFACTOR",1.0);
+                appSettings.setValue("LENGTH",0.5);
+                appSettings.setValue("PENETRATION",0.0);
+                appSettings.setValue("RADIUS",6.0);
+
+            appSettings.endGroup();
+            appSettings.beginGroup("SUPPORT_BOTTOM_NONGROUNDED");
+
+                appSettings.setValue("ATTACHSHAPE","Cone 25%");
+                appSettings.setValue("ANGLEFACTOR",0.5);
+                appSettings.setValue("LENGTH",2.0);
+                appSettings.setValue("PENETRATION",0.5);
+                appSettings.setValue("RADIUS",1.0);
+
+            appSettings.endGroup();
+        }
+        else if(supportWeight == "HEAVY")
+        {
+        appSettings.beginGroup("SUPPORT_TOP");
+            appSettings.setValue("ATTACHSHAPE","Cone 25%");
+                appSettings.setValue("ANGLEFACTOR",0.8);
+                appSettings.setValue("LENGTH",8.0);
+                appSettings.setValue("PENETRATION",0.75);
+                appSettings.setValue("RADIUS",2.0);
+
+            appSettings.endGroup();
+            appSettings.beginGroup("SUPPORT_MID");
+            appSettings.setValue("ATTACHSHAPE","Cylinder");
+                appSettings.setValue("RADIUS",2.0);
+
+            appSettings.endGroup();
+            appSettings.beginGroup("SUPPORT_BOTTOM_GROUNDED");
+                appSettings.setValue("ATTACHSHAPE","Cylinder");
+                appSettings.setValue("ANGLEFACTOR",1.0);
+                appSettings.setValue("LENGTH",0.5);
+                appSettings.setValue("PENETRATION",0.0);
+                appSettings.setValue("RADIUS",12.0);
+
+            appSettings.endGroup();
+            appSettings.beginGroup("SUPPORT_BOTTOM_NONGROUNDED");
+
+                appSettings.setValue("ATTACHSHAPE","Cone 25%");
+                appSettings.setValue("ANGLEFACTOR",0.5);
+                appSettings.setValue("LENGTH",4.0);
+                appSettings.setValue("PENETRATION",0.75);
+                appSettings.setValue("RADIUS",2.0);
+
+            appSettings.endGroup();
+        }
         appSettings.endGroup();
 
     }

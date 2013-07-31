@@ -556,11 +556,13 @@ void B9Layout::UpdateInterface()
         if(pWorldView->GetTool() == "SUPPORTADD")
         {
             ui.supportInformationBox->show();
+            ui.Support_Reset_To_Vertical_button->hide();
         }
 
         if(pWorldView->GetTool() == "SUPPORTDELETE")
         {
             ui.supportInformationBox->hide();
+             ui.Support_Reset_To_Vertical_button->hide();
         }
 
         if(pWorldView->GetTool() == "SUPPORTMODIFY")
@@ -571,6 +573,7 @@ void B9Layout::UpdateInterface()
             else
             {
                 ui.supportInformationBox->show();
+                ui.Support_Reset_To_Vertical_button->show();
                 PushSupportProperties();
             }
 
@@ -1911,9 +1914,9 @@ void B9Layout::PushBasePlateProperties()
 }
 
 
-void B9Layout::ResetSupportDefaults()//connected to push button will always use hardcoded values!
+void B9Layout::ResetSupportLight()//connected to push button will always use hardcoded values!
 {
-    B9SupportStructure::FillRegistryDefaults(true);
+    B9SupportStructure::FillRegistryDefaults(true,"LIGHT");
     if(pWorldView->GetTool() == "SUPPORTADD")
     {
         FillSupportParamsWithDefaults();
@@ -1930,11 +1933,51 @@ void B9Layout::ResetSupportDefaults()//connected to push button will always use 
         OnSupport_Mid_AttachType_Changed(false);
         OnSupport_Mid_Radius_Changed(false);
         //TODO THERE IS A DIFFERENCT BETWEEN GROUNDED AND NON GROUNDED WITH GROuPS
-        //OnSupport_Bottom_AttachType_Changed(false);
-        //OnSupport_Bottom_Radius_Changed(false);
         OnSupport_Bottom_Length_Changed(false);
-        //OnSupport_Bottom_Penetration_Changed(false);
-        //OnSupport_Bottom_AngleFactor_Changed(false);
+    }
+}
+void B9Layout::ResetSupportMedium()//connected to push button will always use hardcoded values!
+{
+    B9SupportStructure::FillRegistryDefaults(true,"MEDIUM");
+    if(pWorldView->GetTool() == "SUPPORTADD")
+    {
+        FillSupportParamsWithDefaults();
+    }
+    else if(pWorldView->GetTool() == "SUPPORTMODIFY")
+    {
+        FillSupportParamsWithDefaults();
+
+        OnSupport_Top_AttachType_Changed(false);
+        OnSupport_Top_Radius_Changed(false);
+        OnSupport_Top_Length_Changed(false);
+        OnSupport_Top_Penetration_Changed(false);
+        OnSupport_Top_AngleFactor_Changed(false);
+        OnSupport_Mid_AttachType_Changed(false);
+        OnSupport_Mid_Radius_Changed(false);
+        //TODO THERE IS A DIFFERENCT BETWEEN GROUNDED AND NON GROUNDED WITH GROuPS
+        OnSupport_Bottom_Length_Changed(false);
+    }
+}
+void B9Layout::ResetSupportHeavy()//connected to push button will always use hardcoded values!
+{
+    B9SupportStructure::FillRegistryDefaults(true,"HEAVY");
+    if(pWorldView->GetTool() == "SUPPORTADD")
+    {
+        FillSupportParamsWithDefaults();
+    }
+    else if(pWorldView->GetTool() == "SUPPORTMODIFY")
+    {
+        FillSupportParamsWithDefaults();
+
+        OnSupport_Top_AttachType_Changed(false);
+        OnSupport_Top_Radius_Changed(false);
+        OnSupport_Top_Length_Changed(false);
+        OnSupport_Top_Penetration_Changed(false);
+        OnSupport_Top_AngleFactor_Changed(false);
+        OnSupport_Mid_AttachType_Changed(false);
+        OnSupport_Mid_Radius_Changed(false);
+        //TODO THERE IS A DIFFERENCT BETWEEN GROUNDED AND NON GROUNDED WITH GROuPS
+        OnSupport_Bottom_Length_Changed(false);
     }
 }
 

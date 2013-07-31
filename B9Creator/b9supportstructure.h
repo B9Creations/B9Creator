@@ -79,7 +79,7 @@ public: //enums and static vars
 
     static std::vector<B9SupportAttachmentData> AttachmentDataList;
     static void ImportAttachmentDataFromStls();
-    static void FillRegistryDefaults(bool reset = false);
+    static void FillRegistryDefaults( bool reset = false, QString supportWeight = "LIGHT");
     static void FreeAttachmentData(){}
     static unsigned char sColorID[3];
 

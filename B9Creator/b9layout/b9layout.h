@@ -176,7 +176,9 @@ public slots:
     void OnBasePlatePropertiesChanged();
     void PushSupportProperties();//fills the support properties with relevent data.
     void PushBasePlateProperties();
-    void ResetSupportDefaults();//connected to push button
+    void ResetSupportLight();//connected to push button
+    void ResetSupportMedium();//connected to push button
+    void ResetSupportHeavy();//connected to push button
     void FillSupportParamsWithDefaults();
 
     //returns a valid instance if we are editing it in support mode.
