@@ -5,7 +5,7 @@
 //  BCreator(tm)
 //  Software for the control of the 3D Printer, "B9Creator"(tm)
 //
-//  Copyright 2011-2012 B9Creations, LLC
+//  Copyright 2011-2013 B9Creations, LLC
 //  B9Creations(tm) and B9Creator(tm) are trademarks of B9Creations, LLC
 //
 //  This file is part of B9Creator
@@ -44,6 +44,26 @@
 #include "dlgcyclesettings.h"
 #include "dlgmaterialsmanager.h"
 
+#define RAISE1 80
+#define LOWER1 80
+#define CLOSE1 100
+#define OPEN1 50
+#define BREATHE1 2.0
+#define SETTLE1 3.0
+#define OVERLIFT1 6.35
+
+#define RAISE2 80
+#define LOWER2 80
+#define CLOSE2 50
+#define OPEN2 50
+#define BREATHE2 1.5
+#define SETTLE2 3.5
+#define OVERLIFT2 0.0
+
+#define CUTOFF 0.5
+#define HARDDOWN 0.0
+#define UP2FLUSH 0.0
+
 void PCycleSettings::updateValues()
 {
     DlgCycleSettings dlg(this);
@@ -53,26 +73,26 @@ void PCycleSettings::updateValues()
 void PCycleSettings::loadSettings()
 {
     QSettings settings;
-    m_iRSpd1 = settings.value("RSpd1",70).toInt();
-    m_iLSpd1 = settings.value("LSpd1",70).toInt();
-    m_iCloseSpd1 = settings.value("CloseSpd1",100).toInt();
-    m_iOpenSpd1 = settings.value("OpenSpd1",80).toInt();
-    m_dBreatheClosed1 = settings.value("BreatheClosed1",2.0).toDouble();
-    m_dSettleOpen1 = settings.value("SettleOpen1",3.0).toDouble();
-    m_dOverLift1 = settings.value("OverLift1",0.0).toDouble();
+    m_iRSpd1 = settings.value("RSpd1",RAISE1).toInt();
+    m_iLSpd1 = settings.value("LSpd1",LOWER1).toInt();
+    m_iCloseSpd1 = settings.value("CloseSpd1",CLOSE1).toInt();
+    m_iOpenSpd1 = settings.value("OpenSpd1",OPEN1).toInt();
+    m_dBreatheClosed1 = settings.value("BreatheClosed1",BREATHE1).toDouble();
+    m_dSettleOpen1 = settings.value("SettleOpen1",SETTLE1).toDouble();
+    m_dOverLift1 = settings.value("OverLift1",OVERLIFT1).toDouble();
 
-    m_iRSpd2 = settings.value("RSpd2",70).toInt();
-    m_iLSpd2 = settings.value("LSpd2",70).toInt();
-    m_iCloseSpd2 = settings.value("CloseSpd2",50).toInt();
-    m_iOpenSpd2 = settings.value("OpenSpd2",80).toInt();
-    m_dBreatheClosed2 = settings.value("BreatheClosed2",2.0).toDouble();
-    m_dSettleOpen2 = settings.value("SettleOpen2",3.0).toDouble();
-    m_dOverLift2 = settings.value("OverLift2",0.0).toDouble();
+    m_iRSpd2 = settings.value("RSpd2",RAISE2).toInt();
+    m_iLSpd2 = settings.value("LSpd2",LOWER2).toInt();
+    m_iCloseSpd2 = settings.value("CloseSpd2",CLOSE2).toInt();
+    m_iOpenSpd2 = settings.value("OpenSpd2",OPEN2).toInt();
+    m_dBreatheClosed2 = settings.value("BreatheClosed2",BREATHE2).toDouble();
+    m_dSettleOpen2 = settings.value("SettleOpen2",SETTLE2).toDouble();
+    m_dOverLift2 = settings.value("OverLift2",OVERLIFT2).toDouble();
 
-    m_dBTClearInMM = settings.value("BTClearInMM",0.005).toDouble();
+    m_dBTClearInMM = settings.value("BTClearInMM",CUTOFF).toDouble();
 
-    m_dHardZDownMM = settings.value("HardDownZMM",0.0).toDouble();
-    m_dZFlushMM    = settings.value("ZFlushMM",   0.0).toDouble();
+    m_dHardZDownMM = settings.value("HardDownZMM",HARDDOWN).toDouble();
+    m_dZFlushMM    = settings.value("ZFlushMM",   UP2FLUSH).toDouble();
 }
 
 void PCycleSettings::saveSettings()
@@ -102,20 +122,23 @@ void PCycleSettings::saveSettings()
 
 void PCycleSettings::setFactorySettings()
 {
-    m_iRSpd1 = m_iLSpd1 = m_iRSpd2 = m_iLSpd2 = 70;
-    m_iOpenSpd1 = 80;
-    m_iCloseSpd1 = 100;
-    m_iOpenSpd2 = 80;
-    m_iCloseSpd2 = 50;
-    m_dBreatheClosed1 = 2.0;
-    m_dSettleOpen1 = 3.0;
-    m_dBreatheClosed2 = 2.0;
-    m_dSettleOpen2 = 3.0;
-    m_dOverLift1 = 0.0;
-    m_dOverLift2 = 0.0;
-    m_dBTClearInMM = 0.005;
-    m_dHardZDownMM = 0.0;
-    m_dZFlushMM = 0.0;
+    m_iRSpd1 = RAISE1;
+    m_iLSpd1 = LOWER1;
+    m_iRSpd2 = RAISE2;
+    m_iLSpd2 = LOWER2;
+    m_iOpenSpd1 = OPEN1;
+    m_iCloseSpd1 = CLOSE1;
+    m_iOpenSpd2 = OPEN2;
+    m_iCloseSpd2 = CLOSE2;
+    m_dBreatheClosed1 = BREATHE1;
+    m_dSettleOpen1 = SETTLE1;
+    m_dBreatheClosed2 = BREATHE2;
+    m_dSettleOpen2 = SETTLE2;
+    m_dOverLift1 = OVERLIFT1;
+    m_dOverLift2 = OVERLIFT2;
+    m_dBTClearInMM = CUTOFF;
+    m_dHardZDownMM = HARDDOWN;
+    m_dZFlushMM = UP2FLUSH;
 }
 
 B9Terminal::B9Terminal(QWidget *parent, Qt::WFlags flags) :

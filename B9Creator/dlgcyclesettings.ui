@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>406</width>
+    <width>400</width>
     <height>374</height>
    </rect>
   </property>
@@ -167,7 +167,7 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="1" colspan="2">
+         <item row="4" column="2">
           <widget class="QDoubleSpinBox" name="doubleSpinBoxOverlift1">
            <property name="toolTip">
             <string>After release move up to next level plus this amount.</string>
@@ -176,7 +176,7 @@
             <string>After release move up to next level plus this amount. Once repositioned, we must lower back by this amount to target level</string>
            </property>
            <property name="decimals">
-            <number>5</number>
+            <number>3</number>
            </property>
            <property name="maximum">
             <double>10.000000000000000</double>
@@ -222,7 +222,7 @@
            </property>
           </widget>
          </item>
-         <item row="6" column="1" colspan="2">
+         <item row="6" column="2">
           <widget class="QDoubleSpinBox" name="doubleSpinBoxSettle1">
            <property name="toolTip">
             <string>Delay in the VAT Open position.</string>
@@ -355,7 +355,7 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="1" colspan="2">
+         <item row="4" column="2">
           <widget class="QDoubleSpinBox" name="doubleSpinBoxOverlift2">
            <property name="toolTip">
             <string>After release move up to next level plus this amount.</string>
@@ -364,7 +364,7 @@
             <string>After release move up to next level plus this amount. Once repositioned, we must lower back by this amount to target level</string>
            </property>
            <property name="decimals">
-            <number>5</number>
+            <number>3</number>
            </property>
            <property name="maximum">
             <double>10.000000000000000</double>
@@ -430,7 +430,7 @@
          <string>Use Initial settings when Build Table is at or below this value.  At higher positions, use the subsequent settings.</string>
         </property>
         <property name="decimals">
-         <number>5</number>
+         <number>3</number>
         </property>
         <property name="maximum">
          <double>10.000000000000000</double>
@@ -465,7 +465,7 @@
             <string>We go lower than 'zero' by this amount, expecting to hit bottom, motor will 'skip' a bit.  Adjust this value so it only skips a few times.</string>
            </property>
            <property name="decimals">
-            <number>5</number>
+            <number>3</number>
            </property>
            <property name="maximum">
             <double>1.270000000000000</double>
@@ -497,7 +497,7 @@
             <string>After we hit hard bottom, move up this much to flush the Build Table with the PDMS.  This value should normally be less than the Hard Down Value.</string>
            </property>
            <property name="decimals">
-            <number>5</number>
+            <number>3</number>
            </property>
            <property name="maximum">
             <double>1.270000000000000</double>
