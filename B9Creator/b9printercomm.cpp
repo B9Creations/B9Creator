@@ -125,7 +125,11 @@ int B9PrinterStatus::getIntVersion(){
 //upload the firware hex file to the current port - this will freeze the program.
 bool B9FirmwareUpdate::UploadHex(QString sCurPort)
 {
+
     QDir avrdir = QDir(CROSS_OS_GetDirectoryFromLocationTag("APPLICATION_DIR"));
+
+
+
     QString launchcommand = "avrdude ";
     #ifndef Q_OS_WIN
         launchcommand = "./avrdude ";

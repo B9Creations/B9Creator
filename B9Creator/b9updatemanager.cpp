@@ -576,28 +576,29 @@ bool B9UpdateManager::CopyFromTemp()
             if(updateEntries[i].fileName == "B9Creator")
             {
                 #ifdef Q_OS_MAC
-                    system(QString("chmod +x " + dest).toAscii());
+                system(QString("chmod +x " + dest + "\"").toAscii());
                 #endif
                 #ifdef Q_OS_LINUX
-                    system(QString("chmod +x " + dest).toAscii());
+                    system(QString("chmod +x \"" + dest + "\"").toAscii());
                 #endif
             }
             if(updateEntries[i].fileName == "avrdude")
             {
+                qDebug() << "APPLYING EXECUTABLNESS TO AVRDUDE!";
                 #ifdef Q_OS_MAC
-                    system(QString("chmod +x " + dest).toAscii());
+                    system(QString("chmod +x \"" + dest + "\"").toAscii());
                 #endif
                 #ifdef Q_OS_LINUX
-                    system(QString("chmod +x " + dest).toAscii());
+                    system(QString("chmod +x \"" +  dest + "\"").toAscii());
                 #endif
             }
             if(updateEntries[i].fileName == "avrdude.conf")
             {
                 #ifdef Q_OS_MAC
-                    system(QString("chmod +x " + dest).toAscii());
+                system(QString("chmod +x \"" + dest + "\"").toAscii());
                 #endif
                 #ifdef Q_OS_LINUX
-                    system(QString("chmod +x " + dest).toAscii());
+                system(QString("chmod +x \"" + dest + "\"").toAscii());
                 #endif
             }
         }
@@ -648,6 +649,7 @@ void B9UpdateManager::TransitionFromPreviousVersions()
     QFile::remove(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR") + "/avrdude.exe");
     QFile::remove(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR") + "/avrdude");
     QFile::remove(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR") + "/avrdude.conf");
+
     //OLD Material file sould be salvaged by b9matcat and removed.
 
     //check for old executables and delete them
