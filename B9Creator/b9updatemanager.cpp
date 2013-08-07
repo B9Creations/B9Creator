@@ -138,7 +138,7 @@ void B9UpdateManager::StartNewDownload(QNetworkRequest request)
     if(downloadState == "DownloadingFiles")
     {
         waitingbar->show();
-        waitingbar->setDescription("Downloading: " + updateEntries[currentUpdateIndx].fileName + "...");
+        waitingbar->setDescription("Downloading: " + QFileInfo(updateEntries[currentUpdateIndx].fileName).fileName() + "...");
     }
 }
 
@@ -296,10 +296,14 @@ void B9UpdateManager::OnRecievedReply(QNetworkReply* reply)
 
 bool B9UpdateManager::OnDownloadDone()
 {
+    QString downloadFileName = QString(CROSS_OS_GetDirectoryFromLocationTag("TEMP_DIR") + "/" + updateEntries[currentUpdateIndx].fileName);
     QByteArray data = currentReply->readAll();
 
+    //make directories needed for file int the temp folder.
+    QDir().mkpath(QFileInfo(downloadFileName).absolutePath());
 
-    QFile downloadCopy(CROSS_OS_GetDirectoryFromLocationTag("TEMP_DIR") + "/" + updateEntries[currentUpdateIndx].fileName);
+
+    QFile downloadCopy(downloadFileName);
     downloadCopy.open(QIODevice::WriteOnly | QIODevice::Truncate);
     int success = downloadCopy.write(data);
     downloadCopy.close();
@@ -467,6 +471,8 @@ void B9UpdateManager::CalculateUpdateEntries()
 //convienience function to determine i an entry needs updated.
 bool B9UpdateManager::NeedsUpdated(B9UpdateEntry &candidate, B9UpdateEntry &remote)
 {
+
+
     if(candidate.version < remote.version)
         return true;
 
@@ -567,6 +573,10 @@ bool B9UpdateManager::CopyFromTemp()
             else
                 QFile::remove(dest);
         }
+
+        //were about to copy so we need to make any sub directories needed.
+         QDir().mkpath(QFileInfo(dest).absolutePath());
+
         if(!QFile::copy(src,dest))
             return false;
         else

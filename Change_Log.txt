@@ -1,3 +1,10 @@
+//v1.5.1 Change Log
+-Auto Updator now can create subdirectories locally
+-layout will now load models in the same directory as layout file if a model cant be found.
+-Printing now disables sleeps, dimming, screensave, and turning off of the display on windows.
+-Fixed stl import issues, triangle normals are now based on right hand rule.
+
+
 //v1.5 Change Log
 -Added File Auto Updating System
 -Assimp Library removed from project.

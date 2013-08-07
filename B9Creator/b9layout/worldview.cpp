@@ -313,16 +313,6 @@ QVector3D WorldView::GetRotation()
 
 
 
-
-
-
-
-
-
-
-
-
-
 //Private
 void WorldView::initializeGL()
 {
@@ -337,10 +327,13 @@ void WorldView::initializeGL()
     glEnable ( GL_COLOR_MATERIAL );
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+
+
     glDisable(GL_MULTISAMPLE);
     glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    static GLfloat lightPosition[4] = { 0.0, 0.0, 100.0, 1.0 };
-    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+    static GLfloat lightPosition0[4] = { 0.0, 0.0, 100.0, 1.0 };
+
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition0);
 
 
 }

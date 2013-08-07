@@ -53,10 +53,10 @@
     B9LayoutProjectData::B9LayoutProjectData() : QObject()
 	{
 		New();
-
 	}
     B9LayoutProjectData::~B9LayoutProjectData()
 	{
+
 	}
 
 	//File Access:
@@ -122,6 +122,10 @@
 			{
                 modelpath = buff;
 
+                if(!QFileInfo(modelpath).exists())
+                {
+                    modelpath = QFileInfo(filepath).absolutePath() + "/" + QFileInfo(modelpath).fileName();
+                }
 
                 B9ModelInstance* pinst = pMain->AddModel(modelpath,withoutVisuals);//inst will be null if it cant find the file.
 				
@@ -435,7 +439,7 @@
 
         //chance popup dialog asking if the user wants to manually find the file.
         QMessageBox msgBox;
-        msgBox.setText("the model: " + QFileInfo(modelpath).baseName() + "can not be located");
+        msgBox.setText("The model: " + QFileInfo(modelpath).baseName() + " can not be located.");
         msgBox.setInformativeText("Do you want to locate it manually?");
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Discard);
         msgBox.setDefaultButton(QMessageBox::Yes);

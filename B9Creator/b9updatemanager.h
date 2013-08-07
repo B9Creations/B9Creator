@@ -3,11 +3,11 @@
 
 ///NOTE - Dont use https - windows 8 doesnt like it for some reason.
 //Instead use http
-#define REMOTE_FILE_VERSIONS_URL "http://www.b9creator.com/B9CreatorUpdates/Manifest.txt"
-#define REMOTE_FILE_LOCATIONS_PATH "http://www.b9creator.com/B9CreatorUpdates/"
+//WE ARE USING THE SECOND MANIFEST!
+#define REMOTE_FILE_VERSIONS_URL "http://www.b9creator.com/B9CreatorUpdates2/Manifest.txt"
+#define REMOTE_FILE_LOCATIONS_PATH "http://www.b9creator.com/B9CreatorUpdates2/"
 
 #define UPDATE_TIMOUT 10000
-
 
 #include <QObject>
 #include <QMap>

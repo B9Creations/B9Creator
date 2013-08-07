@@ -93,7 +93,7 @@ QString B9ModelLoader::DetermineFileType(QString filename, bool &readyRead)
     QFile parsefile(filename);
     QTextStream parseStream(&parsefile);
     QString asciiTest;
-
+    unsigned int i = 0;
 
 
     if(suffix.toLower() == "stl")
@@ -111,35 +111,23 @@ QString B9ModelLoader::DetermineFileType(QString filename, bool &readyRead)
         byteCount = parsefile.size();
 
         //now determine if the Stl is binary or ascii
-        parseStream >> asciiTest;
-
-        //to pass the ascii test we need "solid,name,facet"
-        if(asciiTest == "solid")
+        while(i < 50)
         {
-            parseStream.skipWhiteSpace();
-            parseStream >> asciiTest;//name
-            parseStream.skipWhiteSpace();
-            parseStream >> asciiTest;//facet
-            parsefile.close();
-            if(asciiTest.toLower() == "facet")
+            parseStream >> asciiTest;
+            if(asciiTest.toLower().trimmed() == "facet")
             {
+                parsefile.close();
                 qDebug() << "B9ModelLoader: the file is an ascii stl";
                 readyRead = true;
                 return "ASCII_STL";
             }
-            else
-            {
-                qDebug() << "B9ModelLoader: the file is a binary stl";
-                readyRead = true;
-                return "BIN_STL";
-            }
+            i++;
         }
-        else
-        {
-            qDebug() << "B9ModelLoader: the file is a binary stl";
-            readyRead = true;
-            return "BIN_STL";
-        }
+        //if we didnt find the string "facet within 50 words, assum its a bin.
+        qDebug() << "B9ModelLoader: the file is a binary stl";
+        readyRead = true;
+        parsefile.close();
+        return "BIN_STL";
     }
     else if(suffix.toLower() == "amf")
     {
@@ -154,11 +142,11 @@ QString B9ModelLoader::DetermineFileType(QString filename, bool &readyRead)
 
 
 
-
-
 void B9ModelLoader::PrepareSTLForReading(QString filename, bool &readyRead)
 {
     QString buff;
+    unsigned int i = 0;
+    unsigned int pos;
 
 
     if(fileType == "ASCII_STL")//ascii
@@ -167,13 +155,23 @@ void B9ModelLoader::PrepareSTLForReading(QString filename, bool &readyRead)
         asciifile.setFileName(filename);
         asciifile.open(QIODevice::ReadOnly | QIODevice::Text);
         asciiStream.setDevice(&asciifile);
-        //eat solid and name to get ready for reading
-        //first triangle
-        asciiStream >> buff;
-        asciiStream >> buff;
-        asciiStream.skipWhiteSpace();
-
-        readyRead = true;
+        //we need to get the asciistream in the position
+        //where it is about to read the first "facet" word
+        while(i < 50)
+        {
+            pos = asciiStream.pos();
+            asciiStream >> buff;
+            if(buff.toLower().trimmed() == "facet")
+            {
+                asciiStream.seek(pos);//reverse to before we read facet.
+                readyRead = true;
+                return;
+            }
+            i++;
+        }
+        lastError = "No facet string found in stl file.";
+        qDebug() << "B9ModelLoader: No facet string found in stl file.";
+        readyRead = false;
     }
     else if(fileType == "BIN_STL")//binary
     {
@@ -232,7 +230,7 @@ bool B9ModelLoader::ReadBinHeader()
 bool B9ModelLoader::CheckBinFileValidity()
 {
     //each facet should be 50bytes, with a header and facet count of 84 bytes.
-    if(byteCount == (triCount*50 + 84))
+    if(byteCount >= (triCount*50 + 84))
         return true;
     else
         return false;
@@ -338,6 +336,7 @@ bool B9ModelLoader::LoadNextTri(STLTri* &tri, bool &errorFlag)
         bytesRead += binfile.read((char *)&pNewTri->z2,4);
 
 
+
         //skip attribute byte count;
         binfile.seek(binfile.pos()+ 2);
 
@@ -365,6 +364,10 @@ bool B9ModelLoader::LoadNextTri(STLTri* &tri, bool &errorFlag)
         QCoreApplication::processEvents();
 
     }
+
+
+
+
     errorFlag = false;
     return true;
 }

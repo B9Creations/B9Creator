@@ -252,7 +252,6 @@ void Slice::ConnectSegmentNeighbors()
 
 			thisSeg->p2 = finalLeadSeg->p1;
 			thisSeg->FormNormal();
-			
 		}
 	}
 }

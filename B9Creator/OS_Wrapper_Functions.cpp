@@ -207,9 +207,15 @@ QString CROSS_OS_GetDirectoryFromLocationTag(QString locationtag)
 bool CROSS_OS_DisableSleeps(bool disable)
 {
 
-    static ScreenSaverWaker GlobalWaker(NULL);
+
 
     #ifdef Q_OS_WIN
+
+        if(disable)
+            SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED);
+        else
+            SetThreadExecutionState(ES_CONTINUOUS);
+
 
         //power options do nothing in windows 7/8 but should still help in 2000/xp
         static unsigned int timeoutLowPower;
@@ -239,8 +245,10 @@ bool CROSS_OS_DisableSleeps(bool disable)
             }
         }
 
+
     #endif
     #ifdef Q_OS_MAC
+       static ScreenSaverWaker GlobalWaker(NULL);
        if(disable)
            GlobalWaker.StartWaking();//will start waking the application and not let screensaver
                                     //turn on

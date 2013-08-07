@@ -149,9 +149,9 @@ bool ModelData::LoadIn(QString filepath)
         }
         else
         {
-            newtri.normal.setX(pLoadedTri->nx);
-            newtri.normal.setY(pLoadedTri->ny);
-            newtri.normal.setZ(pLoadedTri->nz);
+            //newtri.normal.setX(pLoadedTri->nx);
+            //newtri.normal.setY(pLoadedTri->ny);
+            //newtri.normal.setZ(pLoadedTri->nz);
 
             newtri.vertex[0].setX(pLoadedTri->x0);
             newtri.vertex[0].setY(pLoadedTri->y0);
@@ -162,6 +162,9 @@ bool ModelData::LoadIn(QString filepath)
             newtri.vertex[2].setX(pLoadedTri->x2);
             newtri.vertex[2].setY(pLoadedTri->y2);
             newtri.vertex[2].setZ(pLoadedTri->z2);
+
+            //use right hand rule for importing normals - ignore file normals..
+            newtri.UpdateNormalFromGeom();
 
             delete pLoadedTri;
             newtri.UpdateBounds();

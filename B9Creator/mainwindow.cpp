@@ -44,7 +44,7 @@
 #include "b9supportstructure.h"
 #include <QDebug>
 
-#define B9CVERSION "Version 1.5.0     Copyright 2013 B9Creations, LLC     www.b9creator.com\n "
+#define B9CVERSION "Version 1.5.1     Copyright 2013 B9Creations, LLC     www.b9creator.com\n "
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -78,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
         m_pUpdateManager->TransitionFromPreviousVersions();
 
         //Schedule an auto update check
-        QTimer::singleShot(100,m_pUpdateManager,SLOT(AutoCheckForUpdates()));
+        QTimer::singleShot(1000,m_pUpdateManager,SLOT(AutoCheckForUpdates()));
 
 
     //create Printer Model Manager, withough importing definitions - it will start with a default printer
@@ -136,7 +136,7 @@ void MainWindow::showSplash()
     if(m_pSplash!=NULL){
         m_pSplash->showMessage(B9CVERSION,Qt::AlignBottom|Qt::AlignCenter,QColor(255,130,36));
         m_pSplash->show();
-        QTimer::singleShot(3000,this,SLOT(hideSplash()));
+        QTimer::singleShot(1000,this,SLOT(hideSplash()));
     }
 }
 
