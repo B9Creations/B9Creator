@@ -73,7 +73,6 @@ SOURCES += main.cpp\
     b9matcat.cpp \
     b9print.cpp \
     b9layout/worldview.cpp \
-    b9layout/triangulate.cpp \
     b9layout/triangle3d.cpp \
     b9layout/sliceset.cpp \
     b9layout/slicedebugger.cpp \
@@ -100,7 +99,8 @@ SOURCES += main.cpp\
     b9layout/b9verticaltricontainer.cpp \
     b9modelwriter.cpp \
     dlgcalbuildtable.cpp \
-    dlgcalprojector.cpp
+    dlgcalprojector.cpp \
+    b9layout/b9tesselator.cpp
 
 HEADERS  += mainwindow.h \
     logfilemanager.h \
@@ -121,7 +121,6 @@ HEADERS  += mainwindow.h \
     b9matcat.h \
     b9print.h \
     b9layout/worldview.h \
-    b9layout/triangulate.h \
     b9layout/triangle3d.h \
     b9layout/sliceset.h \
     b9layout/slicedebugger.h \
@@ -150,7 +149,8 @@ HEADERS  += mainwindow.h \
     b9layout/b9verticaltricontainer.h \
     b9modelwriter.h \
     dlgcalbuildtable.h \
-    dlgcalprojector.h
+    dlgcalprojector.h \
+    b9layout/b9tesselator.h
 
 FORMS    += mainwindow.ui \
     b9terminal.ui \

@@ -76,6 +76,7 @@ void SliceContext::initializeGL()
 {
 	qglClearColor(QColor(0,0,0));
 	glEnable(GL_BLEND);
+    glDisable(GL_CULL_FACE);
 
     glViewport(0, 0, pMain->ProjectData()->GetResolution().x(), pMain->ProjectData()->GetResolution().y());
     glMatrixMode(GL_PROJECTION);

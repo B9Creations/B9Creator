@@ -1,3 +1,7 @@
+//v1.5.2 Change Log
+-Increased slicer accuracy.
+
+
 //v1.5.1 Change Log
 -Auto Updator now can create subdirectories locally
 -layout will now load models in the same directory as layout file if a model cant be found.

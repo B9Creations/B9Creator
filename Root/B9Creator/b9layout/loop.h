@@ -39,7 +39,8 @@
 #define LOOP_H
 
 #include <vector>
-#include "triangulate.h"
+#include <QtOpenGL>
+#include "OS_GL_Wrapper.h"
 
 class Segment;
 class Slice;
@@ -56,8 +57,8 @@ public:
 	int numSegs;
 	
 	
-	Vector2dVector polygonStrip;
-	Vector2dVector triangleStrip;//ordered list of vertexes to be rendered, created by the triangulator
+    std::vector<QVector2D> polygonStrip;
+    std::vector<QVector2D> triangleStrip;//ordered list of vertexes to be rendered, created by the triangulator
 
 	bool isfill;
 
@@ -81,11 +82,11 @@ public:
 
 	int NudgeSharedPoints();//finds "self touching" segment points and nudges them out of the way.
 	
-	int DetermineType();//determines if the loop is a fill or void;
+    int DetermineTypeBySides();
 
 	void formPolygon();
 	
-	bool formTriangleStrip();
+    bool formTriStrip();
 
 	void Destroy();//dissacosiates all segments from loop.
 
@@ -98,4 +99,17 @@ public:
 private:
 
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif

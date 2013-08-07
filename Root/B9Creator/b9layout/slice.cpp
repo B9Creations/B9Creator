@@ -261,6 +261,7 @@ void Slice::ConnectSegmentNeighbors()
 int Slice::GenerateLoops()
 {
     unsigned int s;
+    int fillVoidIndicator;
 	for(s=0; s<segmentList.size(); s++)//pick a segment, any segment
 	{
 		if(!segmentList[s]->pLoop)//only if it doesnt belong to a loop already
@@ -280,42 +281,27 @@ int Slice::GenerateLoops()
 		}
 	}
 
-	//at this point we have all of the loops formed.
-	//we need to attempt triangulating, if failed - check for intersections and split up loops., if no intersections - nudge and correct doublebacks. 
-	//if all else fails, simplify until the loop is a triangle....
+    //run through various filters in before determining fill or void
+    for(unsigned int l = 0; l < loopList.size(); l++)//looplist.size keeps growing..
+    {
+        loopList[l].Simplify();//remove small segments
+        loopList[l].CorrectDoubleBacks();
+    }
+    for(unsigned int l = 0; l < loopList.size(); l++)//looplist.size keeps growing..
+    {
+        loopList[l].AttemptSplitUp(this);//split figure eights.
+    }
+
     for(unsigned int l = 0; l < loopList.size(); l++)
-	{
-		//always simplify the loops to get rid of ultra small segments.
-        loopList[l].Simplify();
-        loopList[l].NudgeSharedPoints();
-		loopList[l].DetermineType();
-		loopList[l].formPolygon();
-	}
+    {
+        fillVoidIndicator = loopList[l].DetermineTypeBySides();
 
-    unsigned int currloop = 0;
-	while(currloop < loopList.size())
-	{
-		if(!loopList[currloop].formTriangleStrip())
-		{
+        loopList[l].formPolygon();
+        loopList[l].formTriStrip();
+    }
 
-                if(loopList[currloop].AttemptSplitUp(this))
-				{
-                    loopList[currloop].Simplify();
-                    currloop--;//so we redo this loop.
-				}
-				else
-				{
-                    loopList[currloop].CorrectDoubleBacks();
-					loopList[currloop].DetermineType();
-					loopList[currloop].formPolygon();
-					loopList[currloop].formTriangleStrip();
-				}
 
-		}
-		currloop++;
-	}
-
-	return numLoops;
+    return numLoops;
 }
 
 
@@ -334,7 +320,7 @@ void Slice::Render()
 		}
 		else
 		{
-			glColor3b(0,1,0);//void
+            glColor3b(0,1,0);//void
 		}
 		loopList[l].RenderTriangles();
 	}

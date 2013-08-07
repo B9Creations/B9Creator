@@ -45,6 +45,10 @@
 
 #include <QtDebug>
 #include <QtOpenGL>
+#include "OS_GL_Wrapper.h"
+#include "b9tesselator.h"
+#include "segment.h"
+
 
 //Public:
 Loop::Loop(Segment* startingSeg,Slice* parentSlice)
@@ -52,7 +56,7 @@ Loop::Loop(Segment* startingSeg,Slice* parentSlice)
 	pSlice = parentSlice;
 	numSegs = 0;
 
-	isfill = 0;//by default
+    isfill = 0;//by default4
 
 	//debug
 	isComplete = 0;
@@ -360,90 +364,153 @@ void Loop::formPolygon()
 	}
 }
 
-bool Loop::formTriangleStrip()
+bool Loop::formTriStrip()
 {
 	triangleStrip.clear();
-	
-	//triangulator to triangulate the polygon strip.
-	return Triangulate::Process(polygonStrip,triangleStrip);
+
+    //As of 1.5.2 use the glu tesselator to form triangles
+
+    B9Tesselator tess;
+    return tess.Triangulate(&polygonStrip,&triangleStrip);
 }
 
-int Loop::DetermineType()
+
+
+
+//determines fil or void based on bounding segments
+//returns group majority. + is fill, - is void
+int Loop::DetermineTypeBySides()
 {
-	
-    unsigned int s;
+    Segment* negXSeg = NULL;
+    Segment* posXSeg = NULL;
+    Segment* negYSeg = NULL;
+    Segment* posYSeg = NULL;
+    Segment* currSeg = NULL;
+    double minX = 99999.9;
+    double maxX = -999999.9;
+    double minY = 999999.9;
+    double maxY = -999999.9;
+    QVector3D cross;
+    signed int TypeVotes = 0;
+    bool concaveCheck = false;
+    unsigned long int i;
 
-	double x1 = 0;
-	double y1 = 0;
-	double x2 = 0; 
-	double y2 = 0;
-	double Dot;
-	double Cross;
-	double diff = 0.0;
+    //Find out bounding segments
+    for(i = 0; i < segListp.size(); i++)
+    {
+        currSeg = segListp[i];
 
-	totalAngle = 0;
+        if(currSeg->p2.x() < minX)
+        {
+            negXSeg = currSeg;
+            minX = currSeg->p2.x();
+        }
+        if(currSeg->p2.x() > maxX)
+        {
+            posXSeg = currSeg;
+            maxX = currSeg->p2.x();
+        }
+        if(currSeg->p2.y() < minY)
+        {
+            negYSeg = currSeg;
+            minY = currSeg->p2.y();
+        }
+        if(currSeg->p2.y() > maxY)
+        {
+            posYSeg = currSeg;
+            maxY = currSeg->p2.y();
+        }
+    }
 
-	for(s=0; s < segListp.size(); s++)
-	{
-		
-		x1 = segListp[s]->normal.x();
-		y1 = segListp[s]->normal.y();
 
-		if(s<segListp.size()-1)
-		{
-			x2 = segListp[s+1]->normal.x();
-			y2 = segListp[s+1]->normal.y();
-		}
-		else
-		{
-			x2 = segListp[0]->normal.x();
-			y2 = segListp[0]->normal.y();
-		}
+    //Calculate Negative X Vote
+    if((negXSeg->normal.x() < 0) && (negXSeg->leadingSeg->normal.x() < 0))
+    {
+        TypeVotes++;//fill
+    }
+    else if((negXSeg->normal.x() > 0) && (negXSeg->leadingSeg->normal.x() > 0))
+    {
+        TypeVotes--;//void
+    }
+    else//disagreement, check concavity
+    {
+        concaveCheck = true;
+        cross = QVector3D::crossProduct(QVector3D(negXSeg->normal),QVector3D(negXSeg->leadingSeg->normal));
+        if(cross.z() > 0)
+            TypeVotes--;//fill
+        else
+            TypeVotes++;//void
+    }
 
-		Dot = (x1 * x2) + (y1 * y2);
-		Cross = (x1 * y2) - (y1 * x2);
-		//filter dot and cross
-		if(Dot > 1)
-		{
-			Dot = 1;
-		}
-		else if(Dot < -1)
-		{
-			Dot = -1;
-		}
-		if(Cross > 1)
-		{
-			Cross = 1;
-		}
-		else if(Cross < -1)
-		{
-			Cross = -1;
-		}
-		
-		if(Cross >= 0)
-		{
-			diff = -acos(Dot);
-		}
-		else
-		{
-			diff = acos(Dot);
-		}
-		
-		totalAngle = totalAngle + diff;
-	}
-		
-		if((totalAngle > 0))
-		{
-			isfill = 1;
-			return 1;
-		}
-		if(totalAngle < 0)
-		{
-			isfill = 0;
-			return -1;
-		}
-    return 0;
+
+    //Calculate Positive X Vote
+    if((posXSeg->normal.x() > 0) && (posXSeg->leadingSeg->normal.x() > 0))
+    {
+        TypeVotes++;//fill
+    }
+    else if((posXSeg->normal.x() < 0) && (posXSeg->leadingSeg->normal.x() < 0))
+    {
+        TypeVotes--;//void
+    }
+    else//disagreement, check concavity
+    {
+        concaveCheck = true;
+        cross = QVector3D::crossProduct(QVector3D(posXSeg->normal),QVector3D(posXSeg->leadingSeg->normal));
+        if(cross.z() > 0)
+            TypeVotes--;//fill
+        else
+            TypeVotes++;//void
+    }
+
+    //Calculate Negative Y Vote
+    if((negYSeg->normal.y() < 0) && (negYSeg->leadingSeg->normal.y() < 0))
+    {
+        TypeVotes++;//fill
+    }
+    else if((negYSeg->normal.y() > 0) && (negYSeg->leadingSeg->normal.y() > 0))
+    {
+        TypeVotes--;//void
+    }
+    else//disagreement, check concavity
+    {
+        concaveCheck = true;
+        cross = QVector3D::crossProduct(QVector3D(negYSeg->normal),QVector3D(negYSeg->leadingSeg->normal));
+        if(cross.z() > 0)
+            TypeVotes--;//fill
+        else
+            TypeVotes++;//void
+    }
+
+    //Calculate Positive Y Vote
+    if((posYSeg->normal.y() > 0) && (posYSeg->leadingSeg->normal.y() > 0))
+    {
+        TypeVotes++;//fill
+    }
+    else if((posYSeg->normal.y() < 0) && (posYSeg->leadingSeg->normal.y() < 0))
+    {
+        TypeVotes--;//void
+    }
+    else//disagreement, check concavity
+    {
+        concaveCheck = true;
+        cross = QVector3D::crossProduct(QVector3D(posYSeg->normal),QVector3D(posYSeg->leadingSeg->normal));
+        if(cross.z() > 0)
+            TypeVotes--;//fill
+        else
+            TypeVotes++;//void
+    }
+
+    if(TypeVotes > 0)
+        isfill = 1;
+    else
+        isfill = 0;
+
+    return TypeVotes;
+
 }
+
+
+
 
 void Loop::Destroy()//gives freedom back to all the claimed segments
 {
@@ -462,9 +529,9 @@ void Loop::RenderTriangles()
 
     for (unsigned int i=0; i<tris; i++)
 	{
-		const QVector2D &p1 = triangleStrip[i*3+0];
+        const QVector2D &p1 = triangleStrip[i*3+0];
 		const QVector2D &p2 = triangleStrip[i*3+1];
-		const QVector2D &p3 = triangleStrip[i*3+2];
+        const QVector2D &p3 = triangleStrip[i*3+2];
 		glBegin(GL_TRIANGLES);                      // Drawing Using Triangles
 			glVertex3f( p1.x(), p1.y(), 0);     
 			glVertex3f( p2.x(), p2.y(), 0);  
