@@ -5,8 +5,8 @@
 #define CALLBACK
 #endif
 
-#include <QVector2d>
-#include "Loop.h"
+#include <QVector2D>
+#include "loop.h"
 #include <vector>
 #include <QtOpenGL>
 #include <OS_GL_Wrapper.h>

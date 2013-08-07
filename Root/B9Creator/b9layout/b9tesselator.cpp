@@ -50,7 +50,7 @@ int B9Tesselator::Triangulate( const std::vector<QVector2D>* polygonList, std::v
         gluTessCallback(tess, GLU_TESS_END, (void (CALLBACK *)())tessEndCB);
         gluTessCallback(tess, GLU_TESS_ERROR_DATA, (void (CALLBACK *)())tessErrorCB);
         gluTessCallback(tess, GLU_TESS_VERTEX_DATA, (void (CALLBACK *)())tessVertexCB);
-        gluTessCallback(tess, GLU_TESS_COMBINE_DATA, (void (__stdcall*)(void))tessCombineCB);
+        gluTessCallback(tess, GLU_TESS_COMBINE_DATA, (void (CALLBACK *)())tessCombineCB);
 
 
         gluTessBeginPolygon(tess, (void*) this);
