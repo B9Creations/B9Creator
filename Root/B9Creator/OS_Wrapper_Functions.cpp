@@ -185,7 +185,12 @@ QString CROSS_OS_GetDirectoryFromLocationTag(QString locationtag)
     }
     if(locationtag == "EXECUTABLE_DIR")
     {
-        dir = QCoreApplication::applicationDirPath();
+        #ifdef Q_OS_LINUX
+            dir = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+        #else
+            dir = QCoreApplication::applicationDirPath();
+        #endif
+
     }
     if(locationtag == "TEMP_DIR")
     {

@@ -121,6 +121,7 @@ public:
     void UpdateSupports();
     void RotateSupports(QVector3D deltaRot);
     void ScaleSupportPositionsAroundCenter(QVector3D newScale, QVector3D oldScale);
+    void FlipSupports();
     void ShowSupports();
     void HideSupports();
 

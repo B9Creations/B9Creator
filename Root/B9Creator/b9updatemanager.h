@@ -3,9 +3,9 @@
 
 ///NOTE - Dont use https - windows 8 doesnt like it for some reason.
 //Instead use http
-//WE ARE USING THE SECOND MANIFEST!
-#define REMOTE_FILE_VERSIONS_URL "http://www.b9creator.com/B9CreatorUpdates2/Manifest.txt"
-#define REMOTE_FILE_LOCATIONS_PATH "http://www.b9creator.com/B9CreatorUpdates2/"
+//WE ARE USING THE FIRST MANIFEST!
+#define REMOTE_MANIFEST_FILENAME "Manifest_v2.txt"
+#define REMOTE_MANIFEST_PATH "http://www.b9creator.com/B9CreatorUpdates/"
 
 #define UPDATE_TIMOUT 10000
 
@@ -25,10 +25,9 @@ class B9UpdateManager : public QObject
 public:
     explicit B9UpdateManager(QObject *parent = 0);
     ~B9UpdateManager();
-    void PromptDoUpdates(bool showCheckingBar = true);
+    void PromptDoUpdates(bool showCheckingBar = true, bool promptLocalLocation = false);
     void TransitionFromPreviousVersions();
     static int GetLocalFileVersion(QString filename);
-
 
 
 signals:
@@ -54,6 +53,10 @@ private:
 
     bool silentUpdateChecking;//if true - the updator will not pop up any dialogs or progress
                               //bars unless an update is acutally neededd.
+
+    QString RemoteManifestPath;//the root folder that contains all manifests
+    QString RemoteManifestFileName;//the name of the manifest (manifest1.txt, manifest2.txt, etc)
+
 private slots:
 
     void StartNewDownload(QNetworkRequest request);

@@ -1,3 +1,7 @@
+//v1.5.3 Change Log
+-Added offline updating support
+
+
 //v1.5.2 Change Log
 -Increased slicer accuracy.
 

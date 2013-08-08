@@ -225,26 +225,34 @@ void B9ModelInstance::SetFlipped(int flipped)
     {
         if(supportStructureList.size())
         {
-            QMessageBox msgBox;
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setText("Mirroring will break all supports");
-            msgBox.setInformativeText("Are you sure you want to Mirror?");
-            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-            msgBox.setDefaultButton(QMessageBox::No);
-            int ret = msgBox.exec();
+            //if(this->rot.x() || this->rot.y())
+            //{
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText("Mirroring will break all supports");
+                msgBox.setInformativeText("Are you sure you want to Mirror?");
+                msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+                msgBox.setDefaultButton(QMessageBox::No);
+                int ret = msgBox.exec();
 
-            if(ret == QMessageBox::No)
-            {
-                pData->pMain->ExitToolAction();//fixes mouse problem
-                pData->pMain->UpdateInterface();
-                return;
-            }
-            else
-            {
-                //Break Off supports
-                RemoveAllSupports();
-                pData->pMain->ExitToolAction();//fixes mouse problem
-            }
+                if(ret == QMessageBox::No)
+                {
+                    pData->pMain->ExitToolAction();//fixes mouse problem
+                    pData->pMain->UpdateInterface();
+                    return;
+                }
+                else
+                {
+                    //Break Off supports
+                    RemoveAllSupports();
+                    pData->pMain->ExitToolAction();//fixes mouse problem
+                }
+           // }
+            //else//we dont have any x or y rotation so we should be able to mirror supports.
+            //{
+
+
+            //}
         }
     }
 
@@ -678,6 +686,14 @@ void B9ModelInstance::ScaleSupportPositionsAroundCenter(QVector3D newScale, QVec
         GetBasePlate()->SetBottomRadius(GetBasePlate()->GetBottomRadius()*moveFactor.x());
     }
 }
+
+//mirrors all supports based on z rotation.
+void B9ModelInstance::FlipSupports()
+{
+
+
+}
+
 
 
 void B9ModelInstance::ShowSupports()

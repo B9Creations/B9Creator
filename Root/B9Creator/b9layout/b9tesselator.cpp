@@ -13,7 +13,6 @@ B9Tesselator::~B9Tesselator()
     for(i = 0; i < numPolyVerts; i++)
     {
         delete[] polyverts[i];
-
     }
     delete[] polyverts;
 

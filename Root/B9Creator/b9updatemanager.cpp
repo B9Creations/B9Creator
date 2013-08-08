@@ -42,6 +42,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QTextStream>
+#include <QFileDialog>
 #include "OS_Wrapper_Functions.h"
 #include <QFileInfo>
 #include <stdio.h>
@@ -54,7 +55,6 @@
 B9UpdateManager::B9UpdateManager(QObject *parent) :
     QObject(parent)
 {
-
 
     //Setup Network Manager Connections
     netManager = new QNetworkAccessManager(this);
@@ -75,6 +75,9 @@ B9UpdateManager::B9UpdateManager(QObject *parent) :
     currentUpdateIndx = -1;
 
     silentUpdateChecking = false;
+
+    RemoteManifestFileName = REMOTE_MANIFEST_FILENAME;
+    RemoteManifestPath = REMOTE_MANIFEST_PATH;
 }
 
 B9UpdateManager::~B9UpdateManager()
@@ -92,6 +95,9 @@ void B9UpdateManager::ResetEverything()
         currentReply->deleteLater();
         currentReply = NULL;
     }
+
+    RemoteManifestFileName = REMOTE_MANIFEST_FILENAME;
+    RemoteManifestPath = REMOTE_MANIFEST_PATH;
 
     waitingbar->hide();
     waitingbar->setMax(0);
@@ -160,8 +166,28 @@ void B9UpdateManager::OnRecievedReply(QNetworkReply* reply)
         if(!silentUpdateChecking)
         {
             QMessageBox msgBox;
-            msgBox.setText("Unable to update,\nplease check your internet connection.");
-            msgBox.exec();
+            msgBox.setText("Online Update Attempt Failed.");
+            if(downloadState == "DownloadingFileVersions")
+            {
+                waitingbar->hide();
+                msgBox.setInformativeText("You may use a B9Creator update pack if available. \nBrowse to a local update pack now?");
+                msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+                msgBox.setDefaultButton(QMessageBox::Cancel);
+                int ret = msgBox.exec();
+
+                if(ret == QMessageBox::Ok)
+                {
+                    ResetEverything();
+                    PromptDoUpdates(true,true);
+                    return;
+                }//if no - continue to reset below.
+            }
+            else
+            {
+                msgBox.setInformativeText("please check your internet connection.");
+                msgBox.exec();
+            }
+
         }
         ResetEverything();
         return;
@@ -206,8 +232,8 @@ void B9UpdateManager::OnRecievedReply(QNetworkReply* reply)
                 currentReply->deleteLater();
                 currentReply = NULL;
 
-
-                QNetworkRequest request(QUrl(REMOTE_FILE_LOCATIONS_PATH + updateEntries[currentUpdateIndx].OSDir + updateEntries[currentUpdateIndx].fileName));
+                //request the file in the right directory on the server
+                QNetworkRequest request(QUrl(RemoteManifestPath + updateEntries[currentUpdateIndx].OSDir + updateEntries[currentUpdateIndx].fileName));
 
 
                 StartNewDownload(request);
@@ -248,9 +274,7 @@ void B9UpdateManager::OnRecievedReply(QNetworkReply* reply)
             currentReply = NULL;
 
 
-            QNetworkRequest request(QUrl(REMOTE_FILE_LOCATIONS_PATH + updateEntries[currentUpdateIndx].OSDir + updateEntries[currentUpdateIndx].fileName));
-
-
+            QNetworkRequest request(QUrl(RemoteManifestPath + updateEntries[currentUpdateIndx].OSDir + updateEntries[currentUpdateIndx].fileName));
 
             StartNewDownload(request);
         }
@@ -481,7 +505,7 @@ bool B9UpdateManager::NeedsUpdated(B9UpdateEntry &candidate, B9UpdateEntry &remo
 
 
 
-void B9UpdateManager::PromptDoUpdates(bool showCheckingBar)
+void B9UpdateManager::PromptDoUpdates(bool showCheckingBar, bool promptLocalLocation)
 {
 
     silentUpdateChecking = !showCheckingBar;
@@ -495,6 +519,7 @@ void B9UpdateManager::PromptDoUpdates(bool showCheckingBar)
         return;
     }
 
+
     if(netManager->networkAccessible() == QNetworkAccessManager::NotAccessible && !silentUpdateChecking)
     {
         QMessageBox msgBox;
@@ -502,6 +527,7 @@ void B9UpdateManager::PromptDoUpdates(bool showCheckingBar)
         msgBox.setText("B9Creator does not have accesss to the network");
         msgBox.exec();
         return;
+
     }
     //maybe do some other early checks if possible.
 
@@ -513,10 +539,25 @@ void B9UpdateManager::PromptDoUpdates(bool showCheckingBar)
     connect(waitingbar,SIGNAL(rejected()),this,SLOT(OnCancelUpdate()));
 
 
-    //get the network access manager looking for the file versions.txt on website;
+    //get the network access manager looking for the file versions.txt on the manifest;
     QNetworkRequest request;
 
-    request.setUrl(QUrl(REMOTE_FILE_VERSIONS_URL));
+    if(promptLocalLocation)//prompt the user for new manifest location.
+    {
+        QString path = QFileDialog::getExistingDirectory(NULL,
+                       "Locate the B9Creator Update Pack Folder",
+                       CROSS_OS_GetDirectoryFromLocationTag("DOCUMENTS_DIR"));
+        if(path.isEmpty())
+            return;
+
+        QString manifestURL = QUrl().fromLocalFile(path + "/" + RemoteManifestFileName).toString();
+        RemoteManifestPath = QUrl().fromLocalFile(path).toString();
+        request.setUrl(QUrl(manifestURL));
+    }
+    else//user internet manifest location.
+    {
+        request.setUrl(QUrl(RemoteManifestPath + RemoteManifestFileName));
+    }
 
 
     //and set the state
@@ -653,13 +694,14 @@ bool B9UpdateManager::UpdateLocalFileVersionList()
 //move files to proper locations or delete depreciated stuff.
 void B9UpdateManager::TransitionFromPreviousVersions()
 {
+#ifndef Q_OS_LINUX
     //old 1.4 files in the wrong location
     QFile::remove(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR") + "/B9Creator_LOG.txt");
     QFile::remove(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR") + "/B9Firmware_1_0_9.hex");
     QFile::remove(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR") + "/avrdude.exe");
     QFile::remove(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR") + "/avrdude");
     QFile::remove(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR") + "/avrdude.conf");
-
+#endif
     //OLD Material file sould be salvaged by b9matcat and removed.
 
     //check for old executables and delete them

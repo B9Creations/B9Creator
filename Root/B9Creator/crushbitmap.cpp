@@ -268,7 +268,7 @@ bool CrushedBitMap::crushSlice(QImage* pImage)
 	unsigned uData = 0;
 	int iKey;
 	uiWhitePixels = 0;
-	bool bCurColorIsWhite = pixelIsWhite(pImage, 0);
+    bool bCurColorIsWhite = pixelIsWhite(pImage, 0);
 
 	// reset the bit array
 	if (mBitarray.size()>0) mBitarray.resize(0);
@@ -288,18 +288,18 @@ bool CrushedBitMap::crushSlice(QImage* pImage)
 	// loop through all the pixels in the image
 	do {
 		uData = 0;
-		bCurColorIsWhite = pixelIsWhite(pImage, uCurrentPos); //returns true if pixel is white, updates extents
+        bCurColorIsWhite = pixelIsWhite(pImage, uCurrentPos); //returns true if pixel is white, updates extents
 		// count the pixels until the color changes
 		while ((uCurrentPos < uImageSize) && (bCurColorIsWhite == pixelIsWhite(pImage, uCurrentPos))) {
 			uCurrentPos++;
-			uData++;
+            uData++;
 			if(bCurColorIsWhite)uiWhitePixels++;
 		}
 		// store the count
-		iKey = computeKeySize(uData);
+        iKey = computeKeySize(uData);
 		if(iKey<0) return false;
-		pushBits(iKey, 5);
-		pushBits(uData, iKey+1);
+        pushBits(iKey, 5);
+        pushBits(uData, iKey+1);
 	} while (uCurrentPos < uImageSize);
 	return true;
 }
@@ -620,10 +620,17 @@ bool CrushedPrintJob::addImage(QImage* pImage){
 
 bool CrushedPrintJob::crushCurrentSlice(QImage* pImage){
     // Crushes the pImage and stores at m_CurrentSlice.  Adjusts the job's width and height if needed
-    if(getCBMSlice(m_CurrentSlice)==NULL)return false;
+    if(getCBMSlice(m_CurrentSlice)==NULL)
+        return false;
+
     bool bResult=getCBMSlice(m_CurrentSlice)->crushSlice(pImage);
-	if(m_Width<getCBMSlice(m_CurrentSlice)->getWidth())m_Width=getCBMSlice(m_CurrentSlice)->getWidth();
-	if(m_Height<getCBMSlice(m_CurrentSlice)->getHeight())m_Height=getCBMSlice(m_CurrentSlice)->getHeight();
+
+    if(m_Width<getCBMSlice(m_CurrentSlice)->getWidth())
+        m_Width=getCBMSlice(m_CurrentSlice)->getWidth();
+
+    if(m_Height<getCBMSlice(m_CurrentSlice)->getHeight())
+        m_Height=getCBMSlice(m_CurrentSlice)->getHeight();
+
     return bResult;
 }
 

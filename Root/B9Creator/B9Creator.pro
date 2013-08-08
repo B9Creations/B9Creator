@@ -172,8 +172,6 @@ RESOURCES += \
     b9edit/b9edit.qrc \
     b9edit/sliceeditview.qrc
 
-
-
 include(qextserialport-1.2beta2/src/qextserialport.pri)
 
 OTHER_FILES += \

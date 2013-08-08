@@ -95,6 +95,7 @@ bool B9MatCat::load(QString sModelName)
     m_sModelName = sModelName;
     QString sPath;
 
+    #ifndef Q_OS_LINUX
     //See if there is an old matfile with user defined materials in
     //it and stuff them in the register. THIS IF STATEMENT SHOULD HAPPEN ONLY ONCE EVER
     if(QFile::exists(CROSS_OS_GetDirectoryFromLocationTag("EXECUTABLE_DIR")+"/"+m_sModelName+".b9m"))
@@ -114,7 +115,7 @@ bool B9MatCat::load(QString sModelName)
 
         load(sModelName);//Now do the standard load. (clears out any old official stuff)
     }
-
+    #endif
 
     sPath = CROSS_OS_GetDirectoryFromLocationTag("APPLICATION_DIR")+"/"+m_sModelName+".b9m";
 
