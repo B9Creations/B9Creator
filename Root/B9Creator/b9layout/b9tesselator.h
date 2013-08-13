@@ -47,9 +47,11 @@ public:
     QVector2D prevVertex;
     QVector2D prevPrevVertex;
 
-
-    GLdouble Combinevertices[64][6];               // arrary to store newly created vertices (x,y,z,r,g,b) by combine callback
+    //48 megabytes of buffer for the triangulator
+    unsigned int CombineSize;
+    GLdouble Combinevertices[2048][6];               // arrary to store newly created vertices (x,y,z,r,g,b) by combine callback
     unsigned int CombineVertexIndex;
+    bool memoryFull;
 
     int errorAcumulations;
 private:

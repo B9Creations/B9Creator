@@ -71,10 +71,8 @@ public:
 	void DebugRender(bool normals = true, bool connections = true, bool fills = true, bool outlines = true);//renders with visible debug information
 
 
-
 	//export helpers
 	void WriteToSlc(SlcExporter* pslc);
-
 
 
 	std::vector<Segment*> segmentList;//list of segments

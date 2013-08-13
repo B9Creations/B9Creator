@@ -166,6 +166,9 @@ void B9Print::on_signalAbortPrint()
     m_pTerminal->setPrintPreview(false);
     m_pTerminal->onScreenCountChanged();
     m_pTerminal->setEnabled(true);
+
+
+
     QMessageBox::information(0,"Printing Aborted!","PRINT ABORTED\n\n"+m_sAbortMessage);
 }
 
@@ -261,6 +264,20 @@ void B9Print::on_pushButtonPauseResume_clicked()
 
 void B9Print::on_pushButtonAbort_clicked(QString sAbortText)
 {
+    //Prompt the User To Make Sure they want to abort.
+    QMessageBox msgBox;
+    msgBox.setText("Are you sure you want to abort?");
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+    msgBox.setDefaultButton(QMessageBox::No);
+    int ret = msgBox.exec();
+
+    if(ret == QMessageBox::No)
+        return;
+
+
+
+
     m_sAbortMessage = sAbortText;
     if(m_sAbortMessage.contains("Jammed Mechanism")||m_sAbortMessage.contains("Lost Printer Connection")||
        (m_sAbortMessage.contains("Projector"))){

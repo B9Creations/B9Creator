@@ -44,7 +44,7 @@
 #include "b9supportstructure.h"
 #include <QDebug>
 
-#define B9CVERSION "Version 1.5.3     Copyright 2013 B9Creations, LLC     www.b9creator.com\n "
+#define B9CVERSION "Version 1.5.4     Copyright 2013 B9Creations, LLC     www.b9creator.com\n "
 
 
 MainWindow::MainWindow(QWidget *parent) :

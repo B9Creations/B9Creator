@@ -261,7 +261,10 @@ void Slice::ConnectSegmentNeighbors()
 int Slice::GenerateLoops()
 {
     unsigned int s;
+    bool triangulateSuccess;
     int fillVoidIndicator;
+
+
 	for(s=0; s<segmentList.size(); s++)//pick a segment, any segment
 	{
 		if(!segmentList[s]->pLoop)//only if it doesnt belong to a loop already
@@ -281,12 +284,14 @@ int Slice::GenerateLoops()
 		}
 	}
 
+
     //run through various filters in before determining fill or void
     for(unsigned int l = 0; l < loopList.size(); l++)//looplist.size keeps growing..
     {
         loopList[l].Simplify();//remove small segments
         loopList[l].CorrectDoubleBacks();
     }
+
     for(unsigned int l = 0; l < loopList.size(); l++)//looplist.size keeps growing..
     {
         loopList[l].AttemptSplitUp(this);//split figure eights.
@@ -296,8 +301,12 @@ int Slice::GenerateLoops()
     {
         fillVoidIndicator = loopList[l].DetermineTypeBySides();
 
+
         loopList[l].formPolygon();
-        loopList[l].formTriStrip();
+
+        triangulateSuccess = loopList[l].formTriStrip();
+        if(!triangulateSuccess)
+            qDebug() << "B9Loop: Warning Tesselator Memory Starved!";
     }
 
 

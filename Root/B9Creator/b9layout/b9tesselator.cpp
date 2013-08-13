@@ -5,6 +5,8 @@
 
 B9Tesselator::B9Tesselator()
 {
+    memoryFull = false;
+    CombineSize = 2048;
 }
 B9Tesselator::~B9Tesselator()
 {
@@ -15,16 +17,17 @@ B9Tesselator::~B9Tesselator()
         delete[] polyverts[i];
     }
     delete[] polyverts;
-
 }
 
 
 //input plygonList must be in order - depicting a fill or void
 int B9Tesselator::Triangulate( const std::vector<QVector2D>* polygonList, std::vector<QVector2D> *triangleStrip)
 {
+
         unsigned long int i;
         GLUtesselator *tess = gluNewTess(); // create a tessellator
         if(!tess) return 0;  // failed to create tessellation object, return 0
+
 
         this->triStrip = triangleStrip;
         this->CombineVertexIndex = 0;
@@ -64,7 +67,7 @@ int B9Tesselator::Triangulate( const std::vector<QVector2D>* polygonList, std::v
 
         gluDeleteTess(tess);        // delete after tessellation
 
-        return errorAcumulations;
+        return !(int)memoryFull;
 }
 std::vector<QVector2D>* B9Tesselator::GetTrangleStrip()
 {
@@ -192,6 +195,12 @@ void CALLBACK tessCombineCB(const GLdouble newVertex[3], const GLdouble *neighbo
     B9Tesselator* tess = (B9Tesselator*)user_data;
 
 
+    if(tess->CombineVertexIndex >= tess->CombineSize)
+    {
+        tess->memoryFull = true;
+        return;
+    }
+
 
     // copy new intersect vertex to local array
     // Because newVertex is temporal and cannot be hold by tessellator until next
@@ -206,14 +215,14 @@ void CALLBACK tessCombineCB(const GLdouble newVertex[3], const GLdouble *neighbo
     // return output data (vertex coords and others)
     *outData = tess->Combinevertices[tess->CombineVertexIndex];   // assign the address of new intersect vertex
 
-    ++tess->CombineVertexIndex;  // increase index for next vertex
+    tess->CombineVertexIndex++;  // increase index for next vertex
+
 }
 
 void CALLBACK tessEndCB()
 {
 
 }
-
 
 
 void CALLBACK tessErrorCB(GLenum errorCode, void* user_data)

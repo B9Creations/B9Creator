@@ -2045,7 +2045,7 @@ bool B9Layout::SliceWorld()
                                                 settings.value("WorkingDir").toString() + "/" + ProjectData()->GetJobName(),
                                                 tr("B9 Job (*.b9j);;SLC (*.slc)"));
 
-    if(filename.isEmpty())//cancell button
+    if(filename.isEmpty())//cancel button
 	{
         return false;
 	}
@@ -2080,6 +2080,11 @@ bool B9Layout::SliceWorld()
             return false;
         }
 	}
+    else
+    {
+        QMessageBox::information(0,"Cancelled", "Invalid File Extension: " +  Format);
+        return SliceWorld();
+    }
 
     return false;
 }

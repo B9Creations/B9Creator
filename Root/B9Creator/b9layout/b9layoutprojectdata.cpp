@@ -91,6 +91,11 @@
 		{
 			return false;
         }
+        //check file extension
+        if(QFileInfo(filepath).completeSuffix().toLower() != "b9l")
+            return false;
+
+
         SetDirtied(false);//presumably good from here so undirty the project
 
         in.setDevice(&file);//begin text streaming.

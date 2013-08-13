@@ -1,3 +1,10 @@
+//v1.5.4 Change Log
+-Fixed slicer crashing on models with complex self intersections.
+-Added "Are you sure" dialog when aborting a print.
+-You can now only attempt to open b9l files with layout and the slicer.
+-Now forbids slicing to formats besides b9j and slc.
+-Added change log link in auto-updator prompt.
+
 //v1.5.3 Change Log
 -Added offline updating support
 

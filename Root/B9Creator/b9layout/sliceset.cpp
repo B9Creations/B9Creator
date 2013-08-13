@@ -76,14 +76,17 @@ bool SliceSet::GenerateSlice(double realAltitude)
 
 	//make a new one:
     //qDebug() << "SliceSet::GenerateSlice: Creating New Slice At Altitude: " << realAltitude;
-	
+
 	pSliceData = new Slice(realAltitude);
+
 
 	segments = pSliceData->GenerateSegments(pInstance);//actually generate the segments inside the slice
 
+
     pSliceData->SortSegmentsByX();//sort segments in x direction
 
-	pSliceData->ConnectSegmentNeighbors();//connect adjacent segments
+
+    pSliceData->ConnectSegmentNeighbors();//connect adjacent segments
 
 	loops = pSliceData->GenerateLoops();//generate loop structures
 

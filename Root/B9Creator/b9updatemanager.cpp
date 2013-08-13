@@ -209,12 +209,12 @@ void B9UpdateManager::OnRecievedReply(QNetworkReply* reply)
             if(updateEntries.size() == 1)
             {
                 msgBox.setText("There is " + QString::number(updateEntries.size()) + " file update available.");
-                msgBox.setInformativeText("Do you want to update it?");
+                msgBox.setInformativeText("Do you want to update it? <a href=\"http://b9creator.com/softwaredelta\">View change log</a>");
             }
             else
             {
                 msgBox.setText("There are " + QString::number(updateEntries.size()) + " file updates available.");
-                msgBox.setInformativeText("Do you want to update them?");
+                msgBox.setInformativeText("Do you want to update them? <a href=\"http://b9creator.com/softwaredelta\">View change log</a>");
             }
             msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
             msgBox.setDefaultButton(QMessageBox::Yes);
