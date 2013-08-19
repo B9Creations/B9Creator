@@ -345,23 +345,12 @@ void Loop::formPolygon()
 	Segment* startSeg = segListp[0];
 	Segment* currSeg = startSeg;
 
-	polygonStrip.clear();
-	if(isfill)
-	{
-		do
-		{
-			polygonStrip.push_back( currSeg->p1 );
-			currSeg = currSeg->leadingSeg;
-		}while(currSeg != startSeg);
-	}
-	else
-	{
-		do
-		{
-			polygonStrip.push_back( currSeg->p1 );
-			currSeg = currSeg->trailingSeg;
-		}while(currSeg != startSeg);
-	}
+    do
+    {
+        polygonStrip.push_back( currSeg->p1 );
+        currSeg = currSeg->leadingSeg;
+    }while(currSeg != startSeg);
+
 }
 
 bool Loop::formTriStrip()
@@ -526,18 +515,15 @@ void Loop::RenderTriangles()
 {
     unsigned int tris = triangleStrip.size()/3;
 
-
+    glBegin(GL_TRIANGLES);                      // Drawing Using Triangles
     for (unsigned int i=0; i<tris; i++)
 	{
-        const QVector2D &p1 = triangleStrip[i*3+0];
-		const QVector2D &p2 = triangleStrip[i*3+1];
-        const QVector2D &p3 = triangleStrip[i*3+2];
-		glBegin(GL_TRIANGLES);                      // Drawing Using Triangles
-			glVertex3f( p1.x(), p1.y(), 0);     
-			glVertex3f( p2.x(), p2.y(), 0);  
-			glVertex3f( p3.x(), p3.y(), 0);  
-		glEnd();
-	}
+
+        glVertex3f( triangleStrip[i*3+0].x(), triangleStrip[i*3+0].y(), 0);
+        glVertex3f( triangleStrip[i*3+1].x(), triangleStrip[i*3+1].y(), 0);
+        glVertex3f( triangleStrip[i*3+2].x(), triangleStrip[i*3+2].y(), 0);
+    }
+    glEnd();
 }
 
 int Loop::CorrectDoubleBacks()

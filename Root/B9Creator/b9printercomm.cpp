@@ -289,10 +289,12 @@ void B9PrinterComm::RefreshCommPortItems()
         // Some ports are available, are they the B9Creator?
         qDebug() << "Scanning For Serial Port Devices (" << pPorts->size() << "found )";
         for (int i = 0; i < pPorts->size(); i++) {
-            qDebug() << "  port name   " << pPorts->at(i).portName;
-            qDebug() << "  locationInfo" << pPorts->at(i).physName;
+            //COMMENTED BECAUSE ITS ANNOYYING...
+            //qDebug() << "  port name   " << pPorts->at(i).portName;
+            //qDebug() << "  locationInfo" << pPorts->at(i).physName;
          #ifndef Q_OS_LINUX
             //Note: We only trust friendName, vendorID and productID with Windows and OS_X
+            //COMMENTED BECAUSE ITS ANNOYYING...
             qDebug() << "  description " << pPorts->at(i).friendName;
             qDebug() << "  vendorID    " << pPorts->at(i).vendorID;
             qDebug() << "  productID   " << pPorts->at(i).productID;

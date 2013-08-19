@@ -551,8 +551,12 @@ void CrushedPrintJob::clearAll(int iLayers) {
         mSlices.append(*pCBM);
     }
 }
+void CrushedPrintJob::inflateCurrentSlice(QImage* pImage, int xOffset, int yOffset, bool bUseNaturalSize)
+{
+    inflateSlice(m_CurrentSlice, pImage, xOffset, yOffset, bUseNaturalSize);
+}
 
-void CrushedPrintJob::inflateCurrentSlice(QImage* pImage, int xOffset, int yOffset, bool bUseNaturalSize) {
+void CrushedPrintJob::inflateSlice(int sliceIndx, QImage* pImage, int xOffset, int yOffset, bool bUseNaturalSize) {
 	float WinWidth;
 	float WinHeight;
 	float SliceWidth;
@@ -561,9 +565,9 @@ void CrushedPrintJob::inflateCurrentSlice(QImage* pImage, int xOffset, int yOffs
 	int heightOff;
 	SimpleSupport sSimple;
 
-    if(m_CurrentSlice < 0 || m_CurrentSlice >= getTotalLayers()) return;
+    if(sliceIndx < 0 || sliceIndx >= getTotalLayers()) return;
 
-	getCBMSlice(m_CurrentSlice)->inflateSlice(pImage, xOffset, yOffset, bUseNaturalSize);
+    getCBMSlice(sliceIndx)->inflateSlice(pImage, xOffset, yOffset, bUseNaturalSize);
 
 	//Todo Render filled Extent && Supports
 	if(mShowSupports){
@@ -579,7 +583,7 @@ void CrushedPrintJob::inflateCurrentSlice(QImage* pImage, int xOffset, int yOffs
 		QRect rOffset = mJobExtents;
 		rOffset.moveCenter(rOffset.center() + QPoint(xOffset, yOffset));
 
-		if(m_CurrentSlice < mFilled){
+        if(sliceIndx < mFilled){
 			// Render extents if filled layer
 			QPainter tPainter(pImage);
 			tPainter.setPen(QColor(255,255,255));
@@ -591,7 +595,7 @@ void CrushedPrintJob::inflateCurrentSlice(QImage* pImage, int xOffset, int yOffs
 			// Render Supports
 			//Loop through supports list, if current slice has support, draw it
 			for(int i=0; i<mSupports.size(); i++){
-				if((m_CurrentSlice<mBase && mSupports[i].getStart()==0)||(m_CurrentSlice >= mSupports[i].getStart() + mBase && m_CurrentSlice <= mSupports[i].getEnd() + mBase)){
+                if((sliceIndx<mBase && mSupports[i].getStart()==0)||(sliceIndx >= mSupports[i].getStart() + mBase && sliceIndx <= mSupports[i].getEnd() + mBase)){
 					sSimple = mSupports[i];
 					sSimple.setPoint(sSimple.getPoint()+QPoint(xOffset, yOffset));
 					sSimple.draw(pImage);
@@ -617,19 +621,23 @@ bool CrushedPrintJob::addImage(QImage* pImage){
 	addCBM(CBM);
 	return true;
 }
+bool CrushedPrintJob::crushCurrentSlice(QImage* pImage)
+{
+    return crushSlice(m_CurrentSlice, pImage);
+}
 
-bool CrushedPrintJob::crushCurrentSlice(QImage* pImage){
+bool CrushedPrintJob::crushSlice(int sliceIndx, QImage* pImage){
     // Crushes the pImage and stores at m_CurrentSlice.  Adjusts the job's width and height if needed
-    if(getCBMSlice(m_CurrentSlice)==NULL)
+    if(getCBMSlice(sliceIndx)==NULL)
         return false;
 
-    bool bResult=getCBMSlice(m_CurrentSlice)->crushSlice(pImage);
+    bool bResult=getCBMSlice(sliceIndx)->crushSlice(pImage);
 
-    if(m_Width<getCBMSlice(m_CurrentSlice)->getWidth())
-        m_Width=getCBMSlice(m_CurrentSlice)->getWidth();
+    if(m_Width<getCBMSlice(sliceIndx)->getWidth())
+        m_Width=getCBMSlice(sliceIndx)->getWidth();
 
-    if(m_Height<getCBMSlice(m_CurrentSlice)->getHeight())
-        m_Height=getCBMSlice(m_CurrentSlice)->getHeight();
+    if(m_Height<getCBMSlice(sliceIndx)->getHeight())
+        m_Height=getCBMSlice(sliceIndx)->getHeight();
 
     return bResult;
 }

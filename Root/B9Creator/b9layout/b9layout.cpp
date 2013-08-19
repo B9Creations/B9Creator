@@ -48,7 +48,6 @@
 #include <QVector3D>
 #include <QGLWidget>
 #include <QDebug>
-#include "slicedebugger.h"
 #include "SlcExporter.h"
 #include "modeldata.h"
 #include "b9modelinstance.h"
@@ -77,8 +76,6 @@ B9Layout::B9Layout(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flag
     SetToolModelSelect();//start off with pointer tool
 
 	
-    pslicedebugger = new SliceDebugger(this,this,Qt::Window);
-
 
     //support editing
     currInstanceInSupportMode = NULL;
@@ -104,7 +101,6 @@ B9Layout::~B9Layout()
 	}
 	delete project;
 	delete pWorldView;
-	delete pslicedebugger;
 }
 
 //returns a list of the currently selected instances
@@ -153,8 +149,8 @@ std::vector<B9ModelInstance*> B9Layout::GetAllInstances()
 //debug interface
 void B9Layout::OpenDebugWindow()
 {
-	pslicedebugger->show();
-	pslicedebugger->BakeTests();
+
+
 }
 
 //file
@@ -2045,7 +2041,7 @@ bool B9Layout::SliceWorld()
                                                 settings.value("WorkingDir").toString() + "/" + ProjectData()->GetJobName(),
                                                 tr("B9 Job (*.b9j);;SLC (*.slc)"));
 
-    if(filename.isEmpty())//cancel button
+    if(filename.isEmpty())//cancell button
 	{
         return false;
 	}
@@ -2080,11 +2076,6 @@ bool B9Layout::SliceWorld()
             return false;
         }
 	}
-    else
-    {
-        QMessageBox::information(0,"Cancelled", "Invalid File Extension: " +  Format);
-        return SliceWorld();
-    }
 
     return false;
 }
@@ -2092,29 +2083,21 @@ bool B9Layout::SliceWorld()
 //slicing to a job file!
 bool B9Layout::SliceWorldToJob(QString filename)
 {
-    unsigned int m;
-    unsigned int i;
-    unsigned int l;
-    unsigned int numlayers;
+    unsigned int m,i,l;
+    unsigned int totalSliceOps = 0;
+    unsigned int globalLayers;
     int nummodels = 0;
     B9ModelInstance* pInst;
 	double zhieght = project->GetBuildSpace().z();
 	double thickness = project->GetPixelThickness()*0.001;
-	int xsize = project->GetResolution().x();
-	int ysize = project->GetResolution().y();
     QString jobname = project->GetJobName();
     QString jobdesc = project->GetJobDescription();
-	int x;
-	int y;
-	QRgb pickedcolor;
-	QPixmap pix;
-    QImage img(xsize,ysize, QImage::Format_ARGB32_Premultiplied);
-    QImage imgfrommaster(xsize,ysize, QImage::Format_ARGB32_Premultiplied);
 	CrushedPrintJob* pMasterJob = NULL;
-    QPainter painter;
+    Slice* pSlice;
+    bool moreSlicesToCome;
 
 	//calculate how many layers we need
-	numlayers = qCeil(zhieght/thickness);
+    globalLayers = qCeil(zhieght/thickness);
 
 	//calculate how many models there are
 	for(m=0;m<ModelDataList.size();m++)
@@ -2122,19 +2105,17 @@ bool B9Layout::SliceWorldToJob(QString filename)
 		for(i=0;i<ModelDataList[m]->instList.size();i++)
 		{
             pInst = ModelDataList[m]->instList[i];
-			nummodels++;
+            totalSliceOps += qCeil((pInst->GetMaxBound().z() - pInst->GetMinBound().z())/thickness);
 		}
     }
-	//make a loading bar
-    LoadingBar progressbar(0, numlayers);
-	QObject::connect(&progressbar,SIGNAL(rejected()),this,SLOT(CancelSlicing()));
-    progressbar.setDescription("Processing Layout...");
-	progressbar.setValue(0);
-	QApplication::processEvents();
 
+    //make a loading bar
+    LoadingBar progressbar(0, totalSliceOps);
+    QObject::connect(&progressbar,SIGNAL(rejected()),this,SLOT(CancelSlicing()));
+    progressbar.setDescription("Slicing to Job..");
+    progressbar.setValue(0);
+    QApplication::processEvents();
 
-	SliceContext paintwidget(NULL, this);
-	paintwidget.makeCurrent();
 
 	//make a master job file for use later
 	pMasterJob = new CrushedPrintJob();
@@ -2142,13 +2123,9 @@ bool B9Layout::SliceWorldToJob(QString filename)
     pMasterJob->setDescription(jobdesc);
 	pMasterJob->setXYPixel(QString().number(project->GetPixelSize()/1000));
 	pMasterJob->setZLayer(QString().number(project->GetPixelThickness()/1000));
-	
+    pMasterJob->clearAll(globalLayers);//fills the master job with the needed layers
 
-    pMasterJob->clearAll(numlayers);//fills the master job with the needed layers
 
-    progressbar.setDescription("Slicing Layout..");
-    progressbar.setMax(numlayers*nummodels);
-	progressbar.setValue(0);
     //FOR Each Model Instance
 	for(m=0;m<ModelDataList.size();m++)
     {
@@ -2158,71 +2135,40 @@ bool B9Layout::SliceWorldToJob(QString filename)
             inst->PrepareForSlicing(thickness);
 
 			//slice all layers and add to instance's job file
-			for(l = 0; l < numlayers; l++)
+            for(l = 0; l < globalLayers; l++)
             {
-
                 //if we are in the model's z - bounds
                 if((double)l*thickness <= inst->GetMaxBound().z() && (double)l*thickness >= inst->GetMinBound().z()-0.5*thickness)
                 {
-					//ACTUALLY Generate the Slice.
-					inst->pSliceSet->GenerateSlice(l*thickness + thickness*0.5);
-					paintwidget.SetSlice(inst->pSliceSet->pSliceData);
-					
-
-					pix = paintwidget.renderPixmap(xsize,ysize);
-					img = pix.toImage();
-					
-
-					for(x = 0; x < xsize; x++)
-					{
-						for(y = 0; y < ysize; y++)
-						{
-							pickedcolor = img.pixel(x,y);
-							if(qRed(pickedcolor) || qGreen(pickedcolor))
-							{
-								int result = qRed(pickedcolor) - qGreen(pickedcolor);
-								if(result > 0)
-								{
-									result = 255;
-                                }else result = 0;
-                                img.setPixel(x,y,QColor(result,0,0,result).rgba());
-							}
-						}
-					}
-					QApplication::processEvents();
-                    imgfrommaster.fill(Qt::black);
-                    pMasterJob->setCurrentSlice(l);
-
-                    pMasterJob->inflateCurrentSlice(&imgfrommaster);
-                    if(imgfrommaster.size() == QSize(0,0))
-                    {
-                        imgfrommaster = QImage(xsize,ysize,QImage::Format_ARGB32_Premultiplied);
-                        imgfrommaster.fill(Qt::black);
-                    }
-                    //combine img with masterimage;
-                    painter.begin(&imgfrommaster);
-                    painter.setCompositionMode(QPainter::CompositionMode_Plus);
-                    painter.setRenderHint(QPainter::Antialiasing,false);
-                    painter.drawImage(0,0,img);
-                    painter.end();
-
-                    pMasterJob->crushCurrentSlice(&imgfrommaster);
-
+                    inst->pSliceSet->QueNewSlice(l*thickness + thickness*0.5,l);
                 }
-                //update progress bar
-                progressbar.setValue(progressbar.GetValue() + 1);
-                QApplication::processEvents();//except user input
+            }
+            if(nummodels == 1)
+                inst->pSliceSet->SetSingleModelCompressHint(true);
+            else
+                inst->pSliceSet->SetSingleModelCompressHint(false);
+
+            do
+            {
+                pSlice = inst->pSliceSet->ParallelCreateSlices(moreSlicesToCome,pMasterJob);
+                if(pSlice != NULL)
+                {
+                    delete pSlice;
+                    progressbar.setValue(progressbar.GetValue() + 1);
+                    QApplication::processEvents();
+                }
+
                 if(cancelslicing)
                 {
                     cancelslicing = false;
-                    delete pMasterJob;
-                    pMasterJob = NULL;
-                    pWorldView->makeCurrent();
                     inst->FreeFromSlicing();
                     return false;
                 }
 
-			}
+            }while(moreSlicesToCome);
+
+
+
             inst->FreeFromSlicing();
 		}
 	}
@@ -2246,12 +2192,16 @@ bool B9Layout::SliceWorldToSlc(QString filename)
 {
     unsigned int m;
     unsigned int i;
+    unsigned int j;
 	int l;
 	int numlayers;
 	int nummodels = 0;
 
 	double zhieght = project->GetBuildSpace().z();
 	double thickness = project->GetPixelThickness()*0.001;
+
+    Slice* currSlice = NULL;
+    bool moreSlicesToCome;
 
 	//calculate how many layers we need
 	numlayers = qCeil(zhieght/thickness);
@@ -2263,27 +2213,28 @@ bool B9Layout::SliceWorldToSlc(QString filename)
 			nummodels++;
 		}
 	}
-	
-	//make a loading bar
-    LoadingBar progressbar(0, numlayers*nummodels);
-	QObject::connect(&progressbar,SIGNAL(rejected()),this,SLOT(CancelSlicing()));
-	progressbar.setDescription("Exporting SLC..");
-	progressbar.setValue(0);
-	QApplication::processEvents();
 
-	//create an slc exporter
-	SlcExporter slc(filename.toStdString());
-	if(!slc.SuccessOpen())
-	{
-		 QMessageBox msgBox;
-		 msgBox.setText("Unable To Open Slc File!");
-		 msgBox.exec();
-	}
-	//write the header
-	slc.WriteHeader("heeeeelllllloooooo");
-	slc.WriteReservedSpace();
-	slc.WriteSampleTableSize(1);
-	slc.WriteSampleTable(0.0,float(thickness),0.0f);
+    //make a loading bar
+        LoadingBar progressbar(0, numlayers*nummodels);
+        QObject::connect(&progressbar,SIGNAL(rejected()),this,SLOT(CancelSlicing()));
+        progressbar.setDescription("Exporting SLC..");
+        progressbar.setValue(0);
+        QApplication::processEvents();
+
+	
+    //create an slc exporter
+    SlcExporter slc(filename.toStdString());
+    if(!slc.SuccessOpen())
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Unable To Open Slc File!");
+        msgBox.exec();
+    }
+    //write the header
+    slc.WriteHeader("heeeeelllllloooooo");
+    slc.WriteReservedSpace();
+    slc.WriteSampleTableSize(1);
+    slc.WriteSampleTable(0.0,float(thickness),0.0f);
 
 
 
@@ -2295,35 +2246,45 @@ bool B9Layout::SliceWorldToSlc(QString filename)
             B9ModelInstance* inst = ModelDataList[m]->instList[i];
             inst->PrepareForSlicing(thickness);
 
-			//slice all layers and add to instance's job file
+            //slice all layers and add to instance's job file
 			for(l = 0; l < numlayers; l++)
 			{
 				//make sure we are in the model's z - bounds
 				if(l*thickness <= inst->GetMaxBound().z() && l*thickness >= inst->GetMinBound().z())
 				{
-					
-					//ACTUALLY Generate the Slice.
-					inst->pSliceSet->GenerateSlice(l*thickness + thickness*0.5);
-					slc.WriteNewSlice(l*thickness + thickness*0.5,inst->pSliceSet->pSliceData->loopList.size());
-					inst->pSliceSet->pSliceData->WriteToSlc(&slc);
-				}
+                    inst->pSliceSet->QueNewSlice(l*thickness + thickness*0.5,l);
+                }
+            }
 
-				progressbar.setValue(progressbar.GetValue() + 1);
-				QApplication::processEvents();
-				if(cancelslicing)
-				{
-						cancelslicing = false;
-                        inst->FreeFromSlicing();
-                        return false;
-				}
+            do
+            {
+                currSlice = inst->pSliceSet->ParallelCreateSlices(moreSlicesToCome,0);
+                if(currSlice != NULL)
+                {
+                    progressbar.setValue(progressbar.GetValue() + 1);
+                    QApplication::processEvents();
+                    slc.WriteNewSlice(currSlice->realAltitude, currSlice->loopList.size());
+                    currSlice->WriteToSlc(&slc);
+                    delete currSlice;
+                }
 
-			}
+
+                if(cancelslicing)
+                {
+                    cancelslicing = false;
+                    inst->FreeFromSlicing();
+                    return false;
+                }
+
+            }while(moreSlicesToCome);
+
+
+
             inst->FreeFromSlicing();
 		}
 	}
 
-	slc.WriteNewSlice(0.0,0xFFFFFFFF);
-	//slc falls out of scope (automatically closes the file.)
+    slc.WriteNewSlice(0.0,0xFFFFFFFF);
     return true;
 }
 

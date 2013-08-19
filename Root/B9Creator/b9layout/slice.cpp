@@ -44,10 +44,13 @@
 #include <QtOpenGL>//for the open gl commands in render()...
 
 
-Slice::Slice(double alt)
+Slice::Slice(double alt, int layerIndx)
 {
 	realAltitude = alt;
+    this->layerIndx = layerIndx;
 	numLoops = 0;
+    inProccessing = false;
+    pImg = NULL;
 }
 Slice::~Slice()
 {
@@ -58,6 +61,10 @@ Slice::~Slice()
 		delete segmentList[s];
 	}
 	segmentList.clear();
+
+    if(pImg != NULL)
+        delete pImg;
+
 }
 
 void Slice::AddSegment(Segment* pSeg)
@@ -314,25 +321,26 @@ int Slice::GenerateLoops()
 }
 
 
-
 void Slice::Render()
 {
     unsigned int l;
 
-	glBlendFunc(GL_ONE,GL_ONE);
+    glBlendFunc(GL_ONE,GL_ONE);
+
 	//for each filled loop
 	for(l=0;l<loopList.size();l++)
 	{	
-		if(loopList[l].isfill)
-		{	
-			glColor3b(1,0,0);//filled
-		}
-		else
-		{
-            glColor3b(0,1,0);//void
-		}
-		loopList[l].RenderTriangles();
-	}
+        if(loopList[l].isfill )
+        {
+            glColor3ub(1,0,0);
+            loopList[l].RenderTriangles();
+        }
+        if(!loopList[l].isfill)
+        {
+            glColor3ub(0,1,0);
+            loopList[l].RenderTriangles();
+        }
+    }
 }
 void Slice::DebugRender(bool normals, bool connections, bool fills, bool outlines)
 {

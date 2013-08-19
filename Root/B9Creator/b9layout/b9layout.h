@@ -205,7 +205,6 @@ public slots:
 private:
     Ui::B9Layout ui;
 	WorldView* pWorldView;
-	SliceDebugger* pslicedebugger;
     B9LayoutProjectData* project;
 
 

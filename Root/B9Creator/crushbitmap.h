@@ -169,9 +169,11 @@ public:
     // if bUseNaturalSize, replace the pImage with one sized to this slice's size (offsets may cause clipping!)
     // inflates the raw image and then renders supports, filled base extents, etc.
 	void inflateCurrentSlice(QImage* pImage, int xOffset = 0, int yOffset = 0, bool bUseNaturalSize = false);
+    void inflateSlice(int sliceIndex, QImage* pImage, int xOffset = 0, int yOffset = 0, bool bUseNaturalSize = false);
 
     // attempts to replace the current slice with the crushed version of pImage stored at m_CurrentSlice.  Adjusts the job's width and height if needed
     bool crushCurrentSlice(QImage* pImage);
+    bool crushSlice(int sliceIndex, QImage* pImage);
 
     // attempts to crushe and append pImage to the CBM array
     bool addImage(QImage* pImage);

@@ -1059,8 +1059,8 @@ void B9Edit::PatchJobData(QImage* pNewImg, int slicenumber)
 	 updateWindowTitle();
 	 if(cPJ.getTotalLayers() && pNewImg->width()*pNewImg->height() > 0)
 	 {
-		cPJ.setCurrentSlice(slicenumber);
-		cPJ.crushCurrentSlice(pNewImg);
+        cPJ.setCurrentSlice(slicenumber);
+        cPJ.crushCurrentSlice(pNewImg);
 	 }
  }
 void B9Edit::SetDirty()

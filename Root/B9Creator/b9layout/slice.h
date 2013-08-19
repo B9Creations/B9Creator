@@ -53,8 +53,8 @@ class Slice
 
 public:
 	
-	Slice();
-	Slice(double alt);
+
+    Slice(double alt, int layerIndx);
 	~Slice();
 
 	void AddSegment(Segment* pSeg);
@@ -67,7 +67,7 @@ public:
 	
 	int GenerateLoops();
 
-	void Render();//OpenGL rendering code - renders the whole slice.
+    void Render();//OpenGL rendering code - renders the whole slice.
 	void DebugRender(bool normals = true, bool connections = true, bool fills = true, bool outlines = true);//renders with visible debug information
 
 
@@ -81,7 +81,9 @@ public:
 	int numLoops;
 
 	double realAltitude;//in mm;
-
+    int layerIndx;//index in the progression of layers in a job (or similar construct)
+    bool inProccessing;//for multithreading help...
+    QImage* pImg;//for rasturing help..
 private:
 	bool TestIntersection(QVector2D &vec,Segment* seg1, Segment* seg2);
     void GetTrianglesAroundZ(std::vector<Triangle3D*> &outList, double z);

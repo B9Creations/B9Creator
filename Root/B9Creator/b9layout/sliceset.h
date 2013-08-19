@@ -39,8 +39,24 @@
 #ifndef SLICESET_H
 #define SLICESET_H
 #include <vector>
+#include <list>
+#include <queue>
+#include <QDebug>
+#include <QFuture>
+#include <QImage>
+
 class Slice;
 class B9ModelInstance;
+class CrushedPrintJob;
+class SliceContext;
+
+
+struct SliceRequest
+{
+    double altitude;
+    int layerIndx;
+};
+
 
 class SliceSet
 {
@@ -51,8 +67,37 @@ public:
 	//pointer to the "parent" modelclone
     B9ModelInstance* pInstance;
 
-	Slice* pSliceData;
-	bool GenerateSlice(double realAltitude); //generates 1 slice from a model at the real altitude.
+    std::queue<SliceRequest> SliceRequests;
+    std::queue<Slice*> SlicedSlices;
+    std::queue<Slice*> RasturizedSlices;
+    std::queue<Slice*> CompressedSlices;
+
+    std::vector< QFuture<void> > workerThreads;
+
+    SliceContext* raster;
+
+    void QueNewSlice(double realAltitude, int layerIndx);
+    void SetSingleModelCompressHint(bool hint);
+    Slice* ParallelCreateSlices(bool &slicesInTransit,CrushedPrintJob* toJob);
+
+
+
+
+    void ComputeSlice(Slice* slice);
+    void RasterizeSlice(Slice* slice);
+    void SubtractVoidFromFill(QImage *img);
+    void AddSliceToJob(Slice *rasSlice, CrushedPrintJob* job);
+
+
+
+private:
+    void SetupFutureWorkers();
+    void SetupRasturizer();
+
+    QMutex mutex;
+    bool singleModelCompression;
+
+
 };
 
 #endif

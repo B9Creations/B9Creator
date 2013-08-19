@@ -1,3 +1,7 @@
+//v1.5.5 Change Log
+-Slicer now supports multi-threading
+
+
 //v1.5.4 Change Log
 -Fixed slicer crashing on models with complex self intersections.
 -Added "Are you sure" dialog when aborting a print.

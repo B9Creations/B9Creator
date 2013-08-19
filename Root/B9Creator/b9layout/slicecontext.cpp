@@ -43,23 +43,16 @@
 #include <QVector2D>
 #include <QtOpenGL>
 
-SliceContext::SliceContext(QWidget *parent, B9Layout* pmain) : QGLWidget(parent)
-{
-	pMain = pmain;
-	pSlice = NULL;
-	debugmode = false;
-	shownormals = true;
-	connections = true;
-	fills = true;
-	outlines = true;
-	zoom = 1.0;
 
-	mousedown = false;
+SliceContext::SliceContext(QWidget *parent, B9LayoutProjectData *pmain) : QGLWidget(parent)
+{
+    projectData = pmain;
+    pSlice = NULL;
+    this->setAutoBufferSwap(true);
+
 }
 SliceContext::~SliceContext()
 {
-	pMain = NULL;
-	pSlice = NULL;
 }
 
 
@@ -76,14 +69,16 @@ void SliceContext::initializeGL()
 {
 	qglClearColor(QColor(0,0,0));
 	glEnable(GL_BLEND);
-    glDisable(GL_CULL_FACE);
 
-    glViewport(0, 0, pMain->ProjectData()->GetResolution().x(), pMain->ProjectData()->GetResolution().y());
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+
+    glViewport(0, 0, projectData->GetResolution().x(), projectData->GetResolution().y());
     glMatrixMode(GL_PROJECTION);
-    gluOrtho2D(-pMain->ProjectData()->GetBuildSpace().x()/2.0,
-               pMain->ProjectData()->GetBuildSpace().x()/2.0,
-               -pMain->ProjectData()->GetBuildSpace().y()/2.0,
-               pMain->ProjectData()->GetBuildSpace().y()/2.0);
+    gluOrtho2D(-projectData->GetBuildSpace().x()/2.0,
+               projectData->GetBuildSpace().x()/2.0,
+               -projectData->GetBuildSpace().y()/2.0,
+               projectData->GetBuildSpace().y()/2.0);
 	glMatrixMode(GL_MODELVIEW);
 }
 
@@ -94,51 +89,11 @@ void SliceContext::paintGL()
 	
 	if(pSlice)
 	{
-
-		if(debugmode)
-		{
-			glScalef(zoom,zoom,zoom);
-				glTranslatef(pan.x(),pan.y(),0);
-				pSlice->DebugRender(shownormals,connections,fills,outlines);
-				glTranslatef(-pan.x(),-pan.y(),0);
-			glScalef(1.0,1.0,1.0);
-		}
-		else
-		{
-			pSlice->Render();
-		}
+        pSlice->Render();
 	}
-}
-
-
-
-//events
-void SliceContext::mousePressEvent(QMouseEvent *event)
-{ 
-	lastPos = event->pos();
-	 if(event->button() == Qt::LeftButton)
-	 {
-		
-		 mousedown = true;
-	 }
 
 }
-void SliceContext::mouseReleaseEvent(QMouseEvent *event)
-{
-	if(event->button() == Qt::LeftButton)
-	 {
-		 mousedown = false;
-	 }
 
-}
-void SliceContext::mouseMoveEvent(QMouseEvent *event)
-{ 
-	int dx = event->x() - lastPos.x();
-    int dy = event->y() - lastPos.y();
 
-	if(mousedown)
-	{
-		pan += QVector2D(-double(dx)/100.0,double(dy)/100.0);
-		updateGL();
-	}
-}
+
+

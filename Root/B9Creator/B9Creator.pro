@@ -75,7 +75,6 @@ SOURCES += main.cpp\
     b9layout/worldview.cpp \
     b9layout/triangle3d.cpp \
     b9layout/sliceset.cpp \
-    b9layout/slicedebugger.cpp \
     b9layout/slicecontext.cpp \
     b9layout/slice.cpp \
     b9layout/SlcExporter.cpp \
@@ -123,7 +122,6 @@ HEADERS  += mainwindow.h \
     b9layout/worldview.h \
     b9layout/triangle3d.h \
     b9layout/sliceset.h \
-    b9layout/slicedebugger.h \
     b9layout/slicecontext.h \
     b9layout/slice.h \
     b9layout/SlcExporter.h \

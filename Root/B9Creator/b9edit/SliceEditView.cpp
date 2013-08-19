@@ -194,7 +194,7 @@ void SliceEditView::GoToSlice(int slicenumber)
 //inflates the image from the job file, and also inflates the one below if in support mode.
 void SliceEditView::DeCompressIntoContext()
 {
-	pCPJ->setCurrentSlice(currSlice);
+    pCPJ->setCurrentSlice(currSlice);
 	if(supportMode)
         pCPJ->showSupports(1);
 	else
@@ -219,9 +219,9 @@ void SliceEditView::DeCompressIntoContext()
 		botImg.fill(QColor(255,255,255));
 	}
 	else
-	{
-		pCPJ->setCurrentSlice(currSlice - 1);
-		pCPJ->inflateCurrentSlice(&botImg, m_xOffset, m_yOffset, true);
+    {
+        pCPJ->setCurrentSlice(currSlice - 1);
+        pCPJ->inflateCurrentSlice(&botImg, m_xOffset, m_yOffset, true);
 	}
 		
 	pDrawingContext->SetLowerImg(&botImg);
