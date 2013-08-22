@@ -127,7 +127,9 @@ public:
 
 	//render
     void RenderGL(bool disableColor = false);//renders the instance using the modeldata's displaylist with this instances transforms applied
-    void RenderSupportsGL(bool solidColor, float alpha);//renderes the support shapes.
+    void RenderSupportsGL(bool solidColor, float topAlpha, float bottomAlpha);//renderes the support shapes.
+    void renderSupportGL(B9SupportStructure* pSup, bool solidColor, float topAlpha, float bottomAlpha);
+    void RenderSupportsTipsGL();
     void RenderPickGL();//simple flat rendering with color id
     void RenderTrianglePickGL();//renders all triangles with slightly different colors, - flat shaded for tri picking.
     void RenderSingleTrianglePickGL(unsigned int triIndx);//renders a color coded triangle for precice position picking.
@@ -137,6 +139,7 @@ public:
     //geometry
     void BakeGeometry(bool withsupports = false);//copies triangle data from the model data
     //with applied transforms, also calculates bounds. also copies in support geometry too.
+        unsigned int AddSupportsToBake(bool recompBounds);//add support geometry to bake, also updates bounds..
     void UnBakeGeometry();//frees up the triangle data of this model.
 	void UpdateBounds();//updates the bounds, this is somewhat time consuming!
     //this triangle list is only full

@@ -95,6 +95,7 @@ public:
     QVector3D GetTopPoint();
     QVector3D GetTopPivot();
     QVector3D GetBottomPoint();
+    QVector3D GetBottomPivot();
     double GetTopRadius();
     double GetMidRadius();
     double GetBottomRadius();
@@ -126,6 +127,9 @@ public:
         bool IsMidPrintable();
         bool IsBottomPrintable();
             bool IsBottomAngleDown();
+
+    bool IsVisible();
+
 
 
     //Set Characteristics
@@ -165,8 +169,8 @@ public:
         void RenderTopGL();
         void RenderMidGL();
         void RenderBottomGL();
-    void RenderPickGL();
-    void RenderPartPickGL();//independantly callable rendering function
+    void RenderPickGL(bool renderBottom = true, bool renderTop = true);
+    void RenderPartPickGL(bool renderBottom = true, bool renderTop = true);//independantly callable rendering function
     void EnableErrorGlow();
     void DisableErrorGlow();
     void DebugRender();
@@ -176,7 +180,7 @@ public:
 
 
     //Baking
-    void BakeToInstanceGeometry();
+    unsigned int BakeToInstanceGeometry();
     std::vector<Triangle3D>* GetTriList();
 
     int SupportNumber;
@@ -229,13 +233,12 @@ private:
     bool isSelected;
 
     //rendering
-    bool isVisible;
     bool isErrorGlowing;
 
 
 private: //functions
     void ReBuildGeometry();
-
+    bool isVisible;
 };
 
 #endif // B9SUPPORTSTRUCTURE_H

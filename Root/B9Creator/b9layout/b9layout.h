@@ -91,6 +91,7 @@ public slots:
 
 
     void BuildInterface();
+
     void UpdateInterface();//sets the translation interface fields acourding to what instance/instances are selected.
 	void PushTranslations();
     void OnModelSpinSliderChanged(int val);//when the spin slider changes value by the user.
@@ -112,9 +113,22 @@ public slots:
     void SetToolSupportAdd();
     void SetToolSupportDelete();
 
-
     void ExitToolAction();//use to panic out of a mouse down tool action.
-	
+
+    //contour aid
+    void OnToggleContourAid(bool tog);
+    bool ContourAidEnabled();
+
+    //xray vision
+    void OnToggleXRay(bool tog);
+    void OnXRayChange(int val);
+    bool XRayEnabled();
+    float XRayPercentage();
+
+    //support hiding
+    bool HidingSupports();
+    void OnToggleSupportHiding(bool tog);
+
 	//model
     B9ModelInstance* AddModel(QString filepath = "", bool bypassVisuals = false);
 	void RemoveAllInstances();
@@ -157,6 +171,7 @@ public slots:
     void DeleteSelectedSupports();//called from remove button.
     void DeleteSupport(B9SupportStructure* pSup);
     void MakeSelectedSupportsVertical();
+    void MakeSelectedSupportsStraight();
 
     //Support Interface
     void OnSupport_Top_AttachType_Changed(bool updateInterface = true);
@@ -172,8 +187,10 @@ public slots:
     void OnSupport_Bottom_Penetration_Changed(bool updateInterface = true);
     void OnSupport_Bottom_AngleFactor_Changed(bool updateInterface = true);
 
-
+    //Foundation (BasePlate)
     void OnBasePlatePropertiesChanged();
+
+
     void PushSupportProperties();//fills the support properties with relevent data.
     void PushBasePlateProperties();
     void ResetSupportLight();//connected to push button
@@ -205,6 +222,7 @@ public slots:
 private:
     Ui::B9Layout ui;
 	WorldView* pWorldView;
+    QSlider* pXRaySlider;
     B9LayoutProjectData* project;
 
 
@@ -214,10 +232,15 @@ private:
 
     //support mode
     B9ModelInstance* currInstanceInSupportMode;
+    bool oldModelConstricted;//for raising models that are too close to the ground in support mode.
     QVector3D oldPan;
     QVector3D oldRot;
     float oldZoom;
     QString oldTool;
+    bool useContourAid;
+    bool useXRayVision;
+    float xRayPercentage;
+    bool hideSupports;
     std::vector<B9SupportStructure*> currSelectedSupports;//what supports are currently in selection.
 
 

@@ -78,6 +78,8 @@ public slots:
 
 
     void CheckForUpdates();
+    void OpenLayoutFile(QString file);
+    void OpenJobFile(QString file);
 
     void showLogAndExit();
     void showTerminal();
@@ -89,6 +91,8 @@ public slots:
     void showSlice();
     void showEdit();
     void showPrint();
+
+    void AttemptPrintDialogWithFile(QString openFile);
 
     void showAbout();
     void setSplash(QSplashScreen * splash){m_pSplash = splash;}

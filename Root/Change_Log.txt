@@ -1,6 +1,20 @@
 //v1.5.5 Change Log
--Slicer now supports multi-threading
-
+-Slicer now supports multi-threading!!!!
+-Added contour visual aid to layout when adding supports!!!
+-Added x-ray view to layout!
+-You can now mirror a model with supports if there is no x or y rotation on the model.
+-Added "Make straight" button to support parameters
+-Clicking on the support list will automatically move the user into modify support mode.
+-Light, Medium, and Heavy support buttons are now "checkable" when adding supports.
+-Shift dragging a support now alters support angles.
+-Control dragging a support now stretches a support section.
+-Added Left, Back, and Bottom view buttons.
+-Added "support modify occulsion" option to layout
+-You can no longer select support occluded by the model
+-Opening a job file from windows will now open the print dialog.
+-Fixed supports being constricted when adding supports to a model on the ground.
+-Added warning when uploading firmware to unknown arduino devices
+-Added Reset firmware defaults button to Terminal Utility
 
 //v1.5.4 Change Log
 -Fixed slicer crashing on models with complex self intersections.

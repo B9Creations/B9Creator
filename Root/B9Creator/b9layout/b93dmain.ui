@@ -81,6 +81,9 @@
           <property name="title">
            <string>Build Space:</string>
           </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
           <layout class="QGridLayout" name="gridLayout">
            <item row="0" column="0">
             <widget class="QLabel" name="label">
@@ -172,6 +175,9 @@
          <widget class="QGroupBox" name="groupBox">
           <property name="title">
            <string>Model List:</string>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <property name="spacing">
@@ -304,6 +310,9 @@
           </property>
           <property name="title">
            <string>Model Information:</string>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_11">
            <property name="spacing">
@@ -697,88 +706,86 @@
           <property name="title">
            <string>Foundation:</string>
           </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
           <layout class="QVBoxLayout" name="verticalLayout_10">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_20">
-             <item>
-              <widget class="QCheckBox" name="Support_Base_Enabled_checkBox">
-               <property name="toolTip">
-                <string>Enable foundation under the model</string>
-               </property>
-               <property name="text">
-                <string>Enabled</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="Support_Base_AttachType_comboBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="toolTip">
-                <string>Choose the shape of the foundation</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QLabel" name="label_32">
-               <property name="text">
-                <string>Coverage:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSlider" name="Support_Base_Coverage_horizontalSlider">
-               <property name="toolTip">
-                <string>Change the size of the foundation</string>
-               </property>
-               <property name="minimum">
-                <number>50</number>
-               </property>
-               <property name="maximum">
-                <number>200</number>
-               </property>
-               <property name="value">
-                <number>100</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="Support_Base_Coverage_label">
-               <property name="text">
-                <string>0</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_21">
-             <item>
-              <widget class="QLabel" name="label_34">
-               <property name="text">
-                <string>Thickness(mm):</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="Support_Base_Length_lineEdit">
-               <property name="toolTip">
-                <string>Change the foundation thickness</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="QFrame" name="Support_Base_Frame">
+             <layout class="QVBoxLayout" name="Support_Base_Contents">
+              <item>
+               <widget class="QComboBox" name="Support_Base_AttachType_comboBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>Choose the shape of the foundation</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <item>
+                 <widget class="QLabel" name="label_32">
+                  <property name="text">
+                   <string>Coverage:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSlider" name="Support_Base_Coverage_horizontalSlider">
+                  <property name="toolTip">
+                   <string>Change the size of the foundation</string>
+                  </property>
+                  <property name="minimum">
+                   <number>50</number>
+                  </property>
+                  <property name="maximum">
+                   <number>200</number>
+                  </property>
+                  <property name="value">
+                   <number>100</number>
+                  </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="Support_Base_Coverage_label">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_21">
+                <item>
+                 <widget class="QLabel" name="label_34">
+                  <property name="text">
+                   <string>Thickness(mm):</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="Support_Base_Length_lineEdit">
+                  <property name="toolTip">
+                   <string>Change the foundation thickness</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -787,6 +794,9 @@
          <widget class="QGroupBox" name="groupBox_3">
           <property name="title">
            <string>Support List:</string>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
@@ -833,6 +843,9 @@
           </property>
           <property name="title">
            <string>Support Parameters:</string>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
@@ -1190,20 +1203,31 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="Support_Reset_To_Vertical_button">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="toolTip">
-              <string>Drops the bottom of the support below the top</string>
-             </property>
-             <property name="text">
-              <string>Make Vertical</string>
-             </property>
-            </widget>
+            <layout class="QHBoxLayout" name="horizontalLayout_27">
+             <item>
+              <widget class="QPushButton" name="Support_Reset_To_Vertical_button">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Drops the bottom of the support below the top</string>
+               </property>
+               <property name="text">
+                <string>Make Vertical</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="Support_Set_To_Straight_button">
+               <property name="text">
+                <string>Make Straight</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_26">
@@ -1223,7 +1247,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_2">
+                <widget class="QPushButton" name="Support_Reset_Medium_button">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -1236,7 +1260,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_3">
+                <widget class="QPushButton" name="Support_Reset_Heavy_button">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -1260,28 +1284,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="planingbox">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="title">
-       <string>3D View</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <layout class="QHBoxLayout" name="WorldViewContext"/>
-       </item>
-      </layout>
-     </widget>
+     <layout class="QHBoxLayout" name="WorldViewContext"/>
     </item>
    </layout>
   </widget>
@@ -1318,10 +1321,16 @@
     </property>
     <addaction name="actionCenter_View"/>
     <addaction name="actionTop_View"/>
+    <addaction name="actionBottom_View"/>
+    <addaction name="actionLeft_View"/>
     <addaction name="actionRight_View"/>
     <addaction name="actionFront_View"/>
+    <addaction name="actionBack_View"/>
     <addaction name="separator"/>
     <addaction name="actionPerspective"/>
+    <addaction name="actionContour_Aid"/>
+    <addaction name="actionX_Ray_Vision"/>
+    <addaction name="actionHide_Supports"/>
    </widget>
    <widget class="QMenu" name="menuModelModifiers">
     <property name="title">
@@ -1412,7 +1421,7 @@
     <bool>false</bool>
    </attribute>
   </widget>
-  <widget class="QToolBar" name="supportModifierToolBar">
+  <widget class="QToolBar" name="xRayToolBar">
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -1629,7 +1638,7 @@
   </action>
   <action name="actionTop_View">
    <property name="text">
-    <string>Top View</string>
+    <string>Top</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+5</string>
@@ -1637,7 +1646,7 @@
   </action>
   <action name="actionRight_View">
    <property name="text">
-    <string>Right View</string>
+    <string>Right</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+6</string>
@@ -1645,7 +1654,7 @@
   </action>
   <action name="actionFront_View">
    <property name="text">
-    <string>Front View</string>
+    <string>Front</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+8</string>
@@ -1699,6 +1708,9 @@
    <property name="text">
     <string>Add</string>
    </property>
+   <property name="toolTip">
+    <string>Add Support Structures</string>
+   </property>
   </action>
   <action name="Support_Modify_Support_action">
    <property name="checkable">
@@ -1707,6 +1719,9 @@
    <property name="text">
     <string>Modify</string>
    </property>
+   <property name="toolTip">
+    <string>Move Support Structures (hold shift for rotation)</string>
+   </property>
   </action>
   <action name="Support_Delete_Supports_action">
    <property name="checkable">
@@ -1714,6 +1729,9 @@
    </property>
    <property name="text">
     <string>Delete</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete Support Structures</string>
    </property>
   </action>
   <action name="Support_Modifer_Delete_action">
@@ -1735,6 +1753,60 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionBack_View">
+   <property name="text">
+    <string>Back</string>
+   </property>
+  </action>
+  <action name="actionLeft_View">
+   <property name="text">
+    <string>Left</string>
+   </property>
+  </action>
+  <action name="actionBottom_View">
+   <property name="text">
+    <string>Bottom</string>
+   </property>
+  </action>
+  <action name="actionContour_Aid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Contour Aid</string>
+   </property>
+   <property name="toolTip">
+    <string>Shows a contour of the model while adding supports.</string>
+   </property>
+  </action>
+  <action name="actionX_Ray_Vision">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>X Ray Vision</string>
+   </property>
+   <property name="toolTip">
+    <string>See through models to place support in hard to reach areas</string>
+   </property>
+  </action>
+  <action name="actionHide_Supports">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Support Modify Occlusion</string>
+   </property>
+   <property name="toolTip">
+    <string>Hide surrounding supports while modifying.</string>
    </property>
   </action>
  </widget>
@@ -1957,8 +2029,8 @@
    <slot>DeleteSelectedInstances()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>288</x>
-     <y>201</y>
+     <x>289</x>
+     <y>179</y>
     </hint>
     <hint type="destinationlabel">
      <x>6</x>
@@ -1973,8 +2045,8 @@
    <slot>AddModel()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>109</x>
-     <y>201</y>
+     <x>45</x>
+     <y>179</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -1989,8 +2061,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>388</x>
-     <y>587</y>
+     <x>293</x>
+     <y>568</y>
     </hint>
     <hint type="destinationlabel">
      <x>317</x>
@@ -2005,8 +2077,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>265</x>
-     <y>587</y>
+     <x>171</x>
+     <y>568</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
@@ -2021,8 +2093,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>143</x>
-     <y>587</y>
+     <x>48</x>
+     <y>568</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
@@ -2037,8 +2109,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>106</x>
-     <y>653</y>
+     <x>78</x>
+     <y>634</y>
     </hint>
     <hint type="destinationlabel">
      <x>317</x>
@@ -2053,8 +2125,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>143</x>
-     <y>692</y>
+     <x>48</x>
+     <y>673</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
@@ -2069,8 +2141,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>265</x>
-     <y>692</y>
+     <x>171</x>
+     <y>673</y>
     </hint>
     <hint type="destinationlabel">
      <x>320</x>
@@ -2085,8 +2157,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>386</x>
-     <y>681</y>
+     <x>293</x>
+     <y>673</y>
     </hint>
     <hint type="destinationlabel">
      <x>312</x>
@@ -2101,8 +2173,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>177</x>
-     <y>736</y>
+     <x>95</x>
+     <y>717</y>
     </hint>
     <hint type="destinationlabel">
      <x>315</x>
@@ -2117,8 +2189,8 @@
    <slot>SetProjectorPreset(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>236</x>
-     <y>141</y>
+     <x>164</x>
+     <y>122</y>
     </hint>
     <hint type="destinationlabel">
      <x>312</x>
@@ -2133,8 +2205,8 @@
    <slot>SetXYPixelSizePreset(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>236</x>
-     <y>115</y>
+     <x>164</x>
+     <y>96</y>
     </hint>
     <hint type="destinationlabel">
      <x>314</x>
@@ -2149,8 +2221,8 @@
    <slot>DuplicateSelection()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>199</x>
-     <y>201</y>
+     <x>168</x>
+     <y>179</y>
     </hint>
     <hint type="destinationlabel">
      <x>111</x>
@@ -2165,8 +2237,8 @@
    <slot>SetSelectionFlipped(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>387</x>
-     <y>704</y>
+     <x>241</x>
+     <y>697</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
@@ -2181,8 +2253,8 @@
    <slot>ResetSelectionRotation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>387</x>
-     <y>611</y>
+     <x>316</x>
+     <y>607</y>
     </hint>
     <hint type="destinationlabel">
      <x>315</x>
@@ -2230,7 +2302,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>371</x>
-     <y>507</y>
+     <y>505</y>
     </hint>
     <hint type="destinationlabel">
      <x>590</x>
@@ -2246,7 +2318,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>371</x>
-     <y>535</y>
+     <y>533</y>
     </hint>
     <hint type="destinationlabel">
      <x>361</x>
@@ -2262,7 +2334,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>371</x>
-     <y>563</y>
+     <y>561</y>
     </hint>
     <hint type="destinationlabel">
      <x>539</x>
@@ -2278,7 +2350,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>359</x>
-     <y>617</y>
+     <y>615</y>
     </hint>
     <hint type="destinationlabel">
      <x>366</x>
@@ -2294,7 +2366,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>359</x>
-     <y>590</y>
+     <y>588</y>
     </hint>
     <hint type="destinationlabel">
      <x>600</x>
@@ -2341,8 +2413,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>302</x>
-     <y>627</y>
+     <x>191</x>
+     <y>608</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
@@ -2357,8 +2429,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>161</x>
-     <y>627</y>
+     <x>51</x>
+     <y>608</y>
     </hint>
     <hint type="destinationlabel">
      <x>312</x>
@@ -2389,8 +2461,8 @@
    <slot>OnModelSpinSliderChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>277</x>
-     <y>637</y>
+     <x>123</x>
+     <y>634</y>
     </hint>
     <hint type="destinationlabel">
      <x>313</x>
@@ -2405,76 +2477,12 @@
    <slot>OnModelSpinSliderReleased()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>280</x>
-     <y>637</y>
+     <x>123</x>
+     <y>634</y>
     </hint>
     <hint type="destinationlabel">
      <x>312</x>
      <y>835</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>Support_Base_AttachType_comboBox</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>B9Layout</receiver>
-   <slot>OnBasePlatePropertiesChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>183</x>
-     <y>107</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>309</x>
-     <y>73</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>Support_Base_Enabled_checkBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>B9Layout</receiver>
-   <slot>OnBasePlatePropertiesChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>61</x>
-     <y>107</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>313</x>
-     <y>118</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>Support_Base_Coverage_horizontalSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>B9Layout</receiver>
-   <slot>OnBasePlatePropertiesChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>372</x>
-     <y>143</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>314</x>
-     <y>169</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>Support_Base_Length_lineEdit</sender>
-   <signal>editingFinished()</signal>
-   <receiver>B9Layout</receiver>
-   <slot>OnBasePlatePropertiesChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>384</x>
-     <y>171</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>314</x>
-     <y>228</y>
     </hint>
    </hints>
   </connection>
@@ -2486,7 +2494,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>141</x>
-     <y>487</y>
+     <y>485</y>
     </hint>
     <hint type="destinationlabel">
      <x>419</x>
@@ -2502,7 +2510,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>141</x>
-     <y>491</y>
+     <y>489</y>
     </hint>
     <hint type="destinationlabel">
      <x>414</x>
@@ -2518,7 +2526,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>141</x>
-     <y>494</y>
+     <y>492</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
@@ -2534,7 +2542,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>129</x>
-     <y>498</y>
+     <y>496</y>
     </hint>
     <hint type="destinationlabel">
      <x>415</x>
@@ -2550,7 +2558,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>129</x>
-     <y>501</y>
+     <y>499</y>
     </hint>
     <hint type="destinationlabel">
      <x>419</x>
@@ -2566,7 +2574,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>141</x>
-     <y>487</y>
+     <y>485</y>
     </hint>
     <hint type="destinationlabel">
      <x>417</x>
@@ -2582,7 +2590,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>141</x>
-     <y>492</y>
+     <y>490</y>
     </hint>
     <hint type="destinationlabel">
      <x>418</x>
@@ -2597,8 +2605,8 @@
    <slot>MakeSelectedSupportsVertical()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>706</y>
+     <x>204</x>
+     <y>705</y>
     </hint>
     <hint type="destinationlabel">
      <x>411</x>
@@ -2639,7 +2647,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_2</sender>
+   <sender>Support_Reset_Medium_button</sender>
    <signal>clicked()</signal>
    <receiver>B9Layout</receiver>
    <slot>ResetSupportMedium()</slot>
@@ -2655,7 +2663,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_3</sender>
+   <sender>Support_Reset_Heavy_button</sender>
    <signal>clicked()</signal>
    <receiver>B9Layout</receiver>
    <slot>ResetSupportHeavy()</slot>
@@ -2667,6 +2675,134 @@
     <hint type="destinationlabel">
      <x>691</x>
      <y>766</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Set_To_Straight_button</sender>
+   <signal>clicked()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>MakeSelectedSupportsStraight()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>325</x>
+     <y>695</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>520</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Base_GroupBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnBasePlatePropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>157</x>
+     <y>80</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>219</x>
+     <y>39</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Base_AttachType_comboBox</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnBasePlatePropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>273</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>412</x>
+     <y>59</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Base_Coverage_horizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnBasePlatePropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>337</x>
+     <y>133</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>410</x>
+     <y>125</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>Support_Base_Length_lineEdit</sender>
+   <signal>editingFinished()</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnBasePlatePropertiesChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>155</x>
+     <y>159</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>169</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionContour_Aid</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnToggleContourAid(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>799</x>
+     <y>395</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionX_Ray_Vision</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnToggleXRay(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>799</x>
+     <y>395</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionHide_Supports</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>B9Layout</receiver>
+   <slot>OnToggleSupportHiding(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>799</x>
+     <y>395</y>
     </hint>
    </hints>
   </connection>
@@ -2724,5 +2860,9 @@
   <slot>ResetSupportLight()</slot>
   <slot>ResetSupportMedium()</slot>
   <slot>ResetSupportHeavy()</slot>
+  <slot>MakeSelectedSupportsStraight()</slot>
+  <slot>OnToggleContourAid(bool)</slot>
+  <slot>OnToggleXRay(bool)</slot>
+  <slot>OnToggleSupportHiding(bool)</slot>
  </slots>
 </ui>

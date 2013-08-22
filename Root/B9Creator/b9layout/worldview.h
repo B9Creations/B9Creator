@@ -43,6 +43,7 @@
 #include "b9layout.h"
 #include "b9supportstructure.h"
 #include <QPoint>
+class Slice;
 class B9ModelInstance;
 class B9SupportStructure;
 class MainWindow;
@@ -65,6 +66,9 @@ class WorldView : public QGLWidget
     void TopView();
     void RightView();
     void FrontView();
+    void BackView();
+    void LeftView();
+    void BottomView();
     void SetPerpective(bool persp){perspective = persp;}
     void SetRevolvePoint(QVector3D point);
     void SetPan(QVector3D pan);
@@ -76,6 +80,7 @@ class WorldView : public QGLWidget
 
     void UpdatePlasmaFence();//check if any instances are out of the build area and show fence.
 
+    void UpdateVisSlice();
 
     void UpdateTick();//called every 1/60th of a second by update timer. also refreshes the openGL Screen
 	void SetTool(QString tool);
@@ -105,6 +110,7 @@ public: //Events
     QString toolStringMemory2;
     QVector3D toolVectorMemory1;
     QVector3D toolVectorMemory2;
+    QVector3D toolVectorOffsetMemory;
     double toolDoubleMemory1;
     double toolDoubleMemory2;
     double toolDoubleMemory3;
@@ -124,9 +130,10 @@ public: //Events
     void resizeGL(int width, int height);
 
 
-
-
+    void ResetCamera(bool xrayon = false);
+    void DrawMisc();//draw stuff...
 	void DrawInstances(); //draws all instances!
+    void DrawVisualSlice();//draws the visual slice indicator.
 	void DrawBuildArea();//draws the bounds of the build area.
 	
 
@@ -137,11 +144,13 @@ public: //Events
     void Update3DCursor(QPoint pos);
     void Update3DCursor(QPoint pos, B9ModelInstance *trackInst);
     void Update3DCursor(QPoint pos, B9ModelInstance *trackInst, bool &isAgainstInst);
-
+    QVector3D Get3DCursorOnScreen(QPoint pos, QVector3D hintPos, double standoff);
 
     unsigned int GetPickTriangleIndx(B9ModelInstance *inst, QPoint pos, bool &success);//returns the triangle of any model that the user clicks on. success is returned.
     QVector3D GetPickOnTriangle(QPoint pos, B9ModelInstance *inst, unsigned int triIndx);
     QVector3D GetDrillingHit(QVector3D localBeginPosition, B9ModelInstance *inst, bool &hitground, Triangle3D *&pTri);
+
+
 
 
     void UpdateSelectedBounds();
@@ -162,6 +171,7 @@ public: //Events
     QString currViewAngle;//"FREE", "TOP", "FRONT", etc
 
     bool perspective;
+    bool hideNonActiveSupports;
 
     QVector3D pan;
     QVector3D panTarget;
@@ -199,6 +209,9 @@ public: //Events
     QVector2D mouseDeltaPos;
     QPoint mouseDownInitialPos;
     QPoint mouseLastPos;
+
+    //visual slice following
+    Slice* pVisSlice;
 
     //layout window pointer.
     B9Layout* pMain;

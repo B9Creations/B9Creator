@@ -76,9 +76,12 @@ B9Layout::B9Layout(QWidget *parent, Qt::WFlags flags) : QMainWindow(parent, flag
     SetToolModelSelect();//start off with pointer tool
 
 	
-
     //support editing
     currInstanceInSupportMode = NULL;
+    useContourAid = true;
+    useXRayVision = false;
+    xRayPercentage = 0.5;
+    hideSupports = true;
 
 	//slicing
 	cancelslicing = false;
@@ -101,6 +104,7 @@ B9Layout::~B9Layout()
 	}
 	delete project;
 	delete pWorldView;
+
 }
 
 //returns a list of the currently selected instances
@@ -419,6 +423,10 @@ void B9Layout::BuildInterface()
     ui.viewToolBar->addAction(ui.actionTop_View);
     ui.viewToolBar->addAction(ui.actionFront_View);
     ui.viewToolBar->addAction(ui.actionRight_View);
+    ui.viewToolBar->addAction(ui.actionLeft_View);
+    ui.viewToolBar->addAction(ui.actionBottom_View);
+    ui.viewToolBar->addAction(ui.actionBack_View);
+
 
     //edit Support tab
     //fill the top, mid and lower combos with the valid names of attachement data.
@@ -463,6 +471,9 @@ void B9Layout::BuildInterface()
     QObject::connect(ui.actionTop_View,SIGNAL(activated()),pWorldView,SLOT(TopView()));
     QObject::connect(ui.actionRight_View,SIGNAL(activated()),pWorldView,SLOT(RightView()));
     QObject::connect(ui.actionFront_View,SIGNAL(activated()),pWorldView,SLOT(FrontView()));
+    QObject::connect(ui.actionBack_View,SIGNAL(activated()),pWorldView,SLOT(BackView()));
+    QObject::connect(ui.actionLeft_View,SIGNAL(activated()),pWorldView,SLOT(LeftView()));
+    QObject::connect(ui.actionBottom_View,SIGNAL(activated()),pWorldView,SLOT(BottomView()));
     QObject::connect(ui.TabWidget,SIGNAL(currentChanged(int)),this,SLOT(OnChangeTab(int)));
     QObject::connect(ui.actionSupportMode,SIGNAL(triggered(bool)),this,SLOT(SetSupportMode(bool)));
 
@@ -470,7 +481,19 @@ void B9Layout::BuildInterface()
     QObject::connect(ui.ModelList,SIGNAL(itemSelectionChanged()),this,SLOT(RefreshSelectionsFromList()));
     QObject::connect(ui.SupportList,SIGNAL(itemSelectionChanged()),this,SLOT(RefreshSupportSelectionsFromList()));
 
+    pXRaySlider = new QSlider(ui.viewToolBar);
+    pXRaySlider->setOrientation(Qt::Horizontal);
+    pXRaySlider->setMaximum(1000);
+    pXRaySlider->setMinimum(0);
+    pXRaySlider->setValue(500);
+    pXRaySlider->setEnabled(false);
+    ui.xRayToolBar->addAction(ui.actionX_Ray_Vision);
+    ui.xRayToolBar->addWidget(pXRaySlider);
+
+    QObject::connect(pXRaySlider,SIGNAL(valueChanged(int)),this,SLOT(OnXRayChange(int)));
+
 }
+
 
 
 void B9Layout::UpdateInterface()
@@ -544,21 +567,42 @@ void B9Layout::UpdateInterface()
         ui.menuSupport_Tools->setEnabled(true);
         ui.menuModelModifiers->setEnabled(false);
         ui.menuModelTools->setEnabled(false);
+        ui.actionContour_Aid->setEnabled(true);
         ui.modelModifierToolBar->hide();
         ui.modelToolBar->hide();
         ui.supportToolBar->show();
-        ui.supportModifierToolBar->show();
+        ui.xRayToolBar->show();
+        ui.actionX_Ray_Vision->setEnabled(true);
+        ui.actionHide_Supports->setEnabled(true);
 
         if(pWorldView->GetTool() == "SUPPORTADD")
         {
             ui.supportInformationBox->show();
             ui.Support_Reset_To_Vertical_button->hide();
+            ui.Support_Set_To_Straight_button->hide();
+
+            ui.Support_Reset_Light_button->setCheckable(true);
+            ui.Support_Reset_Medium_button->setCheckable(true);
+            ui.Support_Reset_Heavy_button->setCheckable(true);
+
+            //start off with the right button checked
+            QSettings appSettings;
+            appSettings.beginGroup("USERSUPPORTPARAMS");
+            QString weight = appSettings.value("ADDPRESETWEIGHT","LIGHT").toString();
+            if(weight == "LIGHT") ui.Support_Reset_Light_button->setChecked(true);
+            if(weight == "MEDIUM") ui.Support_Reset_Medium_button->setChecked(true);
+            if(weight == "HEAVY") ui.Support_Reset_Heavy_button->setChecked(true);
+
+
+
+
         }
 
         if(pWorldView->GetTool() == "SUPPORTDELETE")
         {
             ui.supportInformationBox->hide();
              ui.Support_Reset_To_Vertical_button->hide();
+             ui.Support_Set_To_Straight_button->hide();
         }
 
         if(pWorldView->GetTool() == "SUPPORTMODIFY")
@@ -570,6 +614,13 @@ void B9Layout::UpdateInterface()
             {
                 ui.supportInformationBox->show();
                 ui.Support_Reset_To_Vertical_button->show();
+                ui.Support_Set_To_Straight_button->show();
+
+                ui.Support_Reset_Light_button->setCheckable(false);
+                ui.Support_Reset_Medium_button->setCheckable(false);
+                ui.Support_Reset_Heavy_button->setCheckable(false);
+
+
                 PushSupportProperties();
             }
 
@@ -582,6 +633,10 @@ void B9Layout::UpdateInterface()
         ui.menuModelTools->setEnabled(true);
         ui.modelToolBar->show();
         ui.supportToolBar->hide();
+        ui.actionContour_Aid->setEnabled(false);
+        ui.xRayToolBar->hide();
+        ui.actionX_Ray_Vision->setEnabled(false);
+        ui.actionHide_Supports->setEnabled(false);
     }
 }
 void B9Layout::PushTranslations()
@@ -765,6 +820,8 @@ void B9Layout::SetToolSupportAdd()
     UpdateInterface();
 
     FillSupportParamsWithDefaults();
+
+
 }
 
 void B9Layout::SetToolSupportDelete()
@@ -793,6 +850,64 @@ void B9Layout::ExitToolAction()
 {
     pWorldView->ExitToolAction();
 }
+
+
+
+//contour aid
+void B9Layout::OnToggleContourAid(bool tog)
+{
+    useContourAid = tog;
+}
+
+bool B9Layout::ContourAidEnabled()
+{
+    return useContourAid;
+}
+
+//xray vision
+void B9Layout::OnToggleXRay(bool tog)
+{
+
+    if(tog)
+    {
+        pXRaySlider->setEnabled(true);
+        useXRayVision = true;
+    }
+    else
+    {
+        pXRaySlider->setEnabled(false);
+        useXRayVision = false;
+    }
+}
+
+void B9Layout::OnXRayChange(int val)
+{
+    xRayPercentage = float(val)/1000.0;
+}
+
+bool B9Layout::XRayEnabled()
+{
+    return useXRayVision;
+}
+
+float B9Layout::XRayPercentage()
+{
+    return xRayPercentage;
+}
+
+//support hiding
+bool B9Layout::HidingSupports()
+{
+    return hideSupports;
+}
+
+void B9Layout::OnToggleSupportHiding(bool tog)
+{
+    hideSupports = tog;
+}
+
+
+
 
 
 //model
@@ -974,21 +1089,13 @@ void B9Layout::SetSelectionPos(double x, double y, double z, int axis)
     {
         B9ModelInstance* inst = FindInstance(ui.ModelList->selectedItems()[i]);
         if(axis==0)
-        {
             inst->SetPos(QVector3D(x,y,z));
-        }
         else if(axis==1)
-        {
             inst->SetPos(QVector3D(x,inst->GetPos().y(),inst->GetPos().z()));
-        }
         else if(axis==2)
-        {
             inst->SetPos(QVector3D(inst->GetPos().x(),y,inst->GetPos().z()));
-        }
         else if(axis==3)
-        {
             inst->SetPos(QVector3D(inst->GetPos().x(),inst->GetPos().y(),z));
-        }
     }
 }
 void B9Layout::SetSelectionRot(QVector3D newRot)
@@ -999,26 +1106,6 @@ void B9Layout::SetSelectionRot(QVector3D newRot)
         B9ModelInstance* inst = FindInstance(ui.ModelList->selectedItems()[i]);
 
         inst->SetRot(newRot);
-
-
-        /*
-        if(axis==0)
-        {
-            inst->SetRot(QVector3D(x,y,z));
-        }
-        else if(axis==1)
-        {
-            inst->SetRot(QVector3D(x,inst->GetRot().y(),inst->GetRot().z()));
-        }
-        else if(axis==2)
-        {
-            inst->SetRot(QVector3D(inst->GetRot().x(),y,inst->GetRot().z()));
-        }
-        else if(axis==3)
-        {
-            inst->SetRot(QVector3D(inst->GetRot().x(),inst->GetRot().y(),z));
-        }
-        */
     }
 }
 void B9Layout::SetSelectionScale(double x, double y, double z, int axis)
@@ -1028,21 +1115,13 @@ void B9Layout::SetSelectionScale(double x, double y, double z, int axis)
     {
         B9ModelInstance* inst = FindInstance(ui.ModelList->selectedItems()[i]);
         if(axis==0)
-        {
             inst->SetScale(QVector3D(x,y,z));
-        }
         else if(axis==1)
-        {
             inst->SetScale(QVector3D(x,inst->GetScale().y(),inst->GetScale().z()));
-        }
         else if(axis==2)
-        {
             inst->SetScale(QVector3D(inst->GetScale().x(),y,inst->GetScale().z()));
-        }
         else if(axis==3)
-        {
             inst->SetScale(QVector3D(inst->GetScale().x(),inst->GetScale().y(),z));
-        }
     }
 }
 void B9Layout::SetSelectionFlipped(bool flipped)
@@ -1204,11 +1283,22 @@ void B9Layout::SetSupportMode(bool tog)
 
 
         //we can assume weve selected something...
-
-
         currInstanceInSupportMode = GetSelectedInstances()[0];
+
+        //if the instance is on the ground, raise it so we dont get crunched supports.
+        if(currInstanceInSupportMode->GetMinBound().z() < 0.01 && !currInstanceInSupportMode->GetSupports().size())
+        {
+            oldModelConstricted = true;
+            currInstanceInSupportMode->Move(QVector3D(0,0,5));
+        }else oldModelConstricted = false;
+
         currInstanceInSupportMode->SetInSupportMode(true);
+        //bake the instance in a manner similar to slice preparation
+        //but without support baking!
         currInstanceInSupportMode->BakeGeometry();
+        currInstanceInSupportMode->SortBakedTriangles();
+        currInstanceInSupportMode->AllocateTriContainers(0.1);
+        currInstanceInSupportMode->FillTriContainers();
         currInstanceInSupportMode->FormTriPickDispLists();
 
         oldZoom = pWorldView->GetZoom();
@@ -1239,7 +1329,13 @@ void B9Layout::SetSupportMode(bool tog)
             currInstanceInSupportMode->SetInSupportMode(false);
             currInstanceInSupportMode->FreeTriPickDispLists();
             currInstanceInSupportMode->UnBakeGeometry();
-            currInstanceInSupportMode->SetPos(currInstanceInSupportMode->GetPos());//nudge to fix supports
+            currInstanceInSupportMode->FreeTriContainers();
+
+            if(oldModelConstricted && !currInstanceInSupportMode->GetSupports().size())
+                currInstanceInSupportMode->Move(QVector3D(0,0,-5));
+            else
+                currInstanceInSupportMode->SetPos(currInstanceInSupportMode->GetPos());//nudge to fix supports
+
             currInstanceInSupportMode = NULL;
         }
         pWorldView->SetRevolvePoint(QVector3D(0,0,0));
@@ -1339,7 +1435,10 @@ void B9Layout::RefreshSupportSelectionsFromList()
     if(pWorldView->GetTool() == "SUPPORTADD"
     || pWorldView->GetTool() == "SUPPORTDELETE")
     {
-        UpdateSupportList();
+        //UpdateSupportList();
+        //return;
+        SetToolSupportModify();
+        RefreshSupportSelectionsFromList();
         return;
     }
 
@@ -1486,9 +1585,48 @@ void B9Layout::MakeSelectedSupportsVertical()
         pSup->SetBottomPoint(QVector3D(pSup->GetTopPivot().x(),
                                        pSup->GetTopPivot().y(),
                                        pSup->GetBottomPoint().z()));
+    }
+}
+
+void B9Layout::MakeSelectedSupportsStraight()
+{
+    unsigned int i;
+    B9SupportStructure* pSup;
+    QVector3D lenVec;
+    QVector3D topNorm, bottomNorm;
+
+    if(SupportModeInst() == NULL)
+        return;
+
+
+    for(i = 0; i < currSelectedSupports.size(); i++)
+    {
+        pSup = currSelectedSupports[i];
+
+        lenVec = pSup->GetTopPoint() - pSup->GetBottomPoint();
+        lenVec.normalize();
+
+        topNorm = pSup->GetTopNormal();
+        bottomNorm = pSup->GetBottomNormal();
+
+        topNorm = lenVec;
+        topNorm.normalize();
+
+        bottomNorm = -lenVec;
+        bottomNorm.normalize();
+
+
+        pSup->SetTopNormal(topNorm);
+        if(!pSup->GetIsGrounded())
+            pSup->SetBottomNormal(bottomNorm);
+
+        pSup->SetTopAngleFactor(1.0);
+        if(!pSup->GetIsGrounded())
+            pSup->SetBottomAngleFactor(1.0);
 
     }
 
+    UpdateInterface();
 }
 
 //Support Properties changes
@@ -1786,12 +1924,12 @@ void B9Layout::OnBasePlatePropertiesChanged()
     basePlate = SupportModeInst()->GetBasePlate();
 
     //Creation/Destruction
-    if(ui.Support_Base_Enabled_checkBox->isChecked() && (basePlate == NULL))
+    if(ui.Support_Base_GroupBox->isChecked() && (basePlate == NULL))
     {
         SupportModeInst()->EnableBasePlate();
     }
 
-    if(!ui.Support_Base_Enabled_checkBox->isChecked() && (basePlate != NULL))
+    if(!ui.Support_Base_GroupBox->isChecked() && (basePlate != NULL))
     {
         SupportModeInst()->DisableBasePlate();
     }
@@ -1885,22 +2023,14 @@ void B9Layout::PushBasePlateProperties()
     int indx;
 
     if(basePlate == NULL)
-    {
-        ui.Support_Base_AttachType_comboBox->setEnabled(false);
-        ui.Support_Base_Coverage_horizontalSlider->setEnabled(false);
-        ui.Support_Base_Length_lineEdit->setEnabled(false);
-        ui.Support_Base_Enabled_checkBox->blockSignals(true);
-            ui.Support_Base_Enabled_checkBox->setChecked(false);
-        ui.Support_Base_Enabled_checkBox->blockSignals(false);
+    {  
+        ui.Support_Base_GroupBox->setChecked(false);
+        ui.Support_Base_Frame->hide();
     }
     else
     {
-        ui.Support_Base_AttachType_comboBox->setEnabled(true);
-        ui.Support_Base_Coverage_horizontalSlider->setEnabled(true);
-        ui.Support_Base_Length_lineEdit->setEnabled(true);
-        ui.Support_Base_Enabled_checkBox->blockSignals(true);
-            ui.Support_Base_Enabled_checkBox->setChecked(true);
-        ui.Support_Base_Enabled_checkBox->blockSignals(false);
+        ui.Support_Base_GroupBox->setChecked(true);
+        ui.Support_Base_Frame->show();
 
         indx = ui.Support_Base_AttachType_comboBox->findText(basePlate->GetBottomAttachShape());
         ui.Support_Base_Coverage_label->setText(QString::number(ui.Support_Base_Coverage_horizontalSlider->value()) + QString("%"));
@@ -1916,6 +2046,9 @@ void B9Layout::ResetSupportLight()//connected to push button will always use har
     if(pWorldView->GetTool() == "SUPPORTADD")
     {
         FillSupportParamsWithDefaults();
+
+        ui.Support_Reset_Heavy_button->setChecked(false);
+        ui.Support_Reset_Medium_button->setChecked(false);
     }
     else if(pWorldView->GetTool() == "SUPPORTMODIFY")
     {
@@ -1931,6 +2064,8 @@ void B9Layout::ResetSupportLight()//connected to push button will always use har
         //TODO THERE IS A DIFFERENCT BETWEEN GROUNDED AND NON GROUNDED WITH GROuPS
         OnSupport_Bottom_Length_Changed(false);
     }
+
+    UpdateInterface();
 }
 void B9Layout::ResetSupportMedium()//connected to push button will always use hardcoded values!
 {
@@ -1938,6 +2073,9 @@ void B9Layout::ResetSupportMedium()//connected to push button will always use ha
     if(pWorldView->GetTool() == "SUPPORTADD")
     {
         FillSupportParamsWithDefaults();
+
+        ui.Support_Reset_Heavy_button->setChecked(false);
+        ui.Support_Reset_Light_button->setChecked(false);
     }
     else if(pWorldView->GetTool() == "SUPPORTMODIFY")
     {
@@ -1953,6 +2091,7 @@ void B9Layout::ResetSupportMedium()//connected to push button will always use ha
         //TODO THERE IS A DIFFERENCT BETWEEN GROUNDED AND NON GROUNDED WITH GROuPS
         OnSupport_Bottom_Length_Changed(false);
     }
+    UpdateInterface();
 }
 void B9Layout::ResetSupportHeavy()//connected to push button will always use hardcoded values!
 {
@@ -1960,6 +2099,9 @@ void B9Layout::ResetSupportHeavy()//connected to push button will always use har
     if(pWorldView->GetTool() == "SUPPORTADD")
     {
         FillSupportParamsWithDefaults();
+
+        ui.Support_Reset_Light_button->setChecked(false);
+        ui.Support_Reset_Medium_button->setChecked(false);
     }
     else if(pWorldView->GetTool() == "SUPPORTMODIFY")
     {
@@ -1975,6 +2117,7 @@ void B9Layout::ResetSupportHeavy()//connected to push button will always use har
         //TODO THERE IS A DIFFERENCT BETWEEN GROUNDED AND NON GROUNDED WITH GROuPS
         OnSupport_Bottom_Length_Changed(false);
     }
+    UpdateInterface();
 }
 
 //fill the support parameter box will default params.
@@ -2192,7 +2335,6 @@ bool B9Layout::SliceWorldToSlc(QString filename)
 {
     unsigned int m;
     unsigned int i;
-    unsigned int j;
 	int l;
 	int numlayers;
 	int nummodels = 0;

@@ -330,6 +330,7 @@ void B9SupportStructure::FillRegistryDefaults(bool reset, QString supportWeight)
 
         if(supportWeight == "LIGHT")
         {
+            appSettings.setValue("ADDPRESETWEIGHT","LIGHT");
         appSettings.beginGroup("SUPPORT_TOP");
             appSettings.setValue("ATTACHSHAPE","Cone 25%");
                 appSettings.setValue("ANGLEFACTOR",0.8);
@@ -363,6 +364,7 @@ void B9SupportStructure::FillRegistryDefaults(bool reset, QString supportWeight)
         }
         else if(supportWeight == "MEDIUM")
         {
+            appSettings.setValue("ADDPRESETWEIGHT","MEDIUM");
         appSettings.beginGroup("SUPPORT_TOP");
             appSettings.setValue("ATTACHSHAPE","Cone 25%");
                 appSettings.setValue("ANGLEFACTOR",0.8);
@@ -396,6 +398,7 @@ void B9SupportStructure::FillRegistryDefaults(bool reset, QString supportWeight)
         }
         else if(supportWeight == "HEAVY")
         {
+            appSettings.setValue("ADDPRESETWEIGHT","HEAVY");
         appSettings.beginGroup("SUPPORT_TOP");
             appSettings.setValue("ATTACHSHAPE","Cone 25%");
                 appSettings.setValue("ANGLEFACTOR",0.8);
@@ -682,6 +685,11 @@ QVector3D B9SupportStructure::GetBottomPoint()
     return bottomPoint;
 }
 
+QVector3D B9SupportStructure::GetBottomPivot()
+{
+    return (GetBottomPoint() - GetBottomNormal()*GetBottomLength());
+}
+
 bool B9SupportStructure::GetIsGrounded()
 {
     return isGrounded;
@@ -809,6 +817,11 @@ bool B9SupportStructure::IsBottomAngleDown()
     return false;
 }
 
+bool B9SupportStructure::IsVisible()
+{
+   return isVisible;
+}
+
 
 
 //selection
@@ -821,7 +834,7 @@ void B9SupportStructure::SetSelected(bool sel)
 //rendering
 
 //pick rendering
-void B9SupportStructure::RenderPickGL()
+void B9SupportStructure::RenderPickGL(bool renderBottom, bool renderTop)
 {
     glPushMatrix();
         glColor3ub(pickcolor[0],pickcolor[1],pickcolor[2]);
@@ -829,32 +842,36 @@ void B9SupportStructure::RenderPickGL()
                      instanceParent->GetPos().y(),
                      instanceParent->GetPos().z());
 
-        RenderUpper(true);
-        RenderLower(true);
+        if(renderTop)
+            RenderUpper(true);
+
+        if(renderBottom)
+            RenderLower(true);
+
     glPopMatrix();
 }
 
-void B9SupportStructure::RenderPartPickGL()
+void B9SupportStructure::RenderPartPickGL(bool renderBottom, bool renderTop)
 {
     //render in global space
     glPushMatrix();
         glTranslatef(instanceParent->GetPos().x(),instanceParent->GetPos().y(),instanceParent->GetPos().z());
 
         //first draw the top
-        if(topAttachShape != NULL)
+        if(topAttachShape != NULL && renderTop)
         {
             glColor3f(1.0f,0.0f,0.0f);
             RenderTopGL();
         }
         //next draw the middle section
-        if(midAttachShape != NULL)
+        if(midAttachShape != NULL && renderTop)
         {
             glColor3f(0.0f,1.0f,0.0f);
             RenderMidGL();
         }
 
         //third draw the base
-        if(bottomAttachShape != NULL)
+        if(bottomAttachShape != NULL && renderBottom)
         {
             glColor3f(0.0f,0.0f,1.0f);
             RenderBottomGL();
@@ -928,15 +945,15 @@ void B9SupportStructure::RenderUpper(bool disableColor, float alpha)
     if(!disableColor)
     {
         if(!isSelected)
-            glColor4f(0.0f,0.7f,0.0f,1.0f);
+            glColor4f(0.0f,0.7f,0.0f,alpha);
         else
-            glColor4f(0.0f,1.0f,1.0f,1.0f);
+            glColor4f(0.0f,1.0f,1.0f,alpha);
 
     }
     if(isErrorGlowing && !disableColor)
     {
         glDisable(GL_LIGHTING);
-        glColor4f(1.0f,0.0f,0.0f,1.0f);
+        glColor4f(1.0f,0.0f,0.0f,alpha);
     }
 
     //first draw the top
@@ -1065,10 +1082,12 @@ void B9SupportStructure::SetVisible(bool vis)
 //is represented by the rendered shapes.
 //similar to instance baking.
 //remember that this function needed to always reflect what render() does but inverted.
-void B9SupportStructure::BakeToInstanceGeometry()
+//returns number of triangles added
+unsigned int B9SupportStructure::BakeToInstanceGeometry()
 {
     unsigned int t;
     unsigned short int v;
+    unsigned int trisAdded = 0;
     Triangle3D* pNewTri;
     QVector3D topScale;
     QVector3D topPos;
@@ -1110,6 +1129,7 @@ void B9SupportStructure::BakeToInstanceGeometry()
 
         //Add To List
         instanceParent->triList.push_back(pNewTri);
+        trisAdded++;
     }
 
     //second bake the middle
@@ -1146,6 +1166,7 @@ void B9SupportStructure::BakeToInstanceGeometry()
 
         //Add To List
         instanceParent->triList.push_back(pNewTri);
+        trisAdded++;
     }
 
     //third bake the bottom
@@ -1182,8 +1203,10 @@ void B9SupportStructure::BakeToInstanceGeometry()
 
         //Add To List
         instanceParent->triList.push_back(pNewTri);
+        trisAdded++;
     }
 
+    return trisAdded;
 }
 
 

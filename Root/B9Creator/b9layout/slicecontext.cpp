@@ -48,7 +48,8 @@ SliceContext::SliceContext(QWidget *parent, B9LayoutProjectData *pmain) : QGLWid
 {
     projectData = pmain;
     pSlice = NULL;
-    this->setAutoBufferSwap(true);
+    this->setAutoBufferSwap(false);//should speed up rendering by avoid buffer flipping.
+                                   //Render to pixmap should not be effected.
 
 }
 SliceContext::~SliceContext()

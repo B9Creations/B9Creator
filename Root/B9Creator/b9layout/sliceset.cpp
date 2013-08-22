@@ -78,7 +78,7 @@ void SliceSet::SetupFutureWorkers()
     if(workerThreads.size() == 0)
     {
         threads = QThread::idealThreadCount();
-        qDebug() << "SliceSet: Ideal Thread Count = " << threads;
+        qDebug() << "SliceSet: Ideal Thread Count: " << threads;
         if(threads == -1)
         {
             threads = 2;
@@ -116,9 +116,6 @@ Slice* SliceSet::ParallelCreateSlices(bool &slicesInTransit, CrushedPrintJob* to
     unsigned int i;
     Slice* pSlice = NULL;
     SliceRequest req;
-    B9LayoutProjectData* projectData = pInstance->pData->pMain->ProjectData();
-    unsigned int xres = projectData->GetResolution().x();
-    unsigned int yres = projectData->GetResolution().y();
     int buzythreads = 0;
     SetupFutureWorkers(); // make sure our thread count matches our cores (recomended core count)
     SetupRasturizer();
@@ -143,12 +140,13 @@ Slice* SliceSet::ParallelCreateSlices(bool &slicesInTransit, CrushedPrintJob* to
                pSlice->inProccessing = true;
                CompressedSlices.push(pSlice);
                workerThreads[i] = QtConcurrent::run(this, &SliceSet::AddSliceToJob, pSlice, toJob);
+
                continue;
            }
         }
 
         //SLICING
-        if(SliceRequests.size() && SlicedSlices.size() < 20)//20 slices max in buffer..
+        if(SliceRequests.size() && SlicedSlices.size() < 20)//19 slices max in buffer..
         {
             req = SliceRequests.front();
             SliceRequests.pop();

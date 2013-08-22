@@ -262,19 +262,23 @@ void B9Print::on_pushButtonPauseResume_clicked()
     }
 }
 
+//callfrom button as well as from b9terminal for various reasons (given by sAbortText)
 void B9Print::on_pushButtonAbort_clicked(QString sAbortText)
 {
     //Prompt the User To Make Sure they want to abort.
-    QMessageBox msgBox;
-    msgBox.setText("Are you sure you want to abort?");
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-    msgBox.setDefaultButton(QMessageBox::No);
-    int ret = msgBox.exec();
+    //only if the USER was the reason for abort...
+    if(sAbortText == "User Directed Abort.")
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Are you sure you want to abort?");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+        msgBox.setDefaultButton(QMessageBox::No);
+        int ret = msgBox.exec();
 
-    if(ret == QMessageBox::No)
-        return;
-
+        if(ret == QMessageBox::No)
+            return;
+    }
 
 
 

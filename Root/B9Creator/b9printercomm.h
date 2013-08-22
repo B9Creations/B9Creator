@@ -244,7 +244,7 @@ private:
     QextSerialEnumerator *pEnumerator;		// enumerator for finding available comm ports
     QList<QextPortInfo> *pPorts;			// list of available comm ports
     QString sNoFirmwareAurdinoPort;         // if we locate an arduino without firmware, set this to the portname as a flag
-    bool m_bCloneBlanks;                    // if false, we will not burn firmware into suspected blank Arduinos
+    bool m_bCloneBlanks;                    // if false, we will not burn firmware into suspected blank Arduinosz
 
     QString m_sSerialString; // Used by ReadAvailable to store current broadcast line
     B9PrinterStatus m_Status;

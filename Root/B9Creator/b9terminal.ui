@@ -1133,6 +1133,13 @@
            </property>
           </widget>
          </item>
+         <item row="6" column="0" colspan="2">
+          <widget class="QPushButton" name="pushButtonFirmwareReset">
+           <property name="text">
+            <string>Reset Firmware Defaults</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -2239,8 +2246,8 @@
    <slot>sendCommand()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>105</x>
-     <y>67</y>
+     <x>168</x>
+     <y>543</y>
     </hint>
     <hint type="destinationlabel">
      <x>221</x>

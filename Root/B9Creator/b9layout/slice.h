@@ -68,6 +68,7 @@ public:
 	int GenerateLoops();
 
     void Render();//OpenGL rendering code - renders the whole slice.
+    void RenderOutlines();
 	void DebugRender(bool normals = true, bool connections = true, bool fills = true, bool outlines = true);//renders with visible debug information
 
 

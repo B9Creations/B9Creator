@@ -40,6 +40,7 @@
 #include <QDir>
 #include <QProcess>
 #include <QTimer>
+#include <QMessageBox>
 #include "b9printercomm.h"
 #include "b9updatemanager.h"
 #include "qextserialport.h"
@@ -326,9 +327,20 @@ void B9PrinterComm::RefreshCommPortItems()
             // We assume this is a new B9Creator and needs firmware!
             // However, we will not upload firmware unless m_bCloneBlanks is true!
             if(m_bCloneBlanks){
-                qDebug() << "\"Clone Firmware\" Option is enabled.  Attempting Firmware Upload to possible B9Creator found on port: "<< sNoFirmwareAurdinoPort;
-                bUpdateFirmware = true;
-                sPortName = sNoFirmwareAurdinoPort;
+                // Ask before we clone...
+                QMessageBox vWarn(QMessageBox::Warning,"Upload Firmware?", "A new B9Creator appears to be connected.  If this is a newly assembled B9Creator and no other Arduino devices are in use then you should upload the firmware.\n\nProcced with Firmware upload?",QMessageBox::Yes|QMessageBox::No);
+                vWarn.setDefaultButton(QMessageBox::No);
+                if(vWarn.exec()==QMessageBox::No){
+                    bUpdateFirmware = false;
+                }
+                else
+                {
+                    //Clone it...
+                    qDebug() << "\"Clone Firmware\" Option is enabled.  Attempting Firmware Upload to possible B9Creator found on port: "<< sNoFirmwareAurdinoPort;
+                    bUpdateFirmware = true;
+                    sPortName = sNoFirmwareAurdinoPort;
+                }
+                m_bCloneBlanks = false;
             }
             else {
                 qDebug() << "\"Clone Firmware\" Option is disabled.  No Firmware upload attempted on possible B9Creator found on port: " << sNoFirmwareAurdinoPort;

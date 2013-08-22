@@ -342,6 +342,27 @@ void Slice::Render()
         }
     }
 }
+void Slice::RenderOutlines()
+{
+    unsigned int s;
+
+
+    for(s = 0; s < segmentList.size();s++)
+    {
+
+        glBegin(GL_LINES);
+
+
+        glVertex2d( segmentList[s]->p1.x(), segmentList[s]->p1.y());
+        glVertex2d( segmentList[s]->p2.x(), segmentList[s]->p2.y());
+
+        glEnd();
+    }
+
+}
+
+
+
 void Slice::DebugRender(bool normals, bool connections, bool fills, bool outlines)
 {
     unsigned int l;

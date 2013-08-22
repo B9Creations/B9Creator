@@ -221,12 +221,12 @@ void B9ModelInstance::SetRot(QVector3D r)
 void B9ModelInstance::SetFlipped(int flipped)
 {
     //ealy out
-    if(flipped != isFlipped)
+    if(flipped != int(isFlipped))
     {
         if(supportStructureList.size())
         {
-            //if(this->rot.x() || this->rot.y())
-            //{
+            if(this->rot.x() || this->rot.y())
+            {
                 QMessageBox msgBox;
                 msgBox.setIcon(QMessageBox::Warning);
                 msgBox.setText("Mirroring will break all supports");
@@ -247,19 +247,18 @@ void B9ModelInstance::SetFlipped(int flipped)
                     RemoveAllSupports();
                     pData->pMain->ExitToolAction();//fixes mouse problem
                 }
-           // }
-            //else//we dont have any x or y rotation so we should be able to mirror supports.
-            //{
-
-
-            //}
+            }
+            else//we dont have any x or y rotation so we should be able to mirror supports.
+            {
+                FlipSupports();
+            }
         }
     }
 
 
     isFlipped = flipped;
 
-    if(flipped == true)
+    if(flipped)
     {
         if(!pData->flippedDispLists.size())
         {
@@ -282,7 +281,6 @@ void B9ModelInstance::SetBounds(QVector3D newmax, QVector3D newmin)
 //pre-move checking callbacks
 bool B9ModelInstance::OnPosChangeRequest(QVector3D deltaPos)
 {
-
 
 
     return true;
@@ -688,10 +686,74 @@ void B9ModelInstance::ScaleSupportPositionsAroundCenter(QVector3D newScale, QVec
 }
 
 //mirrors all supports based on z rotation.
+//wont work with x or y rotation.
 void B9ModelInstance::FlipSupports()
 {
+    unsigned int s;
+    B9SupportStructure* cSprt;
+    QVector3D oldTopLocalPosition;
+    QVector3D oldBottomLocalPosition;
+    QVector3D newTopLocalPosition;
+    QVector3D newBottomLocalPosition;
+    QVector3D TopNorm;
+    QVector3D BottomNorm;
 
 
+    QVector3D mirrorVec(0,1,0);
+    RotateVector(mirrorVec,this->rot.z(),QVector3D(0,0,1));
+    QVector3D flipVec(0,1,0);
+    RotateVector(flipVec,this->rot.z()-90,QVector3D(0,0,1));
+
+    double side;
+    double distToPlane;
+
+    for(s = 0; s < supportStructureList.size(); s++)
+    {
+        cSprt = supportStructureList[s];
+
+        //top
+        oldTopLocalPosition = cSprt->GetTopPoint();
+        distToPlane = QVector3D().distanceToLine(QVector2D(oldTopLocalPosition),mirrorVec);
+        side = QVector3D::crossProduct(mirrorVec,QVector2D(oldTopLocalPosition).normalized()).z();
+        if(side < 0) side = -1.0;
+        else side = 1.0;
+        newTopLocalPosition = oldTopLocalPosition + side*2.0*distToPlane*flipVec;
+
+        //bottom
+        oldBottomLocalPosition = cSprt->GetBottomPoint();
+        distToPlane = QVector3D().distanceToLine(QVector2D(oldBottomLocalPosition),mirrorVec);
+        side = QVector3D::crossProduct(mirrorVec,QVector2D(oldBottomLocalPosition).normalized()).z();
+        if(side < 0) side = -1.0;
+        else side = 1.0;
+        newBottomLocalPosition = oldBottomLocalPosition + side*2.0*distToPlane*flipVec;
+
+
+        //topnorm
+        TopNorm = cSprt->GetTopNormal();
+        distToPlane = QVector3D().distanceToLine(QVector2D(TopNorm),mirrorVec);
+        side = QVector3D::crossProduct(mirrorVec,QVector2D(TopNorm).normalized()).z();
+        if(side < 0) side = -1.0;
+        else side = 1.0;
+        TopNorm = TopNorm + side*distToPlane*2.0*flipVec;
+        TopNorm.normalize();
+
+
+        //bottomnorm
+        BottomNorm = cSprt->GetBottomNormal();
+        distToPlane = QVector3D().distanceToLine(QVector2D(BottomNorm),mirrorVec);
+        side = QVector3D::crossProduct(mirrorVec,QVector2D(BottomNorm).normalized()).z();
+        if(side < 0) side = -1.0;
+        else side = 1.0;
+        BottomNorm = BottomNorm + side*distToPlane*2.0*flipVec;
+        BottomNorm.normalize();
+
+        //set new values.
+        cSprt->SetTopPoint(newTopLocalPosition);
+        cSprt->SetBottomPoint(newBottomLocalPosition);
+
+        cSprt->SetTopNormal(TopNorm);
+        cSprt->SetBottomNormal(BottomNorm);
+    }
 }
 
 
@@ -726,7 +788,7 @@ void B9ModelInstance::HideSupports()
 void B9ModelInstance::RenderGL(bool disableColor)
 {
     unsigned int ls;
-    unsigned int s;
+
 
 	//do a smooth visual transition.
 	visualcolor.setRedF(visualcolor.redF() + (currcolor.redF() - visualcolor.redF())/2.0);
@@ -759,7 +821,7 @@ void B9ModelInstance::RenderGL(bool disableColor)
 
 
 }
-void B9ModelInstance::RenderSupportsGL(bool solidColor, float alpha)
+void B9ModelInstance::RenderSupportsGL(bool solidColor, float topAlpha, float bottomAlpha)
 {
     //lets also render all the supports.
     //since supports are defined as offsets from the global center of an instance
@@ -769,13 +831,55 @@ void B9ModelInstance::RenderSupportsGL(bool solidColor, float alpha)
         glTranslatef(pos.x(),pos.y(),pos.z());
         for(s = 0; s < supportStructureList.size(); s++)
         {
-            supportStructureList[s]->RenderUpper(solidColor, alpha);
+
+            supportStructureList[s]->RenderUpper(solidColor, topAlpha);
         }
         for(s = 0; s < supportStructureList.size(); s++)
         {
-            supportStructureList[s]->RenderLower(solidColor, alpha);
+
+            supportStructureList[s]->RenderLower(solidColor, bottomAlpha);
         }
-        if(basePlateSupport) basePlateSupport->RenderLower(solidColor, alpha);
+        if(basePlateSupport) basePlateSupport->RenderLower(solidColor, bottomAlpha);
+    glPopMatrix();
+}
+
+void B9ModelInstance::renderSupportGL(B9SupportStructure* pSup, bool solidColor, float topAlpha, float bottomAlpha)
+{
+    glPushMatrix();
+        glTranslatef(pos.x(),pos.y(),pos.z());
+
+            pSup->RenderUpper(solidColor, topAlpha);
+            pSup->RenderLower(solidColor, bottomAlpha);
+
+    glPopMatrix();
+}
+
+
+//renders just lines for support tips.
+void B9ModelInstance::RenderSupportsTipsGL()
+{
+    unsigned int s;
+    B9SupportStructure* pSup;
+    glPushMatrix();
+        glTranslatef(pos.x(),pos.y(),pos.z());
+        for(s = 0; s < supportStructureList.size(); s++)
+        {
+            pSup = supportStructureList[s];
+            glBegin(GL_LINES);
+
+                glVertex3f(pSup->GetTopPoint().x(),pSup->GetTopPoint().y(),pSup->GetTopPoint().z());
+                glVertex3f(pSup->GetTopPivot().x(),pSup->GetTopPivot().y(),pSup->GetTopPivot().z());
+
+                glVertex3f(pSup->GetTopPivot().x(),pSup->GetTopPivot().y(),pSup->GetTopPivot().z());
+                glVertex3f(pSup->GetBottomPivot().x(),pSup->GetBottomPivot().y(),pSup->GetBottomPivot().z());
+
+
+                glVertex3f(pSup->GetBottomPivot().x(),pSup->GetBottomPivot().y(),pSup->GetBottomPivot().z());
+                glVertex3f(pSup->GetBottomPoint().x(),pSup->GetBottomPoint().y(),pSup->GetBottomPoint().z());
+
+            glEnd();
+        }
+
     glPopMatrix();
 }
 
@@ -820,6 +924,8 @@ void B9ModelInstance::RenderPickGL()
 //This Function is slower because it does not use a display list.
 //there is a 16 million + sum triangle limit before overflow...
 //assumes the instance is baked and uses the baked triangles;
+//subtract tris if for skipping the last triangles in the baked triangle list
+//(usefull for support mode)
 bool B9ModelInstance::FormTriPickDispLists()
 {
     unsigned char r = 1;
@@ -915,7 +1021,6 @@ void B9ModelInstance::RenderTrianglePickGL()
     unsigned int t;
     unsigned int i;
 
-    glDisable(GL_CULL_FACE);//drawing backside
     if(triPickDispLists.size())
     {
         for(i = 0; i < triPickDispLists.size(); i++)
@@ -947,7 +1052,6 @@ void B9ModelInstance::RenderTrianglePickGL()
         }
         glEnd();
     }
-    glEnable(GL_CULL_FACE);
 }
 
 
@@ -1046,10 +1150,7 @@ void B9ModelInstance::BakeGeometry(bool withsupports)
 {
     unsigned long int t;
     unsigned short int v;
-    unsigned int s;
     Triangle3D* pNewTri;
-    Triangle3D* pCurTri;
-    B9SupportStructure* pSup;
 
 	UnBakeGeometry();
 	
@@ -1059,7 +1160,6 @@ void B9ModelInstance::BakeGeometry(bool withsupports)
 
     //since this function is usually where the user is waiting, put up wait cursor.
     Enable_User_Waiting_Cursor();
-
 
 
 	//copy the triangles from pData into the list with transforms applied
@@ -1127,17 +1227,33 @@ void B9ModelInstance::BakeGeometry(bool withsupports)
         triList.push_back(pNewTri);
 	}
 
-    //baking supports as well
+    //Bake Supports as well if that flag is set.
     if(withsupports)
+    AddSupportsToBake(true);
+
+    //qDebug() << "Baked instance";
+    Disable_User_Waiting_Cursor();
+}
+
+//returns number of triangles added
+unsigned int B9ModelInstance::AddSupportsToBake(bool recompBounds)
+{
+    unsigned int s, t;
+    unsigned int trisAdded = 0;
+    B9SupportStructure* pSup;
+    Triangle3D* pCurTri;
+
+    for(s = 0; s < supportStructureList.size(); s++)//for each support
     {
-        for(s = 0; s < supportStructureList.size(); s++)//for each support
-        {
-            pSup = supportStructureList[s];
-            pSup->BakeToInstanceGeometry();
-        }
+        pSup = supportStructureList[s];
+        trisAdded += pSup->BakeToInstanceGeometry();
+    }
 
-        if(basePlateSupport) basePlateSupport->BakeToInstanceGeometry();
+    if(basePlateSupport)
+        trisAdded += basePlateSupport->BakeToInstanceGeometry();
 
+    if(recompBounds)
+    {
         //since we are adding supports too we need to re-compute instance bounds
         for(t = 0; t < triList.size(); t++)
         {
@@ -1158,9 +1274,10 @@ void B9ModelInstance::BakeGeometry(bool withsupports)
                 this->minbound.setZ(pCurTri->minBound.z());
         }
     }
-    qDebug() << "Baked instance";
-    Disable_User_Waiting_Cursor();
+
+    return trisAdded;
 }
+
 void B9ModelInstance::UnBakeGeometry()
 {
     if(!triList.size())
@@ -1171,7 +1288,7 @@ void B9ModelInstance::UnBakeGeometry()
         delete triList[i];
     }
     triList.clear();
-    qDebug() << "Unbaked instance";
+    //qDebug() << "Unbaked instance";
 }
 void B9ModelInstance::UpdateBounds()
 {

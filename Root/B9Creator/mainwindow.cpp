@@ -42,6 +42,7 @@
 #include "b9printermodelmanager.h"
 #include "b9updatemanager.h"
 #include "b9supportstructure.h"
+#include "b9layout/b9layoutprojectdata.h"
 #include <QDebug>
 
 #define B9CVERSION "Version 1.5.5     Copyright 2013 B9Creations, LLC     www.b9creator.com\n "
@@ -255,6 +256,16 @@ void MainWindow::CheckForUpdates()
 {
     m_pUpdateManager->PromptDoUpdates();
 }
+void MainWindow::OpenLayoutFile(QString file)
+{
+    showLayout();
+    pMW1->ProjectData()->Open(file);
+}
+void MainWindow::OpenJobFile(QString file)
+{
+    AttemptPrintDialogWithFile(file);
+}
+
 
 void MainWindow::on_commandLayout_clicked(bool checked)
 {
@@ -283,14 +294,22 @@ void MainWindow::on_commandEdit_clicked(bool checked)
 
 void MainWindow::on_commandPrint_clicked()
 {
-    /////////////////////////////////////////////////
-    // Open the .b9j file
-    m_pCPJ->clearAll();
     QFileDialog dialog(0);
     QSettings settings;
     QString openFile = dialog.getOpenFileName(this,"Select a B9Creator Job File to print", settings.value("WorkingDir").toString(), tr("B9Creator Job Files (*.b9j)"));
     if(openFile.isEmpty()) return;
     settings.setValue("WorkingDir", QFileInfo(openFile).absolutePath());
+
+    AttemptPrintDialogWithFile(openFile);
+
+}
+
+void MainWindow::AttemptPrintDialogWithFile(QString openFile)
+{
+    /////////////////////////////////////////////////
+    // Open the .b9j file
+    m_pCPJ->clearAll();
+
     QFile file(openFile);
     if(!m_pCPJ->loadCPJ(&file)) {
         QMessageBox msgBox;
@@ -316,10 +335,10 @@ void MainWindow::on_commandPrint_clicked()
     m_pPrintPrep = new DlgPrintPrep(m_pCPJ, pTerminal, this);
     connect (m_pPrintPrep, SIGNAL(accepted()),this,SLOT(doPrint()));
     m_pPrintPrep->exec();
-
-
-
 }
+
+
+
 
 void MainWindow::doPrint()
 {

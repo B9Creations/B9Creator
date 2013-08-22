@@ -110,6 +110,7 @@ public slots:
     void dlgEditMatCat();
     void dlgEditPrinterCycleSettings();
 
+    void rcResetFirmwareDefaults();
     void rcResetHomePos();
     void rcSendCmd(QString sCmd);
     void rcResetCurrentPositionPU(int iCurPos);
@@ -160,6 +161,7 @@ private slots:
 
 
     void on_pushButtonProjPower_toggled(bool checked);  //Remote slot for turning projector on/off
+    void on_pushButtonFirmwareReset_clicked(); // Remote slot for commanding Reset of firmware defaults
     void on_pushButtonCmdReset_clicked(); // Remote slot for commanding Reset (find home) motion
     void sendCommand();
     void setProjectorPowerCmd(bool bPwrFlag); // call to send projector power on/off command

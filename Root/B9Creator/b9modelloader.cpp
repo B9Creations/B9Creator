@@ -135,6 +135,8 @@ QString B9ModelLoader::DetermineFileType(QString filename, bool &readyRead)
         readyRead = false;//TODO AMF NOT IMPLEMENTED...
         return "UNCOMPRESSED_AMF";
     }
+
+    return "";
 }
 
 
@@ -387,6 +389,8 @@ float B9ModelLoader::GetPercentDone()
     {
         //amf percentage
     }
+
+    return 0.0;
 }
 
 

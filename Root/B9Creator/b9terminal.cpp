@@ -461,6 +461,21 @@ void B9Terminal::onBC_ProjStatusChanged()
 }
 
 
+void B9Terminal::on_pushButtonFirmwareReset_clicked()
+{
+    QMessageBox vWarn(QMessageBox::Warning,"Reset Firmware Default Values?","This will change the firmware's persistent values back to defaults for version 1.1 hardware.\n\n Reset firmware variables?",QMessageBox::Ok|QMessageBox::Cancel);
+    vWarn.setDefaultButton(QMessageBox::Cancel);
+    if(vWarn.exec()==QMessageBox::Cancel) return;
+    pPrinterComm->SendCmd("H1024");
+    pPrinterComm->SendCmd("I768");
+    pPrinterComm->SendCmd("Q5000");
+    pPrinterComm->SendCmd("T0");
+    pPrinterComm->SendCmd("U100");
+    pPrinterComm->SendCmd("Y8135");
+    pPrinterComm->SendCmd("$2000");
+    pPrinterComm->SendCmd("A");
+}
+
 void B9Terminal::on_pushButtonCmdReset_clicked()
 {
     int iTimeoutEstimate = 80000; // 80 seconds (should never take longer than 75 secs from upper limit)
@@ -831,6 +846,10 @@ void B9Terminal::SetCycleParameters(){
 
 void B9Terminal::rcProjectorPwr(bool bPwrOn){
     on_pushButtonProjPower_toggled(bPwrOn);
+}
+
+void B9Terminal::rcResetFirmwareDefaults(){
+    on_pushButtonFirmwareReset_clicked();
 }
 
 void B9Terminal::rcResetHomePos(){
