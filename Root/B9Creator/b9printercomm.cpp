@@ -358,6 +358,7 @@ void B9PrinterComm::RefreshCommPortItems()
                 delete m_serialDevice;
 
             }
+            m_bCloneBlanks = false;
             m_serialDevice = NULL;
             m_Status.reset();
         }
