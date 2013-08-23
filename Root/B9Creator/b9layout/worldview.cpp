@@ -1355,7 +1355,7 @@ void WorldView::OnToolReleaseAction(QString tool, QMouseEvent* event)
 void WorldView::OnToolHoverMove(QString tool, QMouseEvent* event)
 {
     B9ModelInstance* pInst;
-    if(tool == "SUPPORTADD")
+    if(tool == "SUPPORTADD" || tool == "SUPPORTMODIFY")
     {
        if(!pMain->SupportModeInst())
             return;
@@ -1868,7 +1868,7 @@ void WorldView::UpdateVisSlice()
 {
 
     B9ModelInstance* pInst;
-    if(currtool != "SUPPORTADD" || !pMain->ContourAidEnabled())
+    if((currtool != "SUPPORTADD" && currtool != "SUPPORTMODIFY") || !pMain->ContourAidEnabled())
     {
         if(pVisSlice)
             delete pVisSlice;
