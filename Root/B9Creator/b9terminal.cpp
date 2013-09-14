@@ -906,7 +906,14 @@ void B9Terminal::rcFinishPrint(double dDeltaMM)
     // Calculates final position based on current + dDeltaMM
     int newPos = dDeltaMM*100000.0/(double)pPrinterComm->getPU();
     newPos += ui->lineEditCurZPosInPU->text().toInt();
-    if(newPos>ui->lineEditUpperZLimPU->text().toInt())newPos = ui->lineEditUpperZLimPU->text().toInt();
+    int curPos = ui->lineEditCurZPosInPU->text().toInt();
+    int upperLim = ui->lineEditUpperZLimPU->text().toInt();
+
+    if(curPos >= upperLim)
+        newPos = curPos;
+    else if(newPos > upperLim)
+        newPos = upperLim;
+
     setTgtAltitudePU(newPos);
     on_pushButtonPrintFinal_clicked();
 }

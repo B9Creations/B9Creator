@@ -48,7 +48,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideRight</enum>
@@ -84,89 +84,143 @@
           <property name="flat">
            <bool>true</bool>
           </property>
-          <layout class="QGridLayout" name="gridLayout">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Pixel Size(µm):</string>
-             </property>
-            </widget>
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <item>
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>Pixel Size(µm):</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QComboBox" name="pixelsizecombo">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="contextMenuPolicy">
+                <enum>Qt::DefaultContextMenu</enum>
+               </property>
+               <property name="toolTip">
+                <string>X Y Pixel dimensions as determined by printer calibration</string>
+               </property>
+               <property name="whatsThis">
+                <string>X Y Pixel dimensions as determined by printer calibration</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>50</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>75</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>100</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>Projector Resolution:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="projectorcombo">
+               <property name="toolTip">
+                <string>Printer projector's native resolution</string>
+               </property>
+               <property name="whatsThis">
+                <string>Printer projector's native resolution</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>(XGA) 1024x768</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>(SXGA) 1280x1024</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>(1080p) 1920x1080</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>(WUXGA) 1920x1200</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>(QXGA) 2048x1536</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>Projector Resolution:</string>
-             </property>
-            </widget>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_30">
+             <item>
+              <widget class="QLabel" name="label_35">
+               <property name="text">
+                <string>Build Table Area(mm):     X:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="Print_Extents_X">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_33">
+               <property name="text">
+                <string>Y:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="Print_Extents_Y">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
-           <item row="1" column="1">
-            <widget class="QComboBox" name="projectorcombo">
-             <property name="toolTip">
-              <string>Printer projector's native resolution</string>
-             </property>
-             <property name="whatsThis">
-              <string>Printer projector's native resolution</string>
-             </property>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_31">
              <item>
-              <property name="text">
-               <string>(XGA) 1024x768</string>
-              </property>
+              <widget class="QLabel" name="label_36">
+               <property name="text">
+                <string>Build Table Height(mm):</string>
+               </property>
+              </widget>
              </item>
              <item>
-              <property name="text">
-               <string>(SXGA) 1280x1024</string>
-              </property>
+              <widget class="QLineEdit" name="Print_Extents_Z">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
              </item>
-             <item>
-              <property name="text">
-               <string>(1080p) 1920x1080</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>(WUXGA) 1920x1200</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>(QXGA) 2048x1536</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QComboBox" name="pixelsizecombo">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="contextMenuPolicy">
-              <enum>Qt::DefaultContextMenu</enum>
-             </property>
-             <property name="toolTip">
-              <string>X Y Pixel dimensions as determined by printer calibration</string>
-             </property>
-             <property name="whatsThis">
-              <string>X Y Pixel dimensions as determined by printer calibration</string>
-             </property>
-             <item>
-              <property name="text">
-               <string>50</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>75</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>100</string>
-              </property>
-             </item>
-            </widget>
+            </layout>
            </item>
           </layout>
          </widget>
@@ -1294,7 +1348,7 @@
      <x>0</x>
      <y>0</y>
      <width>1600</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -2029,8 +2083,8 @@
    <slot>DeleteSelectedInstances()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>289</x>
-     <y>179</y>
+     <x>388</x>
+     <y>298</y>
     </hint>
     <hint type="destinationlabel">
      <x>6</x>
@@ -2045,8 +2099,8 @@
    <slot>AddModel()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>45</x>
-     <y>179</y>
+     <x>68</x>
+     <y>298</y>
     </hint>
     <hint type="destinationlabel">
      <x>3</x>
@@ -2061,8 +2115,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
-     <y>568</y>
+     <x>386</x>
+     <y>557</y>
     </hint>
     <hint type="destinationlabel">
      <x>317</x>
@@ -2077,8 +2131,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>171</x>
-     <y>568</y>
+     <x>267</x>
+     <y>557</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
@@ -2093,8 +2147,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>48</x>
-     <y>568</y>
+     <x>94</x>
+     <y>557</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
@@ -2125,8 +2179,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>48</x>
-     <y>673</y>
+     <x>94</x>
+     <y>681</y>
     </hint>
     <hint type="destinationlabel">
      <x>316</x>
@@ -2141,8 +2195,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>171</x>
-     <y>673</y>
+     <x>267</x>
+     <y>681</y>
     </hint>
     <hint type="destinationlabel">
      <x>320</x>
@@ -2157,8 +2211,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>293</x>
-     <y>673</y>
+     <x>386</x>
+     <y>681</y>
     </hint>
     <hint type="destinationlabel">
      <x>312</x>
@@ -2189,8 +2243,8 @@
    <slot>SetProjectorPreset(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>164</x>
-     <y>122</y>
+     <x>332</x>
+     <y>155</y>
     </hint>
     <hint type="destinationlabel">
      <x>312</x>
@@ -2205,8 +2259,8 @@
    <slot>SetXYPixelSizePreset(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>164</x>
-     <y>96</y>
+     <x>332</x>
+     <y>125</y>
     </hint>
     <hint type="destinationlabel">
      <x>314</x>
@@ -2221,8 +2275,8 @@
    <slot>DuplicateSelection()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>168</x>
-     <y>179</y>
+     <x>269</x>
+     <y>298</y>
     </hint>
     <hint type="destinationlabel">
      <x>111</x>
@@ -2301,8 +2355,8 @@
    <slot>OnSupport_Bottom_AttachType_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>505</y>
+     <x>366</x>
+     <y>443</y>
     </hint>
     <hint type="destinationlabel">
      <x>590</x>
@@ -2317,8 +2371,8 @@
    <slot>OnSupport_Bottom_Radius_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>533</y>
+     <x>365</x>
+     <y>476</y>
     </hint>
     <hint type="destinationlabel">
      <x>361</x>
@@ -2333,8 +2387,8 @@
    <slot>OnSupport_Bottom_Length_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>561</y>
+     <x>365</x>
+     <y>510</y>
     </hint>
     <hint type="destinationlabel">
      <x>539</x>
@@ -2349,8 +2403,8 @@
    <slot>OnSupport_Bottom_AngleFactor_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
-     <y>615</y>
+     <x>348</x>
+     <y>578</y>
     </hint>
     <hint type="destinationlabel">
      <x>366</x>
@@ -2365,8 +2419,8 @@
    <slot>OnSupport_Bottom_Penetration_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
-     <y>588</y>
+     <x>348</x>
+     <y>544</y>
     </hint>
     <hint type="destinationlabel">
      <x>600</x>
@@ -2413,8 +2467,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>191</x>
-     <y>608</y>
+     <x>251</x>
+     <y>604</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
@@ -2429,8 +2483,8 @@
    <slot>PushTranslations()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>51</x>
-     <y>608</y>
+     <x>97</x>
+     <y>604</y>
     </hint>
     <hint type="destinationlabel">
      <x>312</x>
@@ -2461,8 +2515,8 @@
    <slot>OnModelSpinSliderChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>123</x>
-     <y>634</y>
+     <x>245</x>
+     <y>637</y>
     </hint>
     <hint type="destinationlabel">
      <x>313</x>
@@ -2477,8 +2531,8 @@
    <slot>OnModelSpinSliderReleased()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>123</x>
-     <y>634</y>
+     <x>245</x>
+     <y>637</y>
     </hint>
     <hint type="destinationlabel">
      <x>312</x>
@@ -2493,8 +2547,8 @@
    <slot>OnSupport_Top_AttachType_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>141</x>
-     <y>485</y>
+     <x>155</x>
+     <y>417</y>
     </hint>
     <hint type="destinationlabel">
      <x>419</x>
@@ -2509,8 +2563,8 @@
    <slot>OnSupport_Top_Radius_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>141</x>
-     <y>489</y>
+     <x>154</x>
+     <y>422</y>
     </hint>
     <hint type="destinationlabel">
      <x>414</x>
@@ -2525,8 +2579,8 @@
    <slot>OnSupport_Top_Length_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>141</x>
-     <y>492</y>
+     <x>154</x>
+     <y>426</y>
     </hint>
     <hint type="destinationlabel">
      <x>416</x>
@@ -2541,8 +2595,8 @@
    <slot>OnSupport_Top_Penetration_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>129</x>
-     <y>496</y>
+     <x>137</x>
+     <y>430</y>
     </hint>
     <hint type="destinationlabel">
      <x>415</x>
@@ -2557,8 +2611,8 @@
    <slot>OnSupport_Top_AngleFactor_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>129</x>
-     <y>499</y>
+     <x>139</x>
+     <y>433</y>
     </hint>
     <hint type="destinationlabel">
      <x>419</x>
@@ -2573,8 +2627,8 @@
    <slot>OnSupport_Mid_AttachType_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>141</x>
-     <y>485</y>
+     <x>155</x>
+     <y>417</y>
     </hint>
     <hint type="destinationlabel">
      <x>417</x>
@@ -2589,8 +2643,8 @@
    <slot>OnSupport_Mid_Radius_Changed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>141</x>
-     <y>490</y>
+     <x>154</x>
+     <y>424</y>
     </hint>
     <hint type="destinationlabel">
      <x>418</x>
@@ -2605,8 +2659,8 @@
    <slot>MakeSelectedSupportsVertical()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>204</x>
-     <y>705</y>
+     <x>210</x>
+     <y>684</y>
     </hint>
     <hint type="destinationlabel">
      <x>411</x>
@@ -2637,8 +2691,8 @@
    <slot>ResetSupportLight()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>144</x>
-     <y>737</y>
+     <x>156</x>
+     <y>727</y>
     </hint>
     <hint type="destinationlabel">
      <x>413</x>
@@ -2653,8 +2707,8 @@
    <slot>ResetSupportMedium()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>243</x>
-     <y>729</y>
+     <x>268</x>
+     <y>727</y>
     </hint>
     <hint type="destinationlabel">
      <x>548</x>
@@ -2685,8 +2739,8 @@
    <slot>MakeSelectedSupportsStraight()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>325</x>
-     <y>695</y>
+     <x>381</x>
+     <y>684</y>
     </hint>
     <hint type="destinationlabel">
      <x>412</x>
@@ -2717,8 +2771,8 @@
    <slot>OnBasePlatePropertiesChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>273</x>
-     <y>107</y>
+     <x>309</x>
+     <y>134</y>
     </hint>
     <hint type="destinationlabel">
      <x>412</x>
@@ -2733,8 +2787,8 @@
    <slot>OnBasePlatePropertiesChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>337</x>
-     <y>133</y>
+     <x>354</x>
+     <y>163</y>
     </hint>
     <hint type="destinationlabel">
      <x>410</x>
@@ -2749,8 +2803,8 @@
    <slot>OnBasePlatePropertiesChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>155</x>
-     <y>159</y>
+     <x>303</x>
+     <y>197</y>
     </hint>
     <hint type="destinationlabel">
      <x>413</x>
@@ -2864,5 +2918,6 @@
   <slot>OnToggleContourAid(bool)</slot>
   <slot>OnToggleXRay(bool)</slot>
   <slot>OnToggleSupportHiding(bool)</slot>
+  <slot>UpdateInterface()</slot>
  </slots>
 </ui>

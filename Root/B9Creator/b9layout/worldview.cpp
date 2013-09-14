@@ -544,8 +544,9 @@ void  WorldView::DrawVisualSlice()
     if(pVisSlice == NULL)
         return;
 
+    if(supportAlpha < 0.5)
+        glDisable(GL_DEPTH_TEST);
 
-    //glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
 
     glPushMatrix();
@@ -555,7 +556,9 @@ void  WorldView::DrawVisualSlice()
 
 
     glPopMatrix();
-    //glEnable(GL_DEPTH_TEST);
+
+    if(supportAlpha < 0.5)
+        glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
 }
 
@@ -1561,6 +1564,7 @@ QVector3D WorldView::Get3DCursorOnScreen(QPoint screenPos, QVector3D hintPos, do
         glColor3f(1.0f,0.0f,0.0f);
         glVertex3f( firstPassPos.x() - buildsizex*2*0.039063*0.5, firstPassPos.y() + buildsizey*2*0.039063*0.5, 0);
     glEnd();
+
     //re-read pixels for second pass
     glReadPixels(screenPos.x(), this->height() - screenPos.y(), 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
     glPopMatrix();

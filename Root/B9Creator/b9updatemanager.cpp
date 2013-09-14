@@ -547,6 +547,7 @@ void B9UpdateManager::PromptDoUpdates(bool showCheckingBar, bool promptLocalLoca
         QString path = QFileDialog::getExistingDirectory(NULL,
                        "Locate the B9Creator Update Pack Folder",
                        CROSS_OS_GetDirectoryFromLocationTag("DOCUMENTS_DIR"));
+        qDebug() << "Opening Update Pack: " << path;
         if(path.isEmpty())
             return;
 

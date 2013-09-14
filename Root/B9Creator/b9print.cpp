@@ -453,7 +453,7 @@ void B9Print::exposureOfTOverLayersFinished(){
         ui->pushButtonAbort->setEnabled(false);
         ui->pushButtonPauseResume->setEnabled(false);
         m_iPrintState=PRINT_DONE;
-        m_pTerminal->rcFinishPrint(25.4); //Finish at current z position + 25.4 mm, turn Projector Off
+        m_pTerminal->rcFinishPrint(50.8); //Finish at current z position + 50.8 mm, turn Projector Off
         ui->lineEditLayerCount->setText("Finished!");
         setProjMessage("Finished!");
         return;

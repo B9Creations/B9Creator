@@ -293,12 +293,14 @@ void B9Layout::SetXYPixelSizePreset(QString size)
 {
 	project->SetPixelSize(size.toDouble());
 	project->CalculateBuildArea();
+    UpdateExtentsUI();
 }
 
 void B9Layout::SetZLayerThickness(QString thick)
 {
 	project->SetPixelThickness(thick.toDouble());
 	project->CalculateBuildArea();
+    UpdateExtentsUI();
 }
 
 void B9Layout::SetProjectorX(QString x)
@@ -344,6 +346,7 @@ void B9Layout::SetProjectorPreset(int index)
             break;
 
     }
+    UpdateExtentsUI();
 
 }
 
@@ -389,6 +392,18 @@ void B9Layout::UpdateBuildSpaceUI()
     ui.projectorcombo->setCurrentIndex(proi);
 
 }
+
+
+void B9Layout::UpdateExtentsUI()
+{
+
+    ui.Print_Extents_X->setText(QString::number(ProjectData()->GetBuildSpace().x(),'g',4));
+    ui.Print_Extents_Y->setText(QString::number(ProjectData()->GetBuildSpace().y(),'g',4));
+    ui.Print_Extents_Z->setText(QString::number(ProjectData()->GetBuildSpace().z(),'g',4));
+
+}
+
+
 
 
 void B9Layout::BuildInterface()
@@ -538,9 +553,9 @@ void B9Layout::UpdateInterface()
         ui.TabWidget->blockSignals(false);
 
         B9ModelInstance* inst = FindInstance(ui.ModelList->selectedItems()[0]);
-        ui.posx->setText(QString().number(inst->GetPos().x()));
-		ui.posy->setText(QString().number(inst->GetPos().y()));
-		ui.posz->setText(QString().number(inst->GetPos().z()));
+        ui.posx->setText(QString().number(inst->GetPos().x(),'f',2));
+        ui.posy->setText(QString().number(inst->GetPos().y(),'f',2));
+        ui.posz->setText(QString().number(inst->GetMinBound().z(),'f',2));
 		
         ui.rotz->setText(QString().number(inst->GetRot().z()));
         ui.rotx->setText(QString().number(inst->GetRot().x()));
@@ -592,10 +607,6 @@ void B9Layout::UpdateInterface()
             if(weight == "LIGHT") ui.Support_Reset_Light_button->setChecked(true);
             if(weight == "MEDIUM") ui.Support_Reset_Medium_button->setChecked(true);
             if(weight == "HEAVY") ui.Support_Reset_Heavy_button->setChecked(true);
-
-
-
-
         }
 
         if(pWorldView->GetTool() == "SUPPORTDELETE")
@@ -637,6 +648,9 @@ void B9Layout::UpdateInterface()
         ui.xRayToolBar->hide();
         ui.actionX_Ray_Vision->setEnabled(false);
         ui.actionHide_Supports->setEnabled(false);
+
+        UpdateExtentsUI();
+
     }
 }
 void B9Layout::PushTranslations()
@@ -1082,6 +1096,7 @@ void B9Layout::DeSelectAll()
 		}
 	}
 }
+
 void B9Layout::SetSelectionPos(double x, double y, double z, int axis)
 {
     int i;
@@ -1095,7 +1110,7 @@ void B9Layout::SetSelectionPos(double x, double y, double z, int axis)
         else if(axis==2)
             inst->SetPos(QVector3D(inst->GetPos().x(),y,inst->GetPos().z()));
         else if(axis==3)
-            inst->SetPos(QVector3D(inst->GetPos().x(),inst->GetPos().y(),z));
+            inst->SetPos(QVector3D(inst->GetPos().x(),inst->GetPos().y(),z + inst->GetPos().z() - inst->GetMinBound().z()));
     }
 }
 void B9Layout::SetSelectionRot(QVector3D newRot)

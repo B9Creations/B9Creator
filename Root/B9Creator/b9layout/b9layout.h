@@ -88,7 +88,7 @@ public slots:
     void SetZHeight(QString z);
     void SetAttachmentSurfaceThickness(QString num);
     void UpdateBuildSpaceUI();
-
+    void UpdateExtentsUI();
 
     void BuildInterface();
 

@@ -161,8 +161,7 @@ QString CROSS_OS_GetDirectoryFromLocationTag(QString locationtag)
         QDir().mkpath(QDesktopServices::storageLocation(QDesktopServices::TempLocation) + "/B9Creator");
     #endif
     #ifdef Q_OS_LINUX
-        QDir().mkpath(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
-        QDir().mkpath(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation) + "/B9Creator");
+         QDir().mkpath(QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation) + "/B9Creator");
         QDir().mkpath(QDesktopServices::storageLocation(QDesktopServices::TempLocation) + "/B9Creator");
     #endif
 
@@ -180,17 +179,12 @@ QString CROSS_OS_GetDirectoryFromLocationTag(QString locationtag)
             dir = recources.path();
         #endif
         #ifdef Q_OS_LINUX
-            dir = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+            dir = QCoreApplication::applicationDirPath();
         #endif
     }
     if(locationtag == "EXECUTABLE_DIR")
     {
-        #ifdef Q_OS_LINUX
-            dir = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-        #else
-            dir = QCoreApplication::applicationDirPath();
-        #endif
-
+        dir = QCoreApplication::applicationDirPath();
     }
     if(locationtag == "TEMP_DIR")
     {
