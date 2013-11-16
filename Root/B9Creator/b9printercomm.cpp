@@ -209,7 +209,7 @@ void B9PrinterComm::watchDog()
     int iTimeLimit = 10000;
     if(m_Status.getHomeStatus() == B9PrinterStatus::HS_SEEKING) iTimeLimit = 90000;
 
-    if( m_serialDevice != NULL && m_Status.getLastMsgElapsedTime() <= iTimeLimit){
+    if( m_serialDevice != NULL && (m_Status.getLastMsgElapsedTime() <= iTimeLimit || m_Status.getLastMsgElapsedTime()>120000)){
         // Still in Contact with the B9Creator
         startWatchDogTimer();
         emit updateConnectionStatus(MSG_CONNECTED);

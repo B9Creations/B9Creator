@@ -1,16 +1,14 @@
-//v1.5.6 Change Log
+//v1.5.7 Change Log
+-Some system clock resets were causing rare, random, "lost comm" printing aborts - fixed.
 
+//v1.5.6 Change Log
 -Build Table now raises 2" after print finishes (previously only 1").
 -Fixed bug that may have lowered table after print finished, when near upper limit.
 -Fixed linux auto-update not working.
 -Model Position is now relative to bottom of model
 -Added Build Table Area and Height information to layout.
-
 -Max attach layer cure time increased to 6 minutes.
-
 -Contour visual aid now renders above transparent support bases.
-
-
 
 //v1.5.5 Change Log
 -Slicer now supports multi-threading!!!!
