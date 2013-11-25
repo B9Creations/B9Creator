@@ -993,12 +993,12 @@ int B9Terminal::getEstCompleteTimeMS(int iCurLayer, int iTotLayers, double dLaye
 
 int B9Terminal::getZMoveTime(int iDelta, int iSpd){
     // returns time to travel iDelta PUs distance in milliseconds
-    // Accurate but assumes that 100% is 140rpm and 0% is 10rpm
+    // Accurate but assumes that 100% is 130rpm and 0% is 50rpm
     // Also assumes 200 PU (Steps) per revolution
     // returns milliseconds required to move iDelta PU's
     if(iDelta==0)return 0;
     double dPUms; // printer units per millisecond
-    dPUms = ((double)iSpd/100.0)*130.0 + 10.0;
+    dPUms = ((double)iSpd/100.0)*80.0 + 50.0;
     dPUms *= 200.0; // PU per minute
     dPUms /= 60; // PU per second
     dPUms /= 1000; // PU per millisecond
@@ -1015,7 +1015,7 @@ int B9Terminal::getEstBaseCycleTime(int iCur, int iTgt){
     int iDelta = abs(iTgt - iCur);
     int iLowerSpd,iOpnSpd,iSettle;
     int cutOffPU = (int)(pSettings->m_dBTClearInMM*100000.0/(double)pPrinterComm->getPU());
-    if(iTgt<=cutOffPU){
+    if(iTgt<cutOffPU){
         iLowerSpd = pSettings->m_iLSpd1;
         iOpnSpd = pSettings->m_iOpenSpd1;
         iSettle = pSettings->m_dSettleOpen1*1000.0;
@@ -1038,7 +1038,7 @@ int B9Terminal::getEstNextCycleTime(int iCur, int iTgt){
     int iDelta = abs(iTgt - iCur);
     int iRaiseSpd,iLowerSpd,iOpnSpd,iClsSpd,iGap,iBreathe,iSettle;
     int cutOffPU = (int)(pSettings->m_dBTClearInMM*100000.0/(double)pPrinterComm->getPU());
-    if(iTgt<=cutOffPU){
+    if(iTgt<cutOffPU){
         iRaiseSpd = pSettings->m_iRSpd1;
         iLowerSpd = pSettings->m_iLSpd1;
         iOpnSpd = pSettings->m_iOpenSpd1;
@@ -1070,7 +1070,7 @@ int B9Terminal::getEstFinalCycleTime(int iCur, int iTgt){
     int iDelta = abs(iTgt - iCur);
     int iRaiseSpd,iClsSpd;
     int cutOffPU = (int)(pSettings->m_dBTClearInMM*100000.0/(double)pPrinterComm->getPU());
-    if(iTgt<=cutOffPU){
+    if(iTgt<cutOffPU){
         iRaiseSpd = pSettings->m_iRSpd1;
         iClsSpd = pSettings->m_iCloseSpd1;
     }

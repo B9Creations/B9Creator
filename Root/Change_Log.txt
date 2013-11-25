@@ -1,3 +1,6 @@
+//v1.5.9 Change Log
+-Fixed cycle calculation error that could lead to false timeouts.
+
 //v1.5.8 Change Log
 -Added warning when attempting to print with 0s base time setting.
 
