@@ -194,10 +194,22 @@ void DlgPrintPrep::on_checkBoxMirrored_clicked(bool checked)
 
 void DlgPrintPrep::on_checkBoxStep1_clicked(bool checked)
 {
+
     if(checked && !m_pTerminal->isConnected()){
         ui->checkBoxStep1->setChecked(false);
         QMessageBox msg;
         msg.setText("Sorry, you must be connected to the B9Creator to proceed.");
+        msg.exec();
+        return;
+    }
+
+    //lets also do a quick check to see if the base time for the current settings is above zero.
+    B9MatCat* catalog = m_pTerminal->getMatCat();
+    if(checked && catalog->getCurTbaseAtZinMS(m_pCPJ->getZLayermm()) <= 0)
+    {
+        ui->checkBoxStep1->setChecked(false);
+        QMessageBox msg;
+        msg.setText("Sorry, the initial image exposure time is too small.");
         msg.exec();
         return;
     }

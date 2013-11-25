@@ -1,3 +1,6 @@
+//v1.5.8 Change Log
+-Added warning when attempting to print with 0s base time setting.
+
 //v1.5.7 Change Log
 -Some system clock resets were causing rare, random, "lost comm" printing aborts - fixed.
 
