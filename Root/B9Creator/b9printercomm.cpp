@@ -469,9 +469,13 @@ void B9PrinterComm::ReadAvailable() {
             }
 
             int iCmdID = m_sSerialString.left(1).toUpper().toAscii().at(0);
+            QMessageBox vWarn(QMessageBox::Critical,"Runaway X Motor!","X Motor Failure Detected.  Close program and troubleshoot hardware.");
             switch (iCmdID){
             case 'U':  // Mechanical failure of encoder?
+                SendCmd("S"); // Stop motions
+                SendCmd("P0");// Turn off projector
                 qDebug() << "WARNING:  Printer has sent 'U' report, runaway X Motor indication: " + m_sSerialString << "\n";
+                vWarn.exec();
                 break;
             case 'Q':  // Printer got tired of waiting for command and shut down projectors
                        // We will likely never see this as something bad has happened
