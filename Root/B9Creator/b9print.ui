@@ -467,7 +467,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Est. Competion Time:</string>
+         <string>Est. Completion Time:</string>
         </property>
        </widget>
       </item>

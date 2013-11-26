@@ -469,7 +469,7 @@ void B9PrinterComm::ReadAvailable() {
             }
 
             int iCmdID = m_sSerialString.left(1).toUpper().toAscii().at(0);
-            QMessageBox vWarn(QMessageBox::Critical,"Runaway X Motor!","X Motor Failure Detected.  Close program and troubleshoot hardware.");
+            QMessageBox vWarn(QMessageBox::Critical,"Runaway X Motor!","X Motor Failure Detected, Code:  " + m_sSerialString +"\nClose program and troubleshoot hardware.");
             switch (iCmdID){
             case 'U':  // Mechanical failure of encoder?
                 SendCmd("S"); // Stop motions
