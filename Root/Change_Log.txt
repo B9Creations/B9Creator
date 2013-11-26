@@ -1,3 +1,6 @@
+//v1.6.0 Change Log
+-Fixed cycle calculation error that could lead to false timeouts (again!).
+
 //v1.5.9 Change Log
 -Fixed cycle calculation error that could lead to false timeouts.
 

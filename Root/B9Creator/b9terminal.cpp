@@ -817,7 +817,7 @@ void B9Terminal::on_pushButtonPrintFinal_clicked()
 
 void B9Terminal::SetCycleParameters(){
     int iD, iE, iJ, iK, iL, iW, iX;
-    if(pSettings->m_dBTClearInMM*100000/pPrinterComm->getPU()>ui->lineEditTgtZPU->text().toInt()){
+    if(pSettings->m_dBTClearInMM*100000/(double)pPrinterComm->getPU()>(double)ui->lineEditTgtZPU->text().toInt()){
         iD = (int)(pSettings->m_dBreatheClosed1*1000.0); // Breathe delay time
         iE = (int)(pSettings->m_dSettleOpen1*1000.0); // Settle delay time
         iJ = (int)(pSettings->m_dOverLift1*100000.0/(double)pPrinterComm->getPU()); // Overlift Raise Gap coverted to PU
@@ -1014,8 +1014,8 @@ int B9Terminal::getVatMoveTime(int iSpeed){
 int B9Terminal::getEstBaseCycleTime(int iCur, int iTgt){
     int iDelta = abs(iTgt - iCur);
     int iLowerSpd,iOpnSpd,iSettle;
-    int cutOffPU = (int)(pSettings->m_dBTClearInMM*100000.0/(double)pPrinterComm->getPU());
-    if(iTgt<cutOffPU){
+    double cutOffPU = pSettings->m_dBTClearInMM*100000.0/(double)pPrinterComm->getPU();
+    if((double)iTgt<cutOffPU){
         iLowerSpd = pSettings->m_iLSpd1;
         iOpnSpd = pSettings->m_iOpenSpd1;
         iSettle = pSettings->m_dSettleOpen1*1000.0;
@@ -1037,8 +1037,8 @@ int B9Terminal::getEstBaseCycleTime(int iCur, int iTgt){
 int B9Terminal::getEstNextCycleTime(int iCur, int iTgt){
     int iDelta = abs(iTgt - iCur);
     int iRaiseSpd,iLowerSpd,iOpnSpd,iClsSpd,iGap,iBreathe,iSettle;
-    int cutOffPU = (int)(pSettings->m_dBTClearInMM*100000.0/(double)pPrinterComm->getPU());
-    if(iTgt<cutOffPU){
+    double cutOffPU = pSettings->m_dBTClearInMM*100000.0/(double)pPrinterComm->getPU();
+    if((double)iTgt<cutOffPU){
         iRaiseSpd = pSettings->m_iRSpd1;
         iLowerSpd = pSettings->m_iLSpd1;
         iOpnSpd = pSettings->m_iOpenSpd1;
@@ -1069,8 +1069,8 @@ int B9Terminal::getEstNextCycleTime(int iCur, int iTgt){
 int B9Terminal::getEstFinalCycleTime(int iCur, int iTgt){
     int iDelta = abs(iTgt - iCur);
     int iRaiseSpd,iClsSpd;
-    int cutOffPU = (int)(pSettings->m_dBTClearInMM*100000.0/(double)pPrinterComm->getPU());
-    if(iTgt<cutOffPU){
+    double cutOffPU = pSettings->m_dBTClearInMM*100000.0/(double)pPrinterComm->getPU();
+    if((double)iTgt<cutOffPU){
         iRaiseSpd = pSettings->m_iRSpd1;
         iClsSpd = pSettings->m_iCloseSpd1;
     }
